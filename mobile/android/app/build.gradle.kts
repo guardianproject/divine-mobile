@@ -106,12 +106,17 @@ dependencies {
     // ProofMode library for cryptographic proof generation
     // Upgraded to 1.0.25 to fix duplicate class issues with java-opentimestamps fat JAR
     implementation("org.witness:android-libproofmode:1.0.25")
+    //new c2pa-android library for direct proofmode media integration+signing
+    implementation ("org.contentauth:c2pa:1.0.1-SNAPSHOT")
+    implementation ("net.java.dev.jna:jna:5.13.0@aar")
+
 
     // Zendesk Support SDK
     implementation("com.zendesk:support:5.1.2")
 
     // AndroidX AppCompat required by Zendesk SDK
     implementation("androidx.appcompat:appcompat:1.6.1")
+
 }
 
 // Note: android-libproofmode 1.0.25+ fixed duplicate class issues with java-opentimestamps
