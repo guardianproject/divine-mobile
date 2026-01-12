@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:models/models.dart' as vine show AspectRatio;
+import 'package:models/models.dart' show NativeProofData;
+import 'package:openvine/services/native_proofmode_service.dart';
 import 'package:openvine/models/recording_clip.dart';
 import 'package:openvine/models/saved_clip.dart';
 import 'package:openvine/providers/app_providers.dart';
@@ -263,6 +265,10 @@ class _ClipManagerScreenState extends ConsumerState<ClipManagerScreen> {
         muteAudio: state.muteOriginalAudio,
       );
 
+       // Generate native ProofMode proof
+      final nativeProof = await _generateNativeProof(File(videoPath));
+
+
       Log.info(
         '📹 Clips processed to: $videoPath',
         category: LogCategory.video,
@@ -350,6 +356,81 @@ class _ClipManagerScreenState extends ConsumerState<ClipManagerScreen> {
           ),
         );
       }
+    }
+  }
+
+ /// Generate native ProofMode proof for a video file
+  Future<NativeProofData?> _generateNativeProof(File videoFile) async {
+    try {
+      // Check if native ProofMode is available on this platform
+      final isAvailable = await NativeProofModeService.isAvailable();
+      if (!isAvailable) {
+        Log.info(
+          '🔐 Native ProofMode not available on this platform',
+          name: 'VineRecordingController',
+          category: LogCategory.system,
+        );
+        return null;
+      } 
+ Log.info(
+        '🔐 Generating native ProofMode proof for: ${videoFile.path}',
+        name: 'VineRecordingController',
+        category: LogCategory.system,
+      );
+
+      // Generate proof using native library
+      final proofHash = await NativeProofModeService.generateProof(
+        videoFile.path,
+      );
+      if (proofHash == null) {
+        Log.warning(
+          '🔐 Native proof generation returned null',
+          name: 'VineRecordingController',
+          category: LogCategory.system,
+        );
+        return null;
+      }
+
+      Log.info(
+        '🔐 Native proof hash: $proofHash',
+        name: 'VineRecordingController',
+        category: LogCategory.system,
+      );
+
+      // Read proof metadata from native library
+      final metadata = await NativeProofModeService.readProofMetadata(
+        proofHash,
+      );
+      if (metadata == null) {
+        Log.warning(
+          '🔐 Could not read native proof metadata',
+          name: 'VineRecordingController',
+          category: LogCategory.system,
+        );
+        return null;
+      }
+ Log.info(
+        '🔐 Native proof metadata fields: ${metadata.keys.join(", ")}',
+        name: 'VineRecordingController',
+        category: LogCategory.system,
+      );
+
+      // Create NativeProofData from metadata
+      final proofData = NativeProofData.fromMetadata(metadata);
+      Log.info(
+        '🔐 Native proof data created: ${proofData.verificationLevel}',
+        name: 'VineRecordingController',
+        category: LogCategory.system,
+      );
+
+      return proofData;
+} catch (e) {
+      Log.error(
+        '🔐 Native proof generation failed: $e',
+        name: 'VineRecordingController',
+        category: LogCategory.system,
+      );
+      return null;
     }
   }
 
@@ -1034,4 +1115,5 @@ class _TimelineSegmentState extends State<_TimelineSegment> {
       ),
     );
   }
+
 }

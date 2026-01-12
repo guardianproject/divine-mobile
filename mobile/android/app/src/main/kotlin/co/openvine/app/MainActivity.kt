@@ -4,6 +4,8 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.window.OnBackInvokedCallback
+import androidx.lifecycle.lifecycleScope
+import co.openvine.app.proofmode.C2PAManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -20,6 +22,11 @@ import zendesk.support.CreateRequest
 import zendesk.support.Request
 import com.zendesk.service.ZendeskCallback
 import com.zendesk.service.ErrorResponse
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : FlutterActivity() {
     companion object {
@@ -161,6 +168,13 @@ class MainActivity : FlutterActivity() {
                         }
 
                         val mediaUri = Uri.fromFile(mediaFile)
+
+                        lifecycleScope.launch {
+
+                        var c2paMan = C2PAManager(this@MainActivity)
+                        val signMediaFile =
+                            c2paMan.signMediaFile(mediaFile, "video/mp4", mediaFile, true)
+                            }
 
                         // Generate proof using native ProofMode library
                         val proofHash = ProofMode.generateProof(this, mediaUri)

@@ -85,6 +85,10 @@ android {
             pickFirsts.add("META-INF/NOTICE")
             pickFirsts.add("META-INF/NOTICE.txt")
         }
+
+        jniLibs {
+            pickFirsts.add("lib/*/libc++_shared.so")
+        }
     }
 }
 
@@ -108,7 +112,7 @@ dependencies {
     implementation("org.witness:android-libproofmode:1.0.25")
     //new c2pa-android library for direct proofmode media integration+signing
     implementation ("org.contentauth:c2pa:1.0.1-SNAPSHOT")
-    implementation ("net.java.dev.jna:jna:5.13.0@aar")
+   // implementation ("net.java.dev.jna:jna:5.13.0@aar")
 
 
     // Zendesk Support SDK
