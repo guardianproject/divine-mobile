@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:models/models.dart' show NativeProofData;
+import 'package:openvine/services/c2pa_signing_service.dart';
 
 /// Service for generating cryptographic proof using native ProofMode libraries
 ///
@@ -21,7 +22,8 @@ class NativeProofModeService {
   /// is not supported.
   static Future<NativeProofData?> proofFile(File videoFile) async {
     try {
-      // Check if native ProofMode is available on this platform
+
+      // Check if native ProofMode/C2PA is available on this platform
       final isAvailable = await NativeProofModeService.isAvailable();
       if (!isAvailable) {
         Log.info(
@@ -31,6 +33,72 @@ class NativeProofModeService {
         );
         return null;
       }
+
+      final C2paSigningService _c2paSigningService = C2paSigningService();
+
+      // First, sign/embed video with C2PA content credentials
+      Log.info(
+        'Signing video with C2PA...',
+        name: 'VideoRecorderProofService',
+        category: LogCategory.video,
+      );
+      final c2paResult = await _c2paSigningService.signVideo(
+        videoPath: videoFile.path,
+      );
+
+      if (c2paResult.success) {
+        Log.info(
+          'C2PA signing complete: $c2paResult.signedFilePath',
+          name: 'VideoRecorderProofService',
+          category: LogCategory.video,
+        );
+      } else {
+        Log.warning(
+          'C2PA signing failed (continuing without): ${c2paResult.error}',
+          name: 'VideoRecorderProofService',
+          category: LogCategory.video,
+        );
+      }
+      
+      final manifestInfo = await _c2paSigningService.readManifest(c2paResult.signedFilePath);
+      if (manifestInfo?.validationStatus != null) {
+
+          Log.debug("C2PA Validation Status: ${manifestInfo?.validationStatus}");
+
+          manifestInfo?.validationErrors
+              .forEach((error) => Log.debug("C2PA Validation Error: $error"));
+
+          Log.debug("C2PA Active Manifest ID: ${manifestInfo?.activeManifest}");
+
+          manifestInfo?.manifests.forEach((manifestId, manifest)
+          {
+            Log.debug("C2PA Manifest: $manifestId");
+
+            Log.debug(
+                "C2PA Claim Generator: ${manifest?.claimGenerator.toString()}");
+            Log.debug("C2PA Claim Format: ${manifest?.format}");
+            Log.debug("C2PA Claim Title: ${manifest?.title}");
+
+            manifest?.assertions.forEach((assertion) {
+              Log.debug("C2PA Assertion Label: ${assertion.label}");
+              Log.debug("C2PA Assertion Data: ${assertion.data}");
+            });
+
+            manifest?.ingredients.forEach((ingredient) {
+              Log.debug("C2PA Ingredient Data: ${ingredient.title}");
+              Log.debug("C2PA Ingredient Format: ${ingredient.format}");
+            });
+
+
+            Log.debug("C2PA Claim Signature: ${manifest?.signature?.issuer}");
+            Log.debug(
+                "C2PA Claim Serial: ${manifest?.signature?.serialNumber}");
+          });
+          
+
+      }
+
+
 
       Log.info(
         '🔐 Generating native ProofMode proof for: ${videoFile.path}',

@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:c2pa_flutter/c2pa.dart';
 import 'package:openvine/utils/unified_logger.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 /// Result of a C2PA signing operation
 class C2paSigningResult {
@@ -33,6 +34,7 @@ class C2paSigningService {
   C2paSigningService();
 
   final C2pa _c2pa = C2pa();
+  static const String CLAIM_GENERATOR = "DiVine/1.0";
 
   /// Signs a video file with C2PA content credentials.
   ///
@@ -42,8 +44,7 @@ class C2paSigningService {
   /// Returns the path to the signed video file, or the original path if
   /// signing fails (signing is best-effort, not blocking).
   Future<C2paSigningResult> signVideo({
-    required String videoPath,
-    String claimGenerator = 'DiVine/1.0',
+    required String videoPath
   }) async {
     try {
       Log.info(
@@ -62,13 +63,17 @@ class C2paSigningService {
         );
       }
 
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      String claimGenerator = "${packageInfo.appName}/${packageInfo.version}";
+
       // Generate output path for signed video
       final directory = inputFile.parent.path;
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final signedPath = '$directory/c2pa_signed_$timestamp.mp4';
 
       // Build manifest JSON for digital capture
-      final manifestJson = _buildManifestJson(claimGenerator);
+      final manifestJsonSource = _buildManifestJson(claimGenerator, inputFile.uri.path, DigitalSourceType.digitalCapture.url);
+      Log.info("prepared C2PA manifest json: $manifestJsonSource");
 
       // Create signer using PEM credentials (test certificates for now)
       final signer = _createSigner();
@@ -77,7 +82,7 @@ class C2paSigningService {
       await _c2pa.signFile(
         sourcePath: videoPath,
         destPath: signedPath,
-        manifestJson: manifestJson,
+        manifestJson: manifestJsonSource,
         signer: signer,
       );
 
@@ -91,15 +96,21 @@ class C2paSigningService {
         );
       }
 
-      final signedSize = await signedFile.length();
+      Log.debug("replacing original video $videoPath with signed file $signedFile");
+      var iFileNew = inputFile.renameSync(inputFile.path + ".old");
+      Log.debug("original file renamed: ${iFileNew.path} ");
+      var sFileNew = signedFile.renameSync(inputFile.path);
+      Log.debug("signed file renamed: ${sFileNew.path} ");
+
+      final signedSize = await sFileNew.length();
       Log.info(
-        'C2PA signing complete: $signedPath (${signedSize ~/ 1024} KB)',
+        'C2PA signing complete: $sFileNew (${signedSize ~/ 1024} KB)',
         name: 'C2paSigningService',
         category: LogCategory.video,
       );
 
       return C2paSigningResult(
-        signedFilePath: signedPath,
+        signedFilePath: sFileNew.path,
         success: true,
       );
     } catch (e, stackTrace) {
@@ -152,17 +163,18 @@ class C2paSigningService {
   }
 
   /// Builds the manifest JSON for a freshly captured video.
-  String _buildManifestJson(String claimGenerator) {
+  String _buildManifestJson(String claimGenerator, String title, String digitalSourceUrl) {
     // Using digitalCapture source type for in-app recorded content
     // DigitalSourceType.digitalCapture.url provides the IPTC URL
-    final digitalSourceUrl = DigitalSourceType.digitalCapture.url;
+    //final digitalSourceUrl = DigitalSourceType.digitalCapture.url;
     return '''
 {
   "claim_generator": "$claimGenerator",
-  "title": "DiVine Video",
+  "title": "$title",
+  "format": "video/mp4",
   "assertions": [
     {
-      "label": "c2pa.actions",
+      "label": "c2pa.actions.v2",
       "data": {
         "actions": [
           {
@@ -178,6 +190,7 @@ class C2paSigningService {
 ''';
   }
 
+
   /// Creates a signer for C2PA operations.
   ///
   /// TODO: Replace with proper key management:
@@ -186,13 +199,21 @@ class C2paSigningService {
   /// - Store certificates securely
   /// - Support user-provided certificates via enrollment API
   C2paSigner _createSigner() {
+
+    /**
     return PemSigner(
       algorithm: SigningAlgorithm.es256,
       certificatePem: _testCertificate,
       privateKeyPem: _testPrivateKey,
-    );
-  }
+      tsaUrl: _timeStampAuthority
+    );**/
 
+    return RemoteSigner(configurationUrl: DEFAULT_SIGNING_SERVER_ENDPOINT, bearerToken: DEFAULT_SIGNING_SERVER_TOKEN);
+  }
+  static const DEFAULT_SIGNING_SERVER_ENDPOINT = "https://zbjspd6jfv.us-east-2.awsapprunner.com/api/v1/c2pa/configuration?platform=android";
+  static const DEFAULT_SIGNING_SERVER_TOKEN = "2d0c8b6b66c47c3b215976cc808296269322558c6d533d9ce6f3c45a9ccfe811";
+
+  static const String _timeStampAuthority = 'http://timestamp.digicert.com';
   // Test certificate chain for development - NOT FOR PRODUCTION
   // These are the official C2PA test certificates from c2pa-flutter.
   // They will show as "untrusted" when verified since they're not from
