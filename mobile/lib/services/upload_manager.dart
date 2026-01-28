@@ -13,6 +13,7 @@ import 'package:openvine/models/pending_upload.dart';
 import 'package:openvine/models/vine_draft.dart';
 import 'package:openvine/services/circuit_breaker_service.dart';
 import 'package:openvine/services/blossom_upload_service.dart';
+import 'package:openvine/services/c2pa_signing_service.dart';
 import 'package:openvine/services/crash_reporting_service.dart';
 import 'package:models/models.dart' show NativeProofData;
 import 'package:openvine/services/upload_initialization_helper.dart';
@@ -80,9 +81,11 @@ class UploadMetrics {
 class UploadManager {
   UploadManager({
     required BlossomUploadService blossomService,
+    C2paSigningService? c2paSigningService,
     VideoCircuitBreaker? circuitBreaker,
     UploadRetryConfig? retryConfig,
   }) : _blossomService = blossomService,
+       _c2paSigningService = c2paSigningService ?? C2paSigningService(),
        _circuitBreaker = circuitBreaker ?? VideoCircuitBreaker(),
        _retryConfig = retryConfig ?? const UploadRetryConfig();
   // Removed unused _uploadsBoxName constant
@@ -91,6 +94,7 @@ class UploadManager {
   // Core services
   Box<PendingUpload>? _uploadsBox;
   final BlossomUploadService _blossomService;
+  final C2paSigningService _c2paSigningService;
   final VideoCircuitBreaker _circuitBreaker;
   final UploadRetryConfig _retryConfig;
   final Dio _dio = Dio();
@@ -483,8 +487,32 @@ class UploadManager {
       );
     }
 
+    // Sign video with C2PA content credentials
+    Log.info(
+      'Signing video with C2PA...',
+      name: 'UploadManager',
+      category: LogCategory.video,
+    );
+    final c2paResult = await _c2paSigningService.signVideo(
+      videoPath: videoFile.path,
+    );
+    final effectiveVideoPath = c2paResult.signedFilePath;
+    if (c2paResult.success) {
+      Log.info(
+        'C2PA signing complete: $effectiveVideoPath',
+        name: 'UploadManager',
+        category: LogCategory.video,
+      );
+    } else {
+      Log.warning(
+        'C2PA signing failed (continuing without): ${c2paResult.error}',
+        name: 'UploadManager',
+        category: LogCategory.video,
+      );
+    }
+
     final upload = PendingUpload.create(
-      localVideoPath: videoFile.path,
+      localVideoPath: effectiveVideoPath,
       nostrPubkey: nostrPubkey,
       thumbnailPath: thumbnailPath,
       title: title,

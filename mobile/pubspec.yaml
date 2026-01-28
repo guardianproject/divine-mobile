@@ -82,6 +82,10 @@ dependencies:
     git:
       url: https://github.com/hm21/CamerAwesome.git
       ref: master
+  c2pa_flutter:
+    git:
+      url: https://github.com/redaranj/c2pa-flutter.git
+      ref: main
   camera_macos_plus: ^0.0.3
   divine_camera:
     path: packages/divine_camera

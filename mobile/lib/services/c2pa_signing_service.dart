@@ -1,0 +1,237 @@
+// ABOUTME: Service for signing videos with C2PA content credentials
+// ABOUTME: Embeds provenance information into video files before upload
+
+import 'dart:io';
+
+import 'package:c2pa_flutter/c2pa.dart';
+import 'package:openvine/utils/unified_logger.dart';
+
+/// Result of a C2PA signing operation
+class C2paSigningResult {
+  const C2paSigningResult({
+    required this.signedFilePath,
+    required this.success,
+    this.error,
+  });
+
+  /// Path to the signed video file
+  final String signedFilePath;
+
+  /// Whether signing was successful
+  final bool success;
+
+  /// Error message if signing failed
+  final String? error;
+}
+
+/// Service for signing videos with C2PA content credentials.
+///
+/// C2PA (Coalition for Content Provenance and Authenticity) embeds
+/// cryptographic provenance information directly into media files,
+/// establishing the origin and history of digital content.
+class C2paSigningService {
+  C2paSigningService();
+
+  final C2pa _c2pa = C2pa();
+
+  /// Signs a video file with C2PA content credentials.
+  ///
+  /// [videoPath] - Path to the video file to sign
+  /// [claimGenerator] - Identifier for the app/tool creating the claim
+  ///
+  /// Returns the path to the signed video file, or the original path if
+  /// signing fails (signing is best-effort, not blocking).
+  Future<C2paSigningResult> signVideo({
+    required String videoPath,
+    String claimGenerator = 'DiVine/1.0',
+  }) async {
+    try {
+      Log.info(
+        'Starting C2PA signing for video: $videoPath',
+        name: 'C2paSigningService',
+        category: LogCategory.video,
+      );
+
+      // Verify input file exists
+      final inputFile = File(videoPath);
+      if (!await inputFile.exists()) {
+        return C2paSigningResult(
+          signedFilePath: videoPath,
+          success: false,
+          error: 'Input file does not exist',
+        );
+      }
+
+      // Generate output path for signed video
+      final directory = inputFile.parent.path;
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final signedPath = '$directory/c2pa_signed_$timestamp.mp4';
+
+      // Build manifest JSON for digital capture
+      final manifestJson = _buildManifestJson(claimGenerator);
+
+      // Create signer using PEM credentials (test certificates for now)
+      final signer = _createSigner();
+
+      // Sign the file
+      await _c2pa.signFile(
+        sourcePath: videoPath,
+        destPath: signedPath,
+        manifestJson: manifestJson,
+        signer: signer,
+      );
+
+      // Verify signed file was created
+      final signedFile = File(signedPath);
+      if (!await signedFile.exists()) {
+        return C2paSigningResult(
+          signedFilePath: videoPath,
+          success: false,
+          error: 'Signed file was not created',
+        );
+      }
+
+      final signedSize = await signedFile.length();
+      Log.info(
+        'C2PA signing complete: $signedPath (${signedSize ~/ 1024} KB)',
+        name: 'C2paSigningService',
+        category: LogCategory.video,
+      );
+
+      return C2paSigningResult(
+        signedFilePath: signedPath,
+        success: true,
+      );
+    } catch (e, stackTrace) {
+      Log.error(
+        'C2PA signing failed: $e',
+        name: 'C2paSigningService',
+        category: LogCategory.video,
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      // Return original path - signing is best-effort, not blocking
+      return C2paSigningResult(
+        signedFilePath: videoPath,
+        success: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  /// Reads and validates C2PA manifest from a signed file.
+  ///
+  /// Returns a [ManifestStoreInfo] with parsed manifest data and validation
+  /// info, or null if no manifest is found.
+  Future<ManifestStoreInfo?> readManifest(String filePath) async {
+    try {
+      return await _c2pa.readManifestFromFile(filePath);
+    } catch (e) {
+      Log.warning(
+        'Failed to read C2PA manifest: $e',
+        name: 'C2paSigningService',
+        category: LogCategory.video,
+      );
+      return null;
+    }
+  }
+
+  /// Gets the C2PA library version.
+  Future<String?> getVersion() async {
+    return _c2pa.getVersion();
+  }
+
+  /// Checks if hardware-backed signing is available on this device.
+  ///
+  /// Returns true if:
+  /// - Android: StrongBox is available (Android 9.0+ with hardware support)
+  /// - iOS: Secure Enclave is available (iPhone 5s+, not in Simulator)
+  Future<bool> isHardwareSigningAvailable() async {
+    return _c2pa.isHardwareSigningAvailable();
+  }
+
+  /// Builds the manifest JSON for a freshly captured video.
+  String _buildManifestJson(String claimGenerator) {
+    // Using digitalCapture source type for in-app recorded content
+    // DigitalSourceType.digitalCapture.url provides the IPTC URL
+    final digitalSourceUrl = DigitalSourceType.digitalCapture.url;
+    return '''
+{
+  "claim_generator": "$claimGenerator",
+  "title": "DiVine Video",
+  "assertions": [
+    {
+      "label": "c2pa.actions",
+      "data": {
+        "actions": [
+          {
+            "action": "c2pa.created",
+            "digitalSourceType": "$digitalSourceUrl",
+            "softwareAgent": "$claimGenerator"
+          }
+        ]
+      }
+    }
+  ]
+}
+''';
+  }
+
+  /// Creates a signer for C2PA operations.
+  ///
+  /// TODO: Replace with proper key management:
+  /// - Use HardwareSigner for Secure Enclave (iOS) / StrongBox (Android)
+  /// - Generate per-user keys during onboarding
+  /// - Store certificates securely
+  /// - Support user-provided certificates via enrollment API
+  C2paSigner _createSigner() {
+    return PemSigner(
+      algorithm: SigningAlgorithm.es256,
+      certificatePem: _testCertificate,
+      privateKeyPem: _testPrivateKey,
+    );
+  }
+
+  // Test certificate chain for development - NOT FOR PRODUCTION
+  // These are the official C2PA test certificates from c2pa-flutter.
+  // They will show as "untrusted" when verified since they're not from
+  // a recognized C2PA trust list. Production requires proper PKI certificates.
+  static const String _testCertificate = '''-----BEGIN CERTIFICATE-----
+MIIChzCCAi6gAwIBAgIUcCTmJHYF8dZfG0d1UdT6/LXtkeYwCgYIKoZIzj0EAwIw
+gYwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTESMBAGA1UEBwwJU29tZXdoZXJl
+MScwJQYDVQQKDB5DMlBBIFRlc3QgSW50ZXJtZWRpYXRlIFJvb3QgQ0ExGTAXBgNV
+BAsMEEZPUiBURVNUSU5HX09OTFkxGDAWBgNVBAMMD0ludGVybWVkaWF0ZSBDQTAe
+Fw0yMjA2MTAxODQ2NDBaFw0zMDA4MjYxODQ2NDBaMIGAMQswCQYDVQQGEwJVUzEL
+MAkGA1UECAwCQ0ExEjAQBgNVBAcMCVNvbWV3aGVyZTEfMB0GA1UECgwWQzJQQSBU
+ZXN0IFNpZ25pbmcgQ2VydDEZMBcGA1UECwwQRk9SIFRFU1RJTkdfT05MWTEUMBIG
+A1UEAwwLQzJQQSBTaWduZXIwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQPaL6R
+kAkYkKU4+IryBSYxJM3h77sFiMrbvbI8fG7w2Bbl9otNG/cch3DAw5rGAPV7NWky
+l3QGuV/wt0MrAPDoo3gwdjAMBgNVHRMBAf8EAjAAMBYGA1UdJQEB/wQMMAoGCCsG
+AQUFBwMEMA4GA1UdDwEB/wQEAwIGwDAdBgNVHQ4EFgQUFznP0y83joiNOCedQkxT
+tAMyNcowHwYDVR0jBBgwFoAUDnyNcma/osnlAJTvtW6A4rYOL2swCgYIKoZIzj0E
+AwIDRwAwRAIgOY/2szXjslg/MyJFZ2y7OH8giPYTsvS7UPRP9GI9NgICIDQPMKrE
+LQUJEtipZ0TqvI/4mieoyRCeIiQtyuS0LACz
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIICajCCAg+gAwIBAgIUfXDXHH+6GtA2QEBX2IvJ2YnGMnUwCgYIKoZIzj0EAwIw
+dzELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMRIwEAYDVQQHDAlTb21ld2hlcmUx
+GjAYBgNVBAoMEUMyUEEgVGVzdCBSb290IENBMRkwFwYDVQQLDBBGT1IgVEVTVElO
+R19PTkxZMRAwDgYDVQQDDAdSb290IENBMB4XDTIyMDYxMDE4NDY0MFoXDTMwMDgy
+NzE4NDY0MFowgYwxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJDQTESMBAGA1UEBwwJ
+U29tZXdoZXJlMScwJQYDVQQKDB5DMlBBIFRlc3QgSW50ZXJtZWRpYXRlIFJvb3Qg
+Q0ExGTAXBgNVBAsMEEZPUiBURVNUSU5HX09OTFkxGDAWBgNVBAMMD0ludGVybWVk
+aWF0ZSBDQTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABHllI4O7a0EkpTYAWfPM
+D6Rnfk9iqhEmCQKMOR6J47Rvh2GGjUw4CS+aLT89ySukPTnzGsMQ4jK9d3V4Aq4Q
+LsOjYzBhMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgGGMB0GA1UdDgQW
+BBQOfI1yZr+iyeUAlO+1boDitg4vazAfBgNVHSMEGDAWgBRembiG4Xgb2VcVWnUA
+UrYpDsuojDAKBggqhkjOPQQDAgNJADBGAiEAtdZ3+05CzFo90fWeZ4woeJcNQC4B
+84Ill3YeZVvR8ZECIQDVRdha1xEDKuNTAManY0zthSosfXcvLnZui1A/y/DYeg==
+-----END CERTIFICATE-----''';
+
+  static const String _testPrivateKey = '''-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgfNJBsaRLSeHizv0m
+GL+gcn78QmtfLSm+n+qG9veC2W2hRANCAAQPaL6RkAkYkKU4+IryBSYxJM3h77sF
+iMrbvbI8fG7w2Bbl9otNG/cch3DAw5rGAPV7NWkyl3QGuV/wt0MrAPDo
+-----END PRIVATE KEY-----''';
+}
