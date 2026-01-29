@@ -26,6 +26,9 @@ import 'package:openvine/utils/unified_logger.dart';
 import 'package:openvine/utils/proofmode_publishing_helpers.dart';
 import 'package:openvine/constants/nip71_migration.dart';
 
+//adding c2pa support for publishing c2pa manifest data into nostr
+import 'package:openvine/services/c2pa_signing_service.dart';
+
 /// Service for publishing processed videos to Nostr relays
 /// REFACTORED: Removed ChangeNotifier - now uses pure state management via Riverpod
 class VideoEventPublisher {
@@ -620,6 +623,18 @@ class VideoEventPublisher {
               tags.add(['pgp_fingerprint', pgpTag]);
               Log.verbose(
                 'Added pgp_fingerprint tag: $pgpTag',
+                name: 'VideoEventPublisher',
+                category: LogCategory.video,
+              );
+            }
+
+            //check C2PA metadata
+            final C2paSigningService _c2paSigningService = C2paSigningService();
+            final manifestInfo = await _c2paSigningService.readManifest(upload.localVideoPath);
+            if (manifestInfo?.validationStatus != null) {
+              tags.add(['c2pa_manifest_id', ?manifestInfo?.activeManifest]);
+              Log.verbose(
+                'Added c2pa_manifest_id tag: ${manifestInfo?.activeManifest}',
                 name: 'VideoEventPublisher',
                 category: LogCategory.video,
               );

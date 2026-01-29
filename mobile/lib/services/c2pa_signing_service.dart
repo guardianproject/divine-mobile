@@ -71,8 +71,9 @@ class C2paSigningService {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final signedPath = '$directory/c2pa_signed_$timestamp.mp4';
 
+      var filename = inputFile.path.split("/").last;
       // Build manifest JSON for digital capture
-      final manifestJsonSource = _buildManifestJson(claimGenerator, inputFile.uri.path, DigitalSourceType.digitalCapture.url);
+      final manifestJsonSource = _buildManifestJson(claimGenerator, filename, DigitalSourceType.digitalCapture.url);
       Log.info("prepared C2PA manifest json: $manifestJsonSource");
 
       // Create signer using PEM credentials (test certificates for now)
@@ -96,9 +97,9 @@ class C2paSigningService {
         );
       }
 
-      Log.debug("replacing original video $videoPath with signed file $signedFile");
+     // Log.debug("replacing original video $videoPath with signed file $signedFile");
       var iFileNew = inputFile.renameSync(inputFile.path + ".old");
-      Log.debug("original file renamed: ${iFileNew.path} ");
+     // Log.debug("original file renamed: ${iFileNew.path} ");
       var sFileNew = signedFile.renameSync(inputFile.path);
       Log.debug("signed file renamed: ${sFileNew.path} ");
 
@@ -172,6 +173,14 @@ class C2paSigningService {
   "claim_generator": "$claimGenerator",
   "title": "$title",
   "format": "video/mp4",
+  "ingredients": [
+        {
+          "title": "$title",
+          "format": "video/mp4",
+          "relationship": "parentOf",
+          "label": "c2pa.ingredient.v2"
+        }
+      ],
   "assertions": [
     {
       "label": "c2pa.actions.v2",

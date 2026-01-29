@@ -94,7 +94,7 @@ class NativeProofModeService {
             Log.debug(
                 "C2PA Claim Serial: ${manifest?.signature?.serialNumber}");
           });
-          
+
 
       }
 
@@ -144,8 +144,14 @@ class NativeProofModeService {
         category: .video,
       );
 
+      if (manifestInfo?.activeManifest != null) {
+        String activeManifestId = manifestInfo!.activeManifest!;
+        metadata.putIfAbsent("c2paManifestId", () => activeManifestId);
+      }
+
       // Create NativeProofData from metadata
       final proofData = NativeProofData.fromMetadata(metadata);
+
       Log.info(
         '🔐 Native proof data created: ${proofData.verificationLevel}',
         name: 'VideoRecorderProofService',
