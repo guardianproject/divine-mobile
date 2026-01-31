@@ -19,10 +19,14 @@ class CameraMobileService extends CameraService {
   });
 
   bool _isInitialized = false;
+  String? _initializationError;
   final _camera = DivineCamera.instance;
 
   @override
   Future<void> initialize() async {
+    // Clear any previous error
+    _initializationError = null;
+
     Log.info(
       '📷 Initializing mobile camera',
       name: 'CameraMobileService',
@@ -33,7 +37,9 @@ class CameraMobileService extends CameraService {
       _camera.onRecordingAutoStopped = (result) {
         onAutoStopped(EditorVideo.file(result.filePath));
       };
+      _isInitialized = true;
     } catch (e) {
+      _initializationError = 'Camera initialization failed: $e';
       Log.error(
         '📷 Failed to initialize camera: $e',
         name: 'CameraMobileService',
@@ -41,7 +47,6 @@ class CameraMobileService extends CameraService {
       );
     }
 
-    _isInitialized = true;
     onUpdateState(forceCameraRebuild: true);
   }
 
@@ -186,7 +191,10 @@ class CameraMobileService extends CameraService {
         name: 'CameraMobileService',
         category: .video,
       );
-      final success = await _camera.startRecording(maxDuration: maxDuration);
+      final success = await _camera.startRecording(
+        maxDuration: maxDuration,
+        useCache: false,
+      );
       if (success) {
         Log.info(
           '📷 Video recording truly started',
@@ -278,4 +286,7 @@ class CameraMobileService extends CameraService {
 
   @override
   bool get canSwitchCamera => _camera.canSwitchCamera;
+
+  @override
+  String? get initializationError => _initializationError;
 }

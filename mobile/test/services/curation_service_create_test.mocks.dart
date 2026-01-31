@@ -6,7 +6,7 @@
 import 'dart:async' as _i8;
 import 'dart:ui' as _i12;
 
-import 'package:keycast_flutter/keycast_flutter.dart' as _i17;
+import 'package:keycast_flutter/keycast_flutter.dart' as _i19;
 import 'package:likes_repository/likes_repository.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
@@ -17,8 +17,11 @@ import 'package:nostr_key_manager/nostr_key_manager.dart' as _i4;
 import 'package:nostr_sdk/nostr_sdk.dart' as _i9;
 import 'package:openvine/services/age_verification_service.dart' as _i14;
 import 'package:openvine/services/auth_service.dart' as _i5;
+import 'package:openvine/services/blossom_server_discovery_service.dart'
+    as _i17;
 import 'package:openvine/services/content_blocklist_service.dart' as _i13;
-import 'package:openvine/services/user_profile_service.dart' as _i16;
+import 'package:openvine/services/relay_discovery_service.dart' as _i16;
+import 'package:openvine/services/user_profile_service.dart' as _i18;
 import 'package:openvine/services/video_event_service.dart' as _i10;
 import 'package:openvine/services/video_filter_builder.dart' as _i15;
 
@@ -319,6 +322,14 @@ class MockNostrClient extends _i1.Mock implements _i6.NostrClient {
           as _i8.Future<bool>);
 
   @override
+  _i8.Future<int> addRelays(List<String>? relayUrls) =>
+      (super.noSuchMethod(
+            Invocation.method(#addRelays, [relayUrls]),
+            returnValue: _i8.Future<int>.value(0),
+          )
+          as _i8.Future<int>);
+
+  @override
   _i8.Future<bool> removeRelay(String? relayUrl) =>
       (super.noSuchMethod(
             Invocation.method(#removeRelay, [relayUrl]),
@@ -421,6 +432,7 @@ class MockNostrClient extends _i1.Mock implements _i6.NostrClient {
     required String? addressableId,
     required int? targetKind,
     required String? authorPubkey,
+    String? eventId,
     String? content = '',
     List<String>? tempRelays,
     List<String>? targetRelays,
@@ -430,6 +442,7 @@ class MockNostrClient extends _i1.Mock implements _i6.NostrClient {
               #addressableId: addressableId,
               #targetKind: targetKind,
               #authorPubkey: authorPubkey,
+              #eventId: eventId,
               #content: content,
               #tempRelays: tempRelays,
               #targetRelays: targetRelays,
@@ -1702,6 +1715,38 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
           as bool);
 
   @override
+  List<_i16.DiscoveredRelay> get userRelays =>
+      (super.noSuchMethod(
+            Invocation.getter(#userRelays),
+            returnValue: <_i16.DiscoveredRelay>[],
+          )
+          as List<_i16.DiscoveredRelay>);
+
+  @override
+  bool get hasExistingProfile =>
+      (super.noSuchMethod(
+            Invocation.getter(#hasExistingProfile),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  List<_i17.DiscoveredBlossomServer> get userBlossomServers =>
+      (super.noSuchMethod(
+            Invocation.getter(#userBlossomServers),
+            returnValue: <_i17.DiscoveredBlossomServer>[],
+          )
+          as List<_i17.DiscoveredBlossomServer>);
+
+  @override
+  bool get hasUserBlossomServers =>
+      (super.noSuchMethod(
+            Invocation.getter(#hasUserBlossomServers),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
   Map<String, dynamic> get userStats =>
       (super.noSuchMethod(
             Invocation.getter(#userStats),
@@ -1815,7 +1860,7 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
 
   @override
   _i8.Future<void> refreshCurrentProfile(
-    _i16.UserProfileService? userProfileService,
+    _i18.UserProfileService? userProfileService,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#refreshCurrentProfile, [userProfileService]),
@@ -1834,7 +1879,7 @@ class MockAuthService extends _i1.Mock implements _i5.AuthService {
           as _i8.Future<void>);
 
   @override
-  _i8.Future<void> signInWithDivineOAuth(_i17.KeycastSession? session) =>
+  _i8.Future<void> signInWithDivineOAuth(_i19.KeycastSession? session) =>
       (super.noSuchMethod(
             Invocation.method(#signInWithDivineOAuth, [session]),
             returnValue: _i8.Future<void>.value(),

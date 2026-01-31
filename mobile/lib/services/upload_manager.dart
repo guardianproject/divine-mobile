@@ -2182,12 +2182,12 @@ Upload Timeout Failure:
       );
 
       // Generate thumbnail at optimal timestamp
-      final thumbnailPath = await VideoThumbnailService.extractThumbnail(
+      final thumbnailExtraction = await VideoThumbnailService.extractThumbnail(
         videoPath: videoFile.path,
         quality: 85,
       );
 
-      if (thumbnailPath == null) {
+      if (thumbnailExtraction == null) {
         Log.warning(
           '❌ Failed to extract thumbnail from video',
           name: 'UploadManager',
@@ -2196,7 +2196,7 @@ Upload Timeout Failure:
         return null;
       }
 
-      final thumbnailFile = File(thumbnailPath);
+      final thumbnailFile = File(thumbnailExtraction.path);
       if (!thumbnailFile.existsSync()) {
         Log.warning(
           '❌ Thumbnail file not found after extraction',
@@ -2215,7 +2215,7 @@ Upload Timeout Failure:
       _updateUploadProgress(upload.id, 0.85);
 
       // Upload thumbnail to Blossom server
-      final thumbnailResult = await _blossomService.uploadImage(
+      final uploadResult = await _blossomService.uploadImage(
         imageFile: thumbnailFile,
         nostrPubkey: nostrPubkey,
         mimeType: 'image/jpeg',
@@ -2241,8 +2241,8 @@ Upload Timeout Failure:
         );
       }
 
-      if (thumbnailResult.success && thumbnailResult.cdnUrl != null) {
-        return thumbnailResult.cdnUrl;
+      if (uploadResult.success && uploadResult.cdnUrl != null) {
+        return uploadResult.cdnUrl;
       }
 
       return null;

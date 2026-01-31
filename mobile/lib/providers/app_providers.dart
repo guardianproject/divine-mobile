@@ -13,6 +13,7 @@ import 'package:likes_repository/likes_repository.dart';
 import 'package:nostr_client/nostr_client.dart'
     show RelayConnectionStatus, RelayState;
 import 'package:nostr_key_manager/nostr_key_manager.dart';
+import 'package:openvine/providers/curation_providers.dart';
 import 'package:openvine/providers/database_provider.dart';
 import 'package:openvine/providers/nostr_client_provider.dart';
 import 'package:openvine/providers/shared_preferences_provider.dart';
@@ -227,12 +228,34 @@ void relaySetChangeBridge(Ref ref) {
 
       // Debounce: collapse rapid changes into a single reset
       debounceTimer?.cancel();
-      debounceTimer = Timer(const Duration(seconds: 2), () {
+      debounceTimer = Timer(const Duration(seconds: 2), () async {
         Log.info(
-          'Debounce elapsed - triggering feed reset for new relay set',
+          'Debounce elapsed - forcing WebSocket reconnection and feed reset',
           name: 'RelaySetChangeBridge',
           category: LogCategory.relay,
         );
+
+        // CRITICAL FIX: Force reconnect all WebSocket connections
+        // When relays are added/removed, the existing WebSocket connections
+        // can become stale/zombie - showing as "connected" but not responding
+        // to subscription requests. Force disconnect and reconnect all relays
+        // to establish fresh connections.
+        try {
+          await nostrService.forceReconnectAll();
+          Log.info(
+            'Successfully reconnected all relay WebSockets',
+            name: 'RelaySetChangeBridge',
+            category: LogCategory.relay,
+          );
+        } catch (e) {
+          Log.error(
+            'Failed to reconnect relays: $e',
+            name: 'RelaySetChangeBridge',
+            category: LogCategory.relay,
+          );
+        }
+
+        // Now reset and resubscribe all feeds with fresh connections
         videoEventService.resetAndResubscribeAll();
       });
     }
@@ -374,7 +397,8 @@ NostrKeyManager nostrKeyManager(Ref ref) {
 }
 
 /// Profile cache service for persistent profile storage
-@riverpod
+/// keepAlive to avoid expensive Hive reinitialization on auth state changes
+@Riverpod(keepAlive: true)
 ProfileCacheService profileCacheService(Ref ref) {
   final service = ProfileCacheService();
   // Initialize asynchronously to avoid blocking UI
@@ -385,6 +409,9 @@ ProfileCacheService profileCacheService(Ref ref) {
       error: e,
     );
   });
+
+  ref.onDispose(() => service.dispose());
+
   return service;
 }
 
@@ -657,15 +684,27 @@ UserProfileService userProfileService(Ref ref) {
   final nostrService = ref.watch(nostrServiceProvider);
   final subscriptionManager = ref.watch(subscriptionManagerProvider);
   final profileCache = ref.watch(profileCacheServiceProvider);
+  final analyticsService = ref.watch(analyticsApiServiceProvider);
+
+  // Use centralized funnelcake availability check (capability detection)
+  final funnelcakeAvailable =
+      ref.watch(funnelcakeAvailableProvider).asData?.value ?? false;
 
   final service = UserProfileService(
     nostrService,
     subscriptionManager: subscriptionManager,
+    analyticsApiService: analyticsService,
+    funnelcakeAvailable: funnelcakeAvailable,
   );
   service.setPersistentCache(profileCache);
 
   // Inject profile cache lookup into SubscriptionManager to avoid redundant relay requests
   subscriptionManager.setCacheLookup(hasProfileCached: service.hasProfile);
+
+  // Listen for funnelcake availability changes
+  ref.listen<AsyncValue<bool>>(funnelcakeAvailableProvider, (previous, next) {
+    service.setFunnelcakeAvailable(next.asData?.value ?? false);
+  });
 
   // Ensure cleanup on disposal
   ref.onDispose(() {
@@ -675,18 +714,16 @@ UserProfileService userProfileService(Ref ref) {
   return service;
 }
 
-/// Social service depends on Nostr service, Auth service, and SubscriptionManager
+/// Social service depends on Nostr service and Auth service
 @Riverpod(keepAlive: true)
 SocialService socialService(Ref ref) {
   final nostrService = ref.watch(nostrServiceProvider);
   final authService = ref.watch(authServiceProvider);
-  final subscriptionManager = ref.watch(subscriptionManagerProvider);
   final personalEventCache = ref.watch(personalEventCacheServiceProvider);
 
   return SocialService(
     nostrService,
     authService,
-    subscriptionManager: subscriptionManager,
     personalEventCache: personalEventCache,
   );
 }
