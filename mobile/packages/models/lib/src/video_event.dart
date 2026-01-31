@@ -664,6 +664,11 @@ class VideoEvent {
     return rawTags['pgp_fingerprint'];
   }
 
+  /// ProofMode: Get C2PA Manifest Id
+  String? get proofModeC2paManifestId {
+    return rawTags['c2pa_manifest_id'];
+  }
+
   String? get addressableId => vineId != null
       ? AId(
           kind: EventKind.videoVertical,
@@ -677,7 +682,8 @@ class VideoEvent {
     return proofModeVerificationLevel != null ||
         proofModeManifest != null ||
         proofModePgpFingerprint != null ||
-        proofModeDeviceAttestation != null;
+        proofModeDeviceAttestation != null ||
+        proofModeC2paManifestId != null;
   }
 
   /// ProofMode: Check if video is verified mobile (highest level)

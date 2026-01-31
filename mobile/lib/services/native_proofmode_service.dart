@@ -61,17 +61,21 @@ class NativeProofModeService {
       }
       
       final manifestInfo = await _c2paSigningService.readManifest(c2paResult.signedFilePath);
+
       if (manifestInfo?.validationStatus != null) {
 
+          /**
           Log.debug("C2PA Validation Status: ${manifestInfo?.validationStatus}");
-
           manifestInfo?.validationErrors
               .forEach((error) => Log.debug("C2PA Validation Error: $error"));
+          **/
 
           Log.debug("C2PA Active Manifest ID: ${manifestInfo?.activeManifest}");
 
+          /**
           manifestInfo?.manifests.forEach((manifestId, manifest)
           {
+
             Log.debug("C2PA Manifest: $manifestId");
 
             Log.debug(
@@ -93,11 +97,9 @@ class NativeProofModeService {
             Log.debug("C2PA Claim Signature: ${manifest?.signature?.issuer}");
             Log.debug(
                 "C2PA Claim Serial: ${manifest?.signature?.serialNumber}");
-          });
-
+          });**/
 
       }
-
 
 
       Log.info(

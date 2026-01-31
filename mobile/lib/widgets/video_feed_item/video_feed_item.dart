@@ -1514,6 +1514,7 @@ class VideoOverlayActions extends ConsumerWidget {
         videoUrl: video.videoUrl!,
         videoEvent: video,
       );
+
       final controller = ref.read(
         individualVideoControllerProvider(controllerParams),
       );
