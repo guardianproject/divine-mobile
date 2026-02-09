@@ -1,8 +1,11 @@
 package co.openvine.app
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Log
 import android.window.OnBackInvokedCallback
 import io.flutter.embedding.android.FlutterActivity
@@ -21,6 +24,10 @@ import zendesk.support.CreateRequest
 import zendesk.support.Request
 import com.zendesk.service.ZendeskCallback
 import com.zendesk.service.ErrorResponse
+import org.witness.proofmode.notarization.NotarizationProvider
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.cert.X509Certificate
 
 class MainActivity : FlutterActivity() {
     companion object {
@@ -172,6 +179,10 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun setupProofModeChannel(flutterEngine: FlutterEngine) {
+
+        //add custom notarization for Android Hardware Attestation
+        ProofMode.addNotarizationProvider(this,  HardwareAttestationNotarizationProvider(this))
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, PROOFMODE_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "generateProof" -> {
@@ -203,6 +214,9 @@ class MainActivity : FlutterActivity() {
                         }
 
                         Log.d(PROOFMODE_TAG, "Proof generated successfully: $proofHash")
+
+
+
                         result.success(proofHash)
                     } catch (e: Exception) {
                         Log.e(PROOFMODE_TAG, "Failed to generate proof", e)
@@ -241,6 +255,8 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
+
+
 
     private fun setupZendeskChannel(flutterEngine: FlutterEngine) {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ZENDESK_CHANNEL).setMethodCallHandler { call, result ->
