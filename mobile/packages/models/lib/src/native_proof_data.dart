@@ -36,7 +36,8 @@ class NativeProofData {
         sensorDataCsv: metadata['csv'],
         pgpSignature: metadata['signature'],
         publicKey: metadata['publicKey'],
-        c2paManifestId: metadata['c2pa_manifest_id']
+        c2paManifestId: metadata['c2pa_manifest_id'],
+        deviceAttestation: metadata['deviceAttestation']
       );
 
   /// SHA256 hash of the video file (used as proof identifier)

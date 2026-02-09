@@ -341,6 +341,17 @@ class NativeProofModeService {
         );
       }
 
+      // Read local device attestation info
+      final deviceAttestation = File('$proofDir/$proofHash.attest');
+      if (deviceAttestation.existsSync()) {
+        metadata['deviceAttestation'] = await deviceAttestation.readAsString();
+        Log.debug(
+          '🔐 Read device attestation (${metadata['deviceAttestation']!.length} bytes)',
+          name: 'NativeProofMode',
+          category: LogCategory.system,
+        );
+      }
+
       metadata['hash'] = proofHash;
 
       Log.info(
