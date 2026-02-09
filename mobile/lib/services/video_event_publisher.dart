@@ -590,6 +590,18 @@ class VideoEventPublisher {
               category: LogCategory.video,
             );
 
+            //check C2PA metadata
+            final C2paSigningService _c2paSigningService = C2paSigningService();
+            final manifestInfo = await _c2paSigningService.readManifest(upload.localVideoPath);
+            if (manifestInfo?.validationStatus != null) {
+              tags.add(['c2pa_manifest_id', ?manifestInfo?.activeManifest]);
+              Log.verbose(
+                'Added c2pa_manifest_id tag: ${manifestInfo?.activeManifest}',
+                name: 'VideoEventPublisher',
+                category: LogCategory.video,
+              );
+            }
+
             // Add verification level tag (NIP-145)
             final verificationLevel = getVerificationLevel(nativeProof);
             tags.add(['verification', verificationLevel]);
@@ -625,18 +637,6 @@ class VideoEventPublisher {
               tags.add(['pgp_fingerprint', pgpTag]);
               Log.verbose(
                 'Added pgp_fingerprint tag: $pgpTag',
-                name: 'VideoEventPublisher',
-                category: LogCategory.video,
-              );
-            }
-
-            //check C2PA metadata
-            final C2paSigningService _c2paSigningService = C2paSigningService();
-            final manifestInfo = await _c2paSigningService.readManifest(upload.localVideoPath);
-            if (manifestInfo?.validationStatus != null) {
-              tags.add(['c2pa_manifest_id', ?manifestInfo?.activeManifest]);
-              Log.verbose(
-                'Added c2pa_manifest_id tag: ${manifestInfo?.activeManifest}',
                 name: 'VideoEventPublisher',
                 category: LogCategory.video,
               );

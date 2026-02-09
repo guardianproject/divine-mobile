@@ -314,7 +314,8 @@ class VideoEvent {
           blurhash = tagValue as String?;
         case 'loops':
           // Original loop count from classic Vine
-          originalLoops = int.tryParse(tagValue);
+          originalLoops
+          = int.tryParse(tagValue);
         case 'likes':
           // Original like count from classic Vine
           originalLikes = int.tryParse(tagValue);
@@ -511,9 +512,9 @@ class VideoEvent {
     }
 
     // DEBUG: Log full event for cdn.divine.video thumbnails
-    if (thumbnailUrl != null && thumbnailUrl!.contains('cdn.divine.video')) {
+    if (thumbnailUrl != null && thumbnailUrl!.contains('media.divine.video')) {
       developer.log(
-        '🔍 DEBUG cdn.divine.video thumbnail found!',
+        '🔍 DEBUG divine.video thumbnail found!',
         name: 'VideoEvent',
       );
       developer.log('🔍 Event ID: ${event.id}', name: 'VideoEvent');
