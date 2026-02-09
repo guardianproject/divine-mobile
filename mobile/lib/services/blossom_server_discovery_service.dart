@@ -17,7 +17,6 @@ class BlossomIndexerConfig {
   static const List<String> defaultIndexers = [
     'wss://purplepag.es', // Purple Pages - primary metadata indexer
     'wss://user.kindpag.es', // Kind Pages - specialized user metadata indexer
-    'wss://index.coracle.social', // Coracle Social - comprehensive indexer
   ];
 }
 
@@ -128,7 +127,17 @@ class BlossomServerDiscoveryService {
       category: LogCategory.system,
     );
 
-    // Check cache first
+    // Check negative cache first - skip discovery if we recently found no servers
+    if (await _hasNegativeCache(npub)) {
+      Log.debug(
+        'Skipping Blossom discovery - negative cache hit for ${_maskNpub(npub)}',
+        name: 'BlossomServerDiscoveryService',
+        category: LogCategory.system,
+      );
+      return BlossomDiscoveryResult.failure('No server list (cached)');
+    }
+
+    // Check cache for existing servers
     final cached = await _getCachedServers(npub);
     if (cached != null) {
       Log.info(
@@ -159,47 +168,52 @@ class BlossomServerDiscoveryService {
       }
 
       Log.debug(
-        'Querying ${_indexerRelays.length} indexers for kind 10063...',
+        'Querying ${_indexerRelays.length} indexers in parallel for kind 10063...',
         name: 'BlossomServerDiscoveryService',
         category: LogCategory.system,
       );
 
-      // Try each indexer until we find the server list
-      for (final indexerUrl in _indexerRelays) {
-        try {
-          final servers = await _queryIndexer(
-            indexerUrl,
-            pubkeyHex,
-            nostrClient,
-          );
-          if (servers.isNotEmpty) {
-            Log.info(
-              'Found ${servers.length} Blossom servers on indexer: $indexerUrl',
+      // Query all indexers in parallel - first success wins
+      final results = await Future.wait(
+        _indexerRelays.map((indexerUrl) async {
+          try {
+            return await _queryIndexer(indexerUrl, pubkeyHex, nostrClient);
+          } catch (e) {
+            Log.warning(
+              'Failed to query indexer $indexerUrl: $e',
               name: 'BlossomServerDiscoveryService',
               category: LogCategory.system,
             );
-
-            // Cache the result
-            await _cacheServers(npub, servers);
-
-            return BlossomDiscoveryResult.success(servers, indexerUrl);
+            return <DiscoveredBlossomServer>[];
           }
-        } catch (e) {
-          Log.warning(
-            'Failed to query indexer $indexerUrl: $e',
+        }),
+      );
+
+      // Use first non-empty result (maintains indexer priority order)
+      for (int i = 0; i < results.length; i++) {
+        if (results[i].isNotEmpty) {
+          final indexerUrl = _indexerRelays[i];
+          Log.info(
+            'Found ${results[i].length} Blossom servers on indexer: $indexerUrl',
             name: 'BlossomServerDiscoveryService',
             category: LogCategory.system,
           );
-          continue;
+
+          // Cache the result
+          await _cacheServers(npub, results[i]);
+
+          return BlossomDiscoveryResult.success(results[i], indexerUrl);
         }
       }
 
-      // No server list found on any indexer
+      // No server list found on any indexer - cache this negative result
+      // to avoid repeated queries for users without kind 10063 events
       Log.info(
-        'No Blossom server list found for ${_maskNpub(npub)} on any indexer',
+        'No Blossom server list found for ${_maskNpub(npub)} on any indexer - caching negative result',
         name: 'BlossomServerDiscoveryService',
         category: LogCategory.system,
       );
+      await _cacheNegativeResult(npub);
       return BlossomDiscoveryResult.failure('No server list found');
     } catch (e) {
       Log.error(
@@ -224,8 +238,20 @@ class BlossomServerDiscoveryService {
     );
 
     try {
-      // Temporarily add the indexer relay
-      final added = await client.addRelay(indexerUrl);
+      // Temporarily add the indexer relay with timeout to prevent hanging
+      final added = await client
+          .addRelay(indexerUrl)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              Log.warning(
+                'Timeout adding indexer relay: $indexerUrl',
+                name: 'BlossomServerDiscoveryService',
+                category: LogCategory.system,
+              );
+              return false;
+            },
+          );
       if (!added) {
         Log.warning(
           'Failed to add indexer relay: $indexerUrl',
@@ -246,7 +272,7 @@ class BlossomServerDiscoveryService {
       final events = await client
           .queryEvents([filter])
           .timeout(
-            const Duration(seconds: 15),
+            const Duration(seconds: 2),
             onTimeout: () {
               Log.warning(
                 'Timeout querying indexer: $indexerUrl',
@@ -449,5 +475,59 @@ class BlossomServerDiscoveryService {
     if (npub.length <= 12) return npub;
     final lastFour = npub.substring(npub.length - 4);
     return '${npub.substring(0, 8)}...$lastFour';
+  }
+
+  // --- Negative cache methods ---
+  // Cache empty results to avoid repeated queries for users without kind 10063
+
+  static const String _negativeCachePrefix = 'blossom_no_servers_';
+  static const Duration _negativeCacheExpiry = Duration(hours: 72);
+
+  /// Cache that no servers were found for a user (negative result)
+  Future<void> _cacheNegativeResult(String npub) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = '$_negativeCachePrefix$npub';
+      await prefs.setInt(cacheKey, DateTime.now().millisecondsSinceEpoch);
+
+      Log.debug(
+        'Cached negative Blossom result for ${_maskNpub(npub)} (valid 72h)',
+        name: 'BlossomServerDiscoveryService',
+        category: LogCategory.system,
+      );
+    } catch (e) {
+      Log.warning(
+        'Failed to cache negative Blossom result: $e',
+        name: 'BlossomServerDiscoveryService',
+        category: LogCategory.system,
+      );
+    }
+  }
+
+  /// Check if we have a recent negative cache for a user
+  Future<bool> _hasNegativeCache(String npub) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = '$_negativeCachePrefix$npub';
+
+      final timestamp = prefs.getInt(cacheKey);
+      if (timestamp == null) return false;
+
+      final cacheAge = DateTime.now().millisecondsSinceEpoch - timestamp;
+      return cacheAge < _negativeCacheExpiry.inMilliseconds;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Clear negative cache for a user (e.g., when they might have published servers)
+  Future<void> clearNegativeCache(String npub) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = '$_negativeCachePrefix$npub';
+      await prefs.remove(cacheKey);
+    } catch (_) {
+      // Ignore cleanup errors
+    }
   }
 }

@@ -16,6 +16,7 @@ class VideoStats {
   final int kind;
   final String dTag;
   final String title;
+  final String? description; // Video description from event.content (NIP-71)
   final String thumbnail;
   final String videoUrl;
   final String? sha256; // Content hash for Blossom authentication
@@ -36,6 +37,7 @@ class VideoStats {
     required this.kind,
     required this.dTag,
     required this.title,
+    this.description,
     required this.thumbnail,
     required this.videoUrl,
     this.sha256,
@@ -115,8 +117,14 @@ class VideoStats {
     String? sha256 =
         eventData['sha256']?.toString() ?? json['sha256']?.toString();
 
-    // Also check for blurhash in tags (NIP-71 standard)
+    // Parse description from event content (NIP-71 standard: content = description)
+    // Fall back to summary tag for backward compatibility
+    String? description = eventData['content']?.toString();
+    if (description != null && description.isEmpty) description = null;
+
+    // Also check for blurhash and summary in tags (NIP-71 standard)
     String? blurhashFromTag;
+    String? summaryFromTag;
 
     if (eventData['tags'] is List) {
       final tags = eventData['tags'] as List;
@@ -137,9 +145,15 @@ class VideoStats {
           if (tagName == 'blurhash' && blurhashFromTag == null) {
             blurhashFromTag = tagValue;
           }
+          if (tagName == 'summary' && summaryFromTag == null) {
+            summaryFromTag = tagValue;
+          }
         }
       }
     }
+
+    // Fall back to summary tag if content is empty
+    description ??= summaryFromTag;
 
     // Normalize empty sha256 to null
     if (sha256 != null && sha256.isEmpty) sha256 = null;
@@ -192,6 +206,7 @@ class VideoStats {
       kind: eventData['kind'] ?? 34236,
       dTag: dTag,
       title: title,
+      description: description,
       thumbnail: thumbnail,
       videoUrl: videoUrl,
       sha256: sha256,
@@ -215,7 +230,7 @@ class VideoStats {
       id: id,
       pubkey: pubkey,
       createdAt: createdAt.millisecondsSinceEpoch ~/ 1000,
-      content: '',
+      content: description ?? '',
       timestamp: createdAt,
       title: title.isNotEmpty ? title : null,
       videoUrl: videoUrl.isNotEmpty ? videoUrl : null,
@@ -731,7 +746,8 @@ class AnalyticsApiService {
     }
 
     try {
-      var url = '$_baseUrl/api/search?tag=$normalizedTag&limit=$limit';
+      var url =
+          '$_baseUrl/api/search?tag=$normalizedTag&sort=trending&limit=$limit';
       if (before != null) {
         url += '&before=$before';
       }
@@ -849,6 +865,68 @@ class AnalyticsApiService {
         'Error searching videos: $e',
         name: 'AnalyticsApiService',
         category: LogCategory.video,
+      );
+      return [];
+    }
+  }
+
+  /// Search user profiles by text query
+  ///
+  /// Uses funnelcake's /api/search/profiles?q= endpoint for profile search.
+  /// Returns a list of JSON maps that can be converted to UserProfile.
+  Future<List<Map<String, dynamic>>> searchProfiles({
+    required String query,
+    int limit = 50,
+  }) async {
+    if (!isAvailable || query.trim().isEmpty) return [];
+
+    try {
+      final encodedQuery = Uri.encodeQueryComponent(query.trim());
+      final url = '$_baseUrl/api/search/profiles?q=$encodedQuery&limit=$limit';
+      Log.info(
+        'Searching profiles from Funnelcake: $url',
+        name: 'AnalyticsApiService',
+        category: LogCategory.system,
+      );
+
+      final response = await _httpClient
+          .get(
+            Uri.parse(url),
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'OpenVine-Mobile/1.0',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+        final profiles = data
+            .whereType<Map<String, dynamic>>()
+            .where((p) => p['pubkey'] != null)
+            .toList();
+
+        Log.info(
+          'Found ${profiles.length} profiles for query "$query"',
+          name: 'AnalyticsApiService',
+          category: LogCategory.system,
+        );
+
+        return profiles;
+      } else {
+        Log.warning(
+          'Profile search failed: ${response.statusCode}',
+          name: 'AnalyticsApiService',
+          category: LogCategory.system,
+        );
+        return [];
+      }
+    } catch (e) {
+      Log.error(
+        'Error searching profiles: $e',
+        name: 'AnalyticsApiService',
+        category: LogCategory.system,
       );
       return [];
     }

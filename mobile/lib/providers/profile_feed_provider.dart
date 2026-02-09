@@ -54,8 +54,12 @@ class ProfileFeed extends _$ProfileFeed {
     List<VideoEvent> authorVideos = [];
 
     // Try REST API first if available (use centralized availability check)
+    // Use ref.read() instead of ref.watch() to prevent cascade rebuilds
+    // through userProfileService → videoEventService chain when funnelcake
+    // availability resolves. ProfileFeed is keepAlive, so cascade rebuilds
+    // create new instances and lose state.
     final funnelcakeAvailable =
-        ref.watch(funnelcakeAvailableProvider).asData?.value ?? false;
+        ref.read(funnelcakeAvailableProvider).asData?.value ?? false;
     final analyticsService = ref.read(analyticsApiServiceProvider);
     if (funnelcakeAvailable) {
       Log.info(
@@ -129,17 +133,21 @@ class ProfileFeed extends _$ProfileFeed {
 
       videoEventService.addListener(checkStability);
 
-      // Also set a maximum wait time
-      Timer(const Duration(seconds: 3), () {
+      // Also set a maximum wait time (1.5s is sufficient since relay EOSE
+      // typically arrives in ~300ms; reduces wait for 0-video profiles)
+      Timer(const Duration(milliseconds: 1500), () {
         if (!completer.isCompleted) {
           completer.complete();
         }
       });
 
       // Trigger initial check
+      final waitStart = DateTime.now();
       checkStability();
 
       await completer.future;
+
+      final waitDuration = DateTime.now().difference(waitStart);
 
       // Clean up
       videoEventService.removeListener(checkStability);
@@ -150,6 +158,68 @@ class ProfileFeed extends _$ProfileFeed {
           .authorVideos(userId)
           .where((v) => !v.isRepost)
           .toList();
+
+      // If initial load returned 0 videos, retry once — but only if the wait
+      // hit the timeout ceiling. A fast completion with 0 results means the
+      // relay sent EOSE promptly with no events (user genuinely has no videos),
+      // so retrying the same subscription is pointless. We only retry when the
+      // timeout fired, which suggests a relay reconnect may have killed the
+      // subscription mid-load.
+      final hitTimeout = waitDuration.inMilliseconds >= 1400;
+      if (authorVideos.isEmpty && hitTimeout) {
+        Log.warning(
+          'ProfileFeed: Initial load returned 0 videos for user=$userId, '
+          'retrying once',
+          name: 'ProfileFeedProvider',
+          category: LogCategory.video,
+        );
+
+        await videoEventService.subscribeToUserVideos(userId, limit: 100);
+
+        // Wait for retry results with same stability pattern
+        final retryCompleter = Completer<void>();
+        int retryStableCount = 0;
+        Timer? retryStabilityTimer;
+
+        void checkRetryStability() {
+          final currentCount = videoEventService.authorVideos(userId).length;
+          if (currentCount != retryStableCount) {
+            retryStableCount = currentCount;
+            retryStabilityTimer?.cancel();
+            retryStabilityTimer = Timer(const Duration(milliseconds: 300), () {
+              if (!retryCompleter.isCompleted) {
+                retryCompleter.complete();
+              }
+            });
+          }
+        }
+
+        videoEventService.addListener(checkRetryStability);
+
+        Timer(const Duration(seconds: 2), () {
+          if (!retryCompleter.isCompleted) {
+            retryCompleter.complete();
+          }
+        });
+
+        checkRetryStability();
+        await retryCompleter.future;
+
+        videoEventService.removeListener(checkRetryStability);
+        retryStabilityTimer?.cancel();
+
+        authorVideos = videoEventService
+            .authorVideos(userId)
+            .where((v) => !v.isRepost)
+            .toList();
+
+        Log.info(
+          'ProfileFeed: Retry got ${authorVideos.length} videos for '
+          'user=$userId',
+          name: 'ProfileFeedProvider',
+          category: LogCategory.video,
+        );
+      }
 
       // Apply cached metadata to preserve engagement stats from previous REST API calls
       authorVideos = _applyMetadataCache(authorVideos);
@@ -185,7 +255,11 @@ class ProfileFeed extends _$ProfileFeed {
       authorPubkey,
     ) {
       if (authorPubkey == userId && ref.mounted) {
-        refreshFromService();
+        // CRITICAL FIX: Optimistically add the new video to state immediately
+        // instead of re-fetching from REST API which may have stale data.
+        // This fixes the "video disappears after upload" bug where Funnelcake
+        // hasn't indexed the new video yet but the user expects to see it.
+        _addNewVideoToState(newVideo);
       }
     });
 
@@ -241,6 +315,62 @@ class ProfileFeed extends _$ProfileFeed {
         videos: updatedVideos,
         hasMoreContent:
             updatedVideos.length >= AppConstants.hasMoreContentThreshold,
+        isLoadingMore: false,
+        lastUpdated: DateTime.now(),
+      ),
+    );
+  }
+
+  /// Optimistically add a newly published video to the profile feed state.
+  /// This is called when the user publishes a new video to ensure instant feedback
+  /// without waiting for Funnelcake REST API to index the event.
+  void _addNewVideoToState(VideoEvent newVideo) {
+    // Skip reposts - profile feed shows only original videos
+    if (newVideo.isRepost) {
+      Log.debug(
+        'ProfileFeed: Skipping repost in optimistic update',
+        name: 'ProfileFeedProvider',
+        category: LogCategory.video,
+      );
+      return;
+    }
+
+    final currentState = state.asData?.value;
+    if (currentState == null) {
+      Log.warning(
+        'ProfileFeed: Cannot add video to state - state is null',
+        name: 'ProfileFeedProvider',
+        category: LogCategory.video,
+      );
+      return;
+    }
+
+    // Check for duplicates (case-insensitive for Nostr IDs)
+    final existingIds = currentState.videos
+        .map((v) => v.id.toLowerCase())
+        .toSet();
+    if (existingIds.contains(newVideo.id.toLowerCase())) {
+      Log.debug(
+        'ProfileFeed: Video ${newVideo.id} already in state, skipping optimistic add',
+        name: 'ProfileFeedProvider',
+        category: LogCategory.video,
+      );
+      return;
+    }
+
+    // Add new video to the front of the list (most recent first)
+    final updatedVideos = <VideoEvent>[newVideo, ...currentState.videos];
+
+    Log.info(
+      'ProfileFeed: Optimistically added new video ${newVideo.id} to state (total: ${updatedVideos.length})',
+      name: 'ProfileFeedProvider',
+      category: LogCategory.video,
+    );
+
+    state = AsyncData(
+      VideoFeedState(
+        videos: updatedVideos,
+        hasMoreContent: currentState.hasMoreContent,
         isLoadingMore: false,
         lastUpdated: DateTime.now(),
       ),
@@ -355,10 +485,12 @@ class ProfileFeed extends _$ProfileFeed {
         if (!ref.mounted) return;
 
         if (apiVideos.isNotEmpty) {
-          // Deduplicate and merge
-          final existingIds = currentState.videos.map((v) => v.id).toSet();
+          // Deduplicate and merge (case-insensitive for Nostr IDs)
+          final existingIds = currentState.videos
+              .map((v) => v.id.toLowerCase())
+              .toSet();
           final newVideos = apiVideos
-              .where((v) => !existingIds.contains(v.id))
+              .where((v) => !existingIds.contains(v.id.toLowerCase()))
               .where((v) => !v.isRepost)
               .toList();
 

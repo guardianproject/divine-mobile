@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:models/models.dart' show AspectRatio;
 import 'package:models/models.dart' show NativeProofData;
 import 'package:openvine/models/recording_clip.dart';
+import 'package:openvine/utils/path_resolver.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:pro_video_editor/pro_video_editor.dart';
 
@@ -26,6 +27,8 @@ class VineDraft {
     this.expireTime,
     required this.publishAttempts,
     this.proofManifestJson,
+    this.editorStateHistory = const {},
+    this.editorEditingParameters = const {},
   });
 
   factory VineDraft.create({
@@ -38,6 +41,8 @@ class VineDraft {
     Duration? expireTime,
     String? id,
     String? proofManifestJson,
+    Map<String, dynamic>? editorStateHistory,
+    Map<String, dynamic>? editorEditingParameters,
   }) {
     final now = DateTime.now();
     return VineDraft(
@@ -55,10 +60,16 @@ class VineDraft {
       publishError: null,
       publishAttempts: 0,
       proofManifestJson: proofManifestJson,
+      editorStateHistory: editorStateHistory ?? const {},
+      editorEditingParameters: editorEditingParameters ?? const {},
     );
   }
 
-  factory VineDraft.fromJson(Map<String, dynamic> json) {
+  factory VineDraft.fromJson(
+    Map<String, dynamic> json,
+    String documentsPath, {
+    bool useOriginalPath = false,
+  }) {
     final List<RecordingClip> clips = [];
 
     // Backward compatibility: Handle old draft format with single videoFilePath
@@ -67,13 +78,19 @@ class VineDraft {
       final now = DateTime.now();
       final targetAspectRatio = AspectRatio.values.firstWhere(
         (e) => e.name == json['aspectRatio'],
-        orElse: () => .square,
+        orElse: () => AspectRatio.square,
       );
 
       clips.add(
         RecordingClip(
           id: 'draft_${now.millisecondsSinceEpoch}',
-          video: EditorVideo.file(json['videoFilePath']),
+          video: EditorVideo.file(
+            resolvePath(
+              json['videoFilePath'] as String,
+              documentsPath,
+              useOriginalPath: useOriginalPath,
+            )!,
+          ),
           duration: .zero,
           recordedAt: DateTime.parse(json['createdAt'] as String),
           originalAspectRatio: targetAspectRatio.value,
@@ -82,9 +99,13 @@ class VineDraft {
       );
     } else {
       clips.addAll(
-        List.from(
-          json['clips'] ?? [],
-        ).map((jsonClip) => RecordingClip.fromJson(jsonClip)),
+        List.from(json['clips'] ?? []).map(
+          (jsonClip) => RecordingClip.fromJson(
+            jsonClip,
+            documentsPath,
+            useOriginalPath: useOriginalPath,
+          ),
+        ),
       );
     }
 
@@ -107,6 +128,11 @@ class VineDraft {
       publishError: json['publishError'] as String?,
       publishAttempts: json['publishAttempts'] as int? ?? 0,
       proofManifestJson: json['proofManifestJson'] as String?,
+      editorStateHistory:
+          (json['editorStateHistory'] as Map<String, dynamic>?) ?? const {},
+      editorEditingParameters:
+          (json['editorEditingParameters'] as Map<String, dynamic>?) ??
+          const {},
     );
   }
 
@@ -124,6 +150,9 @@ class VineDraft {
   final String? publishError;
   final int publishAttempts;
   final bool allowAudioReuse;
+
+  final Map<String, dynamic> editorStateHistory;
+  final Map<String, dynamic> editorEditingParameters;
 
   /// Check if this draft has ProofMode data
   bool get hasProofMode => proofManifestJson != null;
@@ -151,6 +180,7 @@ class VineDraft {
 
   VineDraft copyWith({
     List<RecordingClip>? clips,
+    String? id,
     String? title,
     String? description,
     Set<String>? hashtags,
@@ -160,8 +190,10 @@ class VineDraft {
     bool? allowAudioReuse,
     int? publishAttempts,
     Object? proofManifestJson = _sentinel,
+    Map<String, dynamic>? editorStateHistory,
+    Map<String, dynamic>? editorEditingParameters,
   }) => VineDraft(
-    id: id,
+    id: id ?? this.id,
     clips: clips ?? this.clips,
     title: title ?? this.title,
     description: description ?? this.description,
@@ -179,6 +211,9 @@ class VineDraft {
     proofManifestJson: proofManifestJson == _sentinel
         ? this.proofManifestJson
         : proofManifestJson as String?,
+    editorStateHistory: editorStateHistory ?? this.editorStateHistory,
+    editorEditingParameters:
+        editorEditingParameters ?? this.editorEditingParameters,
   );
 
   static const _sentinel = Object();
@@ -198,6 +233,9 @@ class VineDraft {
     'publishError': publishError,
     'publishAttempts': publishAttempts,
     'proofManifestJson': proofManifestJson,
+    if (editorStateHistory.isNotEmpty) 'editorStateHistory': editorStateHistory,
+    if (editorEditingParameters.isNotEmpty)
+      'editorEditingParameters': editorEditingParameters,
   };
 
   String get displayDuration {

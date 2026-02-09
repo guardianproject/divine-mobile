@@ -20,6 +20,8 @@ import 'package:openvine/services/upload_initialization_helper.dart';
 import 'package:openvine/services/video_thumbnail_service.dart';
 import 'package:openvine/utils/async_utils.dart';
 import 'package:openvine/utils/unified_logger.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:pro_video_editor/pro_video_editor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -298,7 +300,17 @@ class UploadManager {
     if (draft.clips.length == 1) {
       videoFilePath = await draft.clips.first.video.safeFilePath();
     } else {
-      videoFilePath = '';
+      final tempDir = await getTemporaryDirectory();
+      videoFilePath = path.join(
+        tempDir.path,
+        'merged_${DateTime.now().microsecondsSinceEpoch}.mp4',
+      );
+      Log.info(
+        '🎬 Merging ${draft.clips.length} clips into single video '
+        '(unexpected: clips should be pre-merged at this point)...',
+        name: 'UploadManager',
+        category: .video,
+      );
       await ProVideoEditor.instance.renderVideoToFile(
         videoFilePath,
         VideoRenderData(
@@ -306,15 +318,33 @@ class UploadManager {
               .map((clip) => VideoSegment(video: clip.video))
               .toList(),
           endTime: VideoEditorConstants.maxDuration,
+          shouldOptimizeForNetworkUse: true,
         ),
+      );
+      Log.info(
+        '✅ Video merge completed: $videoFilePath',
+        name: 'UploadManager',
+        category: .video,
       );
     }
 
-    if (videoDuration == null) {
+    int? videoWidth;
+    int? videoHeight;
+
+    try {
       final meta = await ProVideoEditor.instance.getMetadata(
         EditorVideo.file(videoFilePath),
       );
-      videoDuration = meta.duration;
+      videoDuration ??= meta.duration;
+      final resolution = meta.resolution;
+      videoWidth = resolution.width.round();
+      videoHeight = resolution.height.round();
+    } catch (e) {
+      Log.warning(
+        '⚠️ Could not extract video metadata: $e',
+        name: 'UploadManager',
+        category: LogCategory.video,
+      );
     }
 
     return _startUploadInternal(
@@ -323,6 +353,8 @@ class UploadManager {
       title: draft.title,
       description: draft.description,
       hashtags: draft.hashtags.toList(),
+      videoWidth: videoWidth,
+      videoHeight: videoHeight,
       videoDuration: videoDuration,
       proofManifestJson: draft.proofManifestJson,
       onProgress: onProgress,
@@ -805,6 +837,7 @@ class UploadManager {
             title: upload.title ?? '',
             description: upload.description,
             hashtags: upload.hashtags,
+            proofManifestJson: upload.proofManifestJson,
             onProgress: (value) {
               final progress = value * 0.8; // Reserve 20% for thumbnail
 
@@ -1278,8 +1311,8 @@ class UploadManager {
 
     await _updateUpload(resumedUpload);
 
-    // Start upload process again
-    _performUpload(resumedUpload);
+    // Start upload process again and wait for completion
+    await _performUpload(resumedUpload);
 
     Log.info(
       'Upload resumed: $uploadId',
@@ -1324,8 +1357,8 @@ class UploadManager {
 
     await _updateUpload(resetUpload);
 
-    // Start upload again
-    _performUpload(resetUpload);
+    // Start upload again and wait for completion
+    await _performUpload(resetUpload);
   }
 
   /// Cancel an upload (stops the upload but keeps it for retry)
@@ -1420,15 +1453,80 @@ class UploadManager {
     if (completedUploads.isNotEmpty) {}
   }
 
-  /// Resume any uploads that were interrupted
+  /// Resume any uploads that were interrupted or never started
+  ///
+  /// Handles uploads in the following states:
+  /// - `pending` - never started, should be started
+  /// - `uploading` - was uploading when app closed, restart
+  /// - `retrying` - was retrying when app closed, continue
+  /// - `failed` with canRetry - failed but can be retried
   Future<void> _resumeInterruptedUploads() async {
-    final interruptedUploads = pendingUploads
-        .where((upload) => upload.status == UploadStatus.uploading)
-        .toList();
+    final allUploads = pendingUploads;
 
-    for (final upload in interruptedUploads) {
-      Log.debug(
-        'Resuming interrupted upload: ${upload.id}',
+    // Log upload state breakdown for debugging
+    final statusCounts = <UploadStatus, int>{};
+    for (final upload in allUploads) {
+      statusCounts[upload.status] = (statusCounts[upload.status] ?? 0) + 1;
+    }
+    Log.info(
+      '📊 Upload state breakdown on startup: $statusCounts',
+      name: 'UploadManager',
+      category: LogCategory.video,
+    );
+
+    // Find all uploads that should be resumed/retried
+    final uploadsToResume = allUploads.where((upload) {
+      // Resume pending, uploading, or retrying uploads
+      if (upload.status == UploadStatus.pending ||
+          upload.status == UploadStatus.uploading ||
+          upload.status == UploadStatus.retrying) {
+        return true;
+      }
+      // Auto-retry failed uploads that can be retried
+      if (upload.status == UploadStatus.failed && upload.canRetry) {
+        return true;
+      }
+      return false;
+    }).toList();
+
+    if (uploadsToResume.isEmpty) {
+      Log.info(
+        '✅ No uploads to resume on startup',
+        name: 'UploadManager',
+        category: LogCategory.video,
+      );
+      return;
+    }
+
+    Log.info(
+      '🔄 Resuming ${uploadsToResume.length} interrupted/stalled uploads',
+      name: 'UploadManager',
+      category: LogCategory.video,
+    );
+
+    for (final upload in uploadsToResume) {
+      // Verify the video file still exists before attempting retry
+      if (!kIsWeb) {
+        final videoFile = File(upload.localVideoPath);
+        if (!videoFile.existsSync()) {
+          Log.warning(
+            '⚠️ Skipping upload ${upload.id} - video file no longer exists: ${upload.localVideoPath}',
+            name: 'UploadManager',
+            category: LogCategory.video,
+          );
+          // Mark as failed with clear message
+          await _updateUpload(
+            upload.copyWith(
+              status: UploadStatus.failed,
+              errorMessage: 'Video file was deleted. Please record again.',
+            ),
+          );
+          continue;
+        }
+      }
+
+      Log.info(
+        '🔄 Resuming upload: ${upload.id} (was ${upload.status.name})',
         name: 'UploadManager',
         category: LogCategory.video,
       );
@@ -1437,10 +1535,21 @@ class UploadManager {
       final resetUpload = upload.copyWith(
         status: UploadStatus.pending,
         uploadProgress: null,
+        errorMessage: null,
       );
 
       await _updateUpload(resetUpload);
-      _performUpload(resetUpload);
+      // Intentional fire-and-forget for parallel processing of interrupted uploads
+      // Wrap in unawaited to make the intent explicit and add error handling
+      unawaited(
+        _performUpload(resetUpload).catchError((Object e) {
+          Log.error(
+            'Error resuming interrupted upload ${resetUpload.id}: $e',
+            name: 'UploadManager',
+            category: LogCategory.video,
+          );
+        }),
+      );
     }
   }
 

@@ -7,14 +7,12 @@ import 'package:divine_ui/divine_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart' show StickerData;
+import 'package:openvine/blocs/video_editor/draw_editor/video_editor_draw_bloc.dart';
 import 'package:openvine/blocs/video_editor/filter_editor/video_editor_filter_bloc.dart';
 import 'package:openvine/blocs/video_editor/main_editor/video_editor_main_bloc.dart';
 import 'package:openvine/blocs/video_editor/sticker/video_editor_sticker_bloc.dart';
-import 'package:openvine/widgets/video_editor/filter_editor/video_editor_filter_bottom_bar.dart';
-import 'package:openvine/widgets/video_editor/filter_editor/video_editor_filter_overlay_controls.dart';
-import 'package:openvine/widgets/video_editor/main_editor/video_editor_canvas.dart';
-import 'package:openvine/widgets/video_editor/main_editor/video_editor_main_bottom_bar.dart';
-import 'package:openvine/widgets/video_editor/main_editor/video_editor_main_top_bar.dart';
+import 'package:openvine/blocs/video_editor/text_editor/video_editor_text_bloc.dart';
+import 'package:openvine/screens/video_editor/video_text_editor_screen.dart';
 import 'package:openvine/widgets/video_editor/main_editor/video_editor_scope.dart';
 import 'package:openvine/widgets/video_editor/sticker_editor/video_editor_sticker.dart';
 import 'package:openvine/widgets/video_editor/sticker_editor/video_editor_sticker_sheet.dart';
@@ -40,6 +38,7 @@ class VideoEditorScreen extends StatefulWidget {
 
 class _VideoEditorScreenState extends State<VideoEditorScreen> {
   final _editorKey = GlobalKey<ProImageEditorState>();
+  final _removeAreaKey = GlobalKey();
 
   /// Manually managed instead of using [BlocProvider.create] so we can reuse
   /// it in contexts outside the widget tree (e.g., bottom sheets opened via
@@ -80,6 +79,10 @@ class _VideoEditorScreenState extends State<VideoEditorScreen> {
     }
   }
 
+  /// Opens the sticker picker sheet and adds the selected sticker as a layer.
+  ///
+  /// Resets the search query before opening and adds a [WidgetLayer] to the
+  /// editor canvas if a sticker is selected.
   Future<void> _addStickers() async {
     // Reset search when opening the sheet
     _stickerBloc.add(const VideoEditorStickerSearch(''));
@@ -97,8 +100,11 @@ class _VideoEditorScreenState extends State<VideoEditorScreen> {
     );
 
     if (sticker != null) {
+      final screenWidth = MediaQuery.sizeOf(context).width;
+      final stickerWidth = screenWidth / 3;
+
       final layer = WidgetLayer(
-        width: 120,
+        width: stickerWidth,
         widget: Semantics(
           label: sticker.description,
           child: VideoEditorSticker(
@@ -106,9 +112,50 @@ class _VideoEditorScreenState extends State<VideoEditorScreen> {
             enableLimitCacheSize: false,
           ),
         ),
+        exportConfigs: WidgetLayerExportConfigs(
+          assetPath: sticker.assetPath,
+          networkUrl: sticker.networkUrl,
+          meta: {'description': sticker.description, 'tags': sticker.tags},
+        ),
       );
-      _editor!.addLayer(layer);
+      _editor!.addLayer(layer, blockSelectLayer: true);
     }
+  }
+
+  /// Opens the text editor screen to add or edit a text layer.
+  ///
+  /// If [layer] is provided, the editor is initialized with its values for
+  /// editing. Otherwise, a new text layer is created.
+  ///
+  /// Returns the resulting [TextLayer] if the user confirms, or `null` if
+  /// cancelled.
+  Future<TextLayer?> _addEditTextLayer({
+    required VideoEditorMainBloc mainBloc,
+    required VideoEditorTextBloc textBloc,
+    TextLayer? layer,
+  }) async {
+    mainBloc.add(const VideoEditorMainOpenSubEditor(.text));
+
+    final result = await Navigator.push<TextLayer>(
+      context,
+      PageRouteBuilder<TextLayer>(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.transparent,
+        pageBuilder: (_, _, _) => BlocProvider.value(
+          value: textBloc,
+          child: VideoTextEditorScreen(layer: layer),
+        ),
+        transitionsBuilder: (_, animation, _, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+
+    textBloc.add(const VideoEditorTextClosePanels());
+    mainBloc.add(const VideoEditorMainSubEditorClosed());
+
+    return result;
   }
 
   @override
@@ -118,104 +165,28 @@ class _VideoEditorScreenState extends State<VideoEditorScreen> {
         BlocProvider(create: (_) => VideoEditorMainBloc()),
         BlocProvider.value(value: _stickerBloc),
         BlocProvider(create: (_) => VideoEditorFilterBloc()),
+        BlocProvider(create: (_) => VideoEditorDrawBloc()),
+        BlocProvider(create: (_) => VideoEditorTextBloc()),
       ],
-      child: VideoEditorScope(
-        editorKey: _editorKey,
-        onAddStickers: _addStickers,
-        child: const VideoEditorScaffold(
-          overlayControls: _OverlayControls(),
-          bottomBar: _BottomActions(),
-          editor: VideoEditorCanvas(),
-        ),
-      ),
-    );
-  }
-}
+      child: Builder(
+        builder: (context) {
+          return VideoEditorScope(
+            editorKey: _editorKey,
+            removeAreaKey: _removeAreaKey,
+            onAddStickers: _addStickers,
+            onAddEditTextLayer: ([layer]) {
+              final mainBloc = context.read<VideoEditorMainBloc>();
+              final textBloc = context.read<VideoEditorTextBloc>();
 
-class _OverlayControls extends StatelessWidget {
-  const _OverlayControls();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: BlocBuilder<VideoEditorMainBloc, VideoEditorMainState>(
-        buildWhen: (previous, current) =>
-            previous.isLayerInteractionActive !=
-                current.isLayerInteractionActive ||
-            previous.openSubEditor != current.openSubEditor,
-        builder: (context, state) {
-          final child = switch (state) {
-            _ when state.isLayerInteractionActive => const SizedBox(),
-            // Main-Editor
-            VideoEditorMainState(openSubEditor: null) =>
-              const VideoEditorMainTopBar(),
-            // Filter-Editor
-            VideoEditorMainState(openSubEditor: .filter) =>
-              const VideoEditorFilterOverlayControls(
-                key: ValueKey('Filter-Overlay-Controls'),
-              ),
-            // Fallback
-            _ => const SizedBox(),
-          };
-
-          return AnimatedSwitcher(
-            layoutBuilder: (currentChild, previousChildren) => Stack(
-              fit: .expand,
-              alignment: .center,
-              children: <Widget>[...previousChildren, ?currentChild],
-            ),
-            duration: const Duration(milliseconds: 200),
-            child: child,
+              return _addEditTextLayer(
+                mainBloc: mainBloc,
+                textBloc: textBloc,
+                layer: layer,
+              );
+            },
+            child: const VideoEditorScaffold(),
           );
         },
-      ),
-    );
-  }
-}
-
-/// Bottom section that switches between different toolbars based on context.
-///
-/// Shows [VideoEditorFilterBottomBar] when filter editor is open, hides the
-/// bar during layer interaction, and falls back to [VideoEditorMainBottomBar].
-class _BottomActions extends StatelessWidget {
-  const _BottomActions();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: SizedBox(
-        height: 88,
-        child: BlocBuilder<VideoEditorMainBloc, VideoEditorMainState>(
-          buildWhen: (previous, current) =>
-              previous.isLayerInteractionActive !=
-                  current.isLayerInteractionActive ||
-              previous.openSubEditor != current.openSubEditor,
-          builder: (context, state) {
-            final child = switch (state) {
-              // TODO(@hm21) Implement Remove-Area
-              _ when state.isLayerInteractionActive => const SizedBox(),
-              // Filter-Bar
-              VideoEditorMainState(openSubEditor: .filter) =>
-                const VideoEditorFilterBottomBar(
-                  key: ValueKey('Filter-Editor-Bottom-Bar'),
-                ),
-              // Main-Bar
-              _ => const VideoEditorMainBottomBar(),
-            };
-
-            return AnimatedSwitcher(
-              switchInCurve: Curves.easeInOut,
-              layoutBuilder: (currentChild, previousChildren) => Stack(
-                clipBehavior: .none,
-                alignment: .bottomCenter,
-                children: <Widget>[...previousChildren, ?currentChild],
-              ),
-              duration: const Duration(milliseconds: 200),
-              child: child,
-            );
-          },
-        ),
       ),
     );
   }

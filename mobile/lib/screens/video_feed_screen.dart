@@ -1,5 +1,7 @@
 // ABOUTME: TDD-driven video feed screen implementation with single source of truth
 // ABOUTME: Memory-efficient PageView with intelligent preloading and error boundaries
+// ABOUTME: Uses router-driven active video state (isVideoActiveProvider) - NOT PageController.page
+// ABOUTME: which is unreliable during scroll. URL updates in _onPageChanged trigger provider chain.
 
 import 'dart:async';
 import 'dart:io';
@@ -578,38 +580,66 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
       );
     });
 
+    // Add +1 to itemCount when at end of feed to show the end card
+    final showEndCard = !feedState.hasMoreContent && videos.isNotEmpty;
+    final itemCount = showEndCard ? videos.length + 1 : videos.length;
+
     return PageView.builder(
-      itemCount: videos.length,
+      // PageStorageKey preserves scroll position across provider rebuilds
+      key: const PageStorageKey<String>('home_feed_page_view'),
+      itemCount: itemCount,
       controller: _pageController,
       scrollDirection: Axis.vertical,
       allowImplicitScrolling: true,
       onPageChanged: (index) {
-        setState(() => _currentIndex = index);
-        _onPageChanged(index);
-        _cacheNextPage(videos);
+        // Don't update index if we're on the end card
+        if (index < videos.length) {
+          setState(() => _currentIndex = index);
+          _onPageChanged(index);
+          _cacheNextPage(videos);
+        }
 
         // Trigger pagination when near the end using PaginationMixin
-        checkForPagination(
-          currentIndex: index,
-          totalItems: videos.length,
-          onLoadMore: () => ref.read(homeFeedProvider.notifier).loadMore(),
-        );
+        // Only trigger if there's potentially more content
+        if (feedState.hasMoreContent) {
+          checkForPagination(
+            currentIndex: index,
+            totalItems: videos.length,
+            onLoadMore: () => ref.read(homeFeedProvider.notifier).loadMore(),
+          );
+        }
 
-        Log.debug(
-          '📄 Page changed to index $index (${videos[index].id}...)',
-          name: 'VideoFeedScreen',
-          category: LogCategory.video,
-        );
+        if (index < videos.length) {
+          Log.debug(
+            '📄 Page changed to index $index (${videos[index].id}...)',
+            name: 'VideoFeedScreen',
+            category: LogCategory.video,
+          );
+        } else {
+          Log.debug(
+            '📄 Page changed to end-of-feed card',
+            name: 'VideoFeedScreen',
+            category: LogCategory.video,
+          );
+        }
       },
       itemBuilder: (context, index) {
+        // Show end-of-feed card as the last item
+        if (index >= videos.length) {
+          return const _EndOfFeedCard();
+        }
+
         final video = videos[index];
         // Check if this video is "list-only" (only in feed because of subscribed list)
         final isListOnly = feedState.listOnlyVideoIds.contains(video.id);
         final listSources = feedState.videoListSources[video.id];
 
-        // Use PageController as source of truth for active video
-        final currentPage = _pageController.page?.round() ?? _currentIndex;
-        final isActive = index == currentPage;
+        // Don't use isActiveOverride - let VideoFeedItem use router-driven
+        // isVideoActiveProvider which derives active state from URL.
+        // Using _pageController.page during itemBuilder is unreliable because
+        // it returns floats during scroll that .round() incorrectly.
+        // URL is updated in _onPageChanged via context.go(), which triggers
+        // the reactive provider chain correctly.
 
         return VideoFeedItem(
           key: ValueKey('video-${video.id}'),
@@ -621,7 +651,6 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
               true, // Home feed only shows followed users
           showListAttribution: isListOnly,
           listSources: listSources,
-          isActiveOverride: isActive,
         );
       },
     );
@@ -707,6 +736,76 @@ class _VideoFeedScreenState extends ConsumerState<VideoFeedScreen>
 
     // Fetch profile only for the currently visible video
     userProfilesNotifier.prefetchProfilesImmediately(pubkeysToFetch.toList());
+  }
+}
+
+/// End of feed card shown when user has viewed all available videos
+class _EndOfFeedCard extends StatelessWidget {
+  const _EndOfFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black,
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Friendly icon
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: VineTheme.vineGreen.withValues(alpha: 0.15),
+                  ),
+                  child: const Icon(
+                    Icons.check_circle_outline,
+                    size: 64,
+                    color: VineTheme.vineGreen,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                const Text(
+                  "You've reached the end,\nmy friend",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Follow more viners to see more content",
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    context.go(ExploreScreen.path);
+                  },
+                  icon: const Icon(Icons.explore_outlined),
+                  label: const Text('Explore to find more videos'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: VineTheme.vineGreen,
+                    side: const BorderSide(color: VineTheme.vineGreen),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:openvine/blocs/my_following/my_following_bloc.dart';
 import 'package:openvine/providers/app_providers.dart';
-import 'package:openvine/screens/profile_screen_router.dart';
-import 'package:openvine/utils/public_identifier_normalizer.dart';
+import 'package:openvine/router/nav_extensions.dart';
 import 'package:divine_ui/divine_ui.dart';
+import 'package:openvine/services/screen_analytics_service.dart';
 import 'package:openvine/widgets/branded_loading_scaffold.dart';
 import 'package:openvine/widgets/profile/follower_count_title.dart';
 import 'package:openvine/widgets/user_profile_tile.dart';
@@ -93,7 +92,15 @@ class _MyFollowingView extends StatelessWidget {
               : 0,
         ),
       ),
-      body: BlocBuilder<MyFollowingBloc, MyFollowingState>(
+      body: BlocConsumer<MyFollowingBloc, MyFollowingState>(
+        listener: (context, state) {
+          if (state.status == MyFollowingStatus.success) {
+            ScreenAnalyticsService().markDataLoaded(
+              'following',
+              dataMetrics: {'following_count': state.followingPubkeys.length},
+            );
+          }
+        },
         builder: (context, state) {
           return switch (state.status) {
             MyFollowingStatus.initial => const Center(
@@ -144,12 +151,7 @@ class _FollowingListBody extends StatelessWidget {
             builder: (context, isFollowing) {
               return UserProfileTile(
                 pubkey: userPubkey,
-                onTap: () {
-                  final npub = normalizeToNpub(userPubkey);
-                  if (npub != null) {
-                    context.go(ProfileScreenRouter.pathForIndex(npub, 0));
-                  }
-                },
+                onTap: () => context.pushOtherProfile(userPubkey),
                 isFollowing: isFollowing,
                 onToggleFollow: () {
                   context.read<MyFollowingBloc>().add(

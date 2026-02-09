@@ -10,7 +10,7 @@ import 'package:openvine/providers/video_publish_provider.dart';
 import 'package:openvine/providers/video_recorder_provider.dart';
 import 'package:openvine/screens/clip_library_screen.dart';
 import 'package:openvine/utils/unified_logger.dart';
-import 'package:openvine/widgets/divine_icon_button.dart';
+import 'package:openvine/widgets/video_editor_icon_button.dart';
 
 class VideoClipEditorMoreButton extends ConsumerStatefulWidget {
   const VideoClipEditorMoreButton({super.key});
@@ -157,26 +157,14 @@ class _VideoEditorMoreButtonState
 
   /// Shows a styled snackbar with the given message.
   void _showSnackBar({required String message, bool isError = false}) {
-    // TODO(@hm21): Update after new final snackbar-design is implemented.
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        shape: RoundedRectangleBorder(borderRadius: .circular(16)),
-        clipBehavior: .hardEdge,
-        content: Text(
-          message,
-          style: VineTheme.bodyFont(
-            fontSize: 14,
-            fontWeight: .w600,
-            height: 1.43,
-            letterSpacing: 0.1,
-            color: isError ? const Color(0xFFF44336) : VineTheme.whiteText,
-          ),
-        ),
-        duration: Duration(seconds: isError ? 3 : 2),
-        backgroundColor: isError
-            ? const Color(0xFF410001)
-            : const Color(0xFF000A06),
+        padding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         behavior: .floating,
+        duration: Duration(seconds: isError ? 3 : 2),
+        content: DivineSnackbarContainer(label: message, error: isError),
       ),
     );
   }
@@ -222,7 +210,7 @@ class _VideoEditorMoreButtonState
 
   @override
   Widget build(BuildContext context) {
-    return DivineIconButton(
+    return VideoEditorIconButton(
       backgroundColor: const Color(0x00000000),
       iconPath: 'assets/icon/more_horiz.svg',
       onTap: _showMoreOptions,

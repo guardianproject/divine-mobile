@@ -9,7 +9,7 @@ import 'package:openvine/constants/video_editor_constants.dart';
 import 'package:openvine/providers/clip_manager_provider.dart';
 import 'package:openvine/providers/video_editor_provider.dart';
 import 'package:openvine/services/video_editor/video_editor_split_service.dart';
-import 'package:openvine/widgets/divine_icon_button.dart';
+import 'package:openvine/widgets/video_editor_icon_button.dart';
 import 'package:openvine/widgets/video_clip_editor/video_clip_editor_more_button.dart';
 import 'package:openvine/widgets/video_clip_editor/video_time_display.dart';
 
@@ -19,24 +19,14 @@ class VideoClipEditorBottomBar extends ConsumerWidget {
   const VideoClipEditorBottomBar({super.key});
 
   void _showSnackBar({required BuildContext context, required String message}) {
-    // TODO(@hm21): Update after new final snackbar-design is implemented.
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        shape: RoundedRectangleBorder(borderRadius: .circular(16)),
-        clipBehavior: .hardEdge,
-        content: Text(
-          message,
-          style: VineTheme.bodyFont(
-            fontSize: 14,
-            fontWeight: .w600,
-            height: 1.43,
-            letterSpacing: 0.1,
-            color: VineTheme.whiteText,
-          ),
-        ),
-        duration: Duration(seconds: 3),
-        backgroundColor: const Color(0xFF000A06),
+        padding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         behavior: .floating,
+        duration: Duration(seconds: 3),
+        content: DivineSnackbarContainer(label: message),
       ),
     );
   }
@@ -113,7 +103,7 @@ class VideoClipEditorBottomBar extends ConsumerWidget {
                   Row(
                     spacing: 16,
                     children: [
-                      DivineIconButton(
+                      VideoEditorIconButton(
                         backgroundColor: const Color(0x00000000),
                         iconPath: state.isPlaying
                             ? 'assets/icon/pause.svg'
@@ -123,7 +113,7 @@ class VideoClipEditorBottomBar extends ConsumerWidget {
                         semanticLabel: 'Play or pause video',
                       ),
                       if (state.isEditing)
-                        DivineIconButton(
+                        VideoEditorIconButton(
                           backgroundColor: const Color(0x00000000),
                           iconPath: 'assets/icon/trim.svg',
                           onTap: () => _handleSplitClip(context, ref),

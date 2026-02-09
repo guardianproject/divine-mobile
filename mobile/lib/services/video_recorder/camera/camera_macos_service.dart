@@ -4,13 +4,17 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:camera_macos_plus/camera_macos.dart';
 import 'package:flutter/widgets.dart';
 import 'package:openvine/models/video_recorder/video_recorder_flash_mode.dart';
+import 'package:openvine/services/audio_device_preference_service.dart';
 import 'package:openvine/services/video_recorder/camera/camera_base_service.dart';
+import 'package:openvine/utils/path_resolver.dart';
 import 'package:openvine/utils/unified_logger.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:pro_video_editor/pro_video_editor.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// macOS implementation of [CameraService] using the camera_macos package.
 ///
@@ -82,8 +86,24 @@ class CameraMacOSService extends CameraService {
     Log.info(
       '📷 Found ${_videoDevices!.length} video device(s)',
       name: 'CameraMacOSService',
-      category: .video,
+      category: LogCategory.video,
     );
+
+    // Log audio devices for debugging
+    if (_audioDevices != null && _audioDevices!.isNotEmpty) {
+      Log.info(
+        '🎤 Found ${_audioDevices!.length} audio device(s): '
+        '${_audioDevices!.map((d) => d.deviceId).join(", ")}',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+    } else {
+      Log.warning(
+        '⚠️ No audio devices found - recording will have no audio!',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+    }
 
     await _initializeCameraController();
 
@@ -131,10 +151,18 @@ class CameraMacOSService extends CameraService {
 
     try {
       final deviceId = _videoDevices![_currentCameraIndex].deviceId;
+      final audioDeviceId = await _selectBestAudioDevice();
+
+      Log.info(
+        '📷 Initializing camera with video=$deviceId, audio=$audioDeviceId',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+
       final result = await CameraMacOS.instance.initialize(
         cameraMacOSMode: CameraMacOSMode.video,
         deviceId: deviceId,
-        audioDeviceId: _audioDevices?.first.deviceId,
+        audioDeviceId: audioDeviceId,
       );
       _isInitialized = true;
       _initializationError = null; // Clear error on success
@@ -145,13 +173,41 @@ class CameraMacOSService extends CameraService {
       _hasFlash = hasFlash;
       onUpdateState(forceCameraRebuild: true);
     } catch (e) {
-      _initializationError = 'Camera initialization failed: $e';
+      _initializationError = _getUserFriendlyErrorMessage(e.toString());
       Log.error(
         '📷 Failed to initialize camera controller: $e',
         name: 'CameraMacOSService',
         category: .video,
       );
     }
+  }
+
+  /// Converts native camera error messages to user-friendly descriptions.
+  String _getUserFriendlyErrorMessage(String error) {
+    final errorLower = error.toLowerCase();
+
+    if (errorLower.contains('cannot use') ||
+        errorLower.contains('in use') ||
+        errorLower.contains('busy')) {
+      return 'Camera is being used by another app. '
+          'Please close other apps using the camera and try again.';
+    }
+
+    if (errorLower.contains('denied') ||
+        errorLower.contains('not authorized') ||
+        errorLower.contains('permission')) {
+      return 'Camera access denied. '
+          'Please allow camera access in System Settings > Privacy & Security.';
+    }
+
+    if (errorLower.contains('not found') ||
+        errorLower.contains('no camera') ||
+        errorLower.contains('unavailable')) {
+      return 'No camera found. Please connect a camera and try again.';
+    }
+
+    // Default fallback - still better than raw error
+    return 'Unable to access camera. Please try again.';
   }
 
   @override
@@ -271,25 +327,84 @@ class CameraMacOSService extends CameraService {
     }
   }
 
+  /// Configures audio session for recording (enables microphone input).
+  Future<void> _configureAudioSessionForRecording() async {
+    try {
+      final session = await AudioSession.instance;
+      await session.configure(
+        const AudioSessionConfiguration(
+          avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+          avAudioSessionMode: AVAudioSessionMode.videoRecording,
+          avAudioSessionCategoryOptions:
+              AVAudioSessionCategoryOptions.defaultToSpeaker,
+        ),
+      );
+      Log.info(
+        '🎤 Audio session configured for recording (playAndRecord mode)',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+    } catch (e) {
+      Log.error(
+        '🎤 Failed to configure audio session for recording: $e',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+    }
+  }
+
+  /// Restores audio session to ambient mode (respects mute switch).
+  Future<void> _restoreAudioSession() async {
+    try {
+      final session = await AudioSession.instance;
+      await session.configure(
+        const AudioSessionConfiguration(
+          avAudioSessionCategory: AVAudioSessionCategory.ambient,
+          avAudioSessionMode: AVAudioSessionMode.defaultMode,
+          avAudioSessionCategoryOptions:
+              AVAudioSessionCategoryOptions.mixWithOthers,
+        ),
+      );
+      Log.info(
+        '🎤 Audio session restored to ambient mode',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+    } catch (e) {
+      Log.warning(
+        '🎤 Failed to restore audio session: $e',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+    }
+  }
+
   @override
-  Future<bool> startRecording({Duration? maxDuration}) async {
+  Future<bool> startRecording({
+    Duration? maxDuration,
+    String? outputDirectory,
+  }) async {
     try {
       Log.info(
         '📷 Starting macOS video recording',
         name: 'CameraMacOSService',
-        category: .video,
+        category: LogCategory.video,
       );
 
-      // Use documents directory for user-accessible persistent storage
-      final documentsDir = await getApplicationDocumentsDirectory();
-      final recordingsDir = Directory('${documentsDir.path}/recordings');
+      // Configure audio session for recording BEFORE starting
+      await _configureAudioSessionForRecording();
+
+      final baseDir = await getDocumentsPath();
+      final recordingsDir = Directory(p.join(baseDir, 'recordings'));
       if (!recordingsDir.existsSync()) {
         await recordingsDir.create(recursive: true);
       }
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final outputPath =
-          '${recordingsDir.path}/openvine_recording_$timestamp.mp4';
+      final outputPath = p.join(
+        recordingsDir.path,
+        'openvine_recording_$timestamp.mp4',
+      );
 
       await CameraMacOS.instance.startVideoRecording(url: outputPath);
       _isRecording = true;
@@ -333,7 +448,7 @@ class CameraMacOSService extends CameraService {
       Log.info(
         '📷 Stopping macOS video recording',
         name: 'CameraMacOSService',
-        category: .video,
+        category: LogCategory.video,
       );
 
       _autoStopTimer?.cancel();
@@ -341,6 +456,9 @@ class CameraMacOSService extends CameraService {
 
       final result = await CameraMacOS.instance.stopVideoRecording();
       _isRecording = false;
+
+      // Restore audio session to ambient mode after recording
+      await _restoreAudioSession();
 
       Log.info(
         '📷 macOS stopVideoRecording result: '
@@ -424,6 +542,110 @@ class CameraMacOSService extends CameraService {
     }
   }
 
+  /// Selects the best audio device for recording.
+  ///
+  /// Priority order:
+  /// 1. User's manually selected preference (if still available)
+  /// 2. Built-in microphone (most reliable for recording)
+  /// 3. Any device with "Microphone" in the name
+  /// 4. First non-virtual device
+  /// 5. First device as fallback
+  ///
+  /// Returns null if no audio devices available.
+  Future<String?> _selectBestAudioDevice() async {
+    if (_audioDevices == null || _audioDevices!.isEmpty) {
+      return null;
+    }
+
+    // Check for user's manual preference first
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final preferredId = prefs.getString(
+        AudioDevicePreferenceService.prefsKey,
+      );
+      if (preferredId != null) {
+        // Check if the preferred device is still available
+        final preferred = _audioDevices!.where(
+          (d) => d.deviceId == preferredId,
+        );
+        if (preferred.isNotEmpty) {
+          Log.info(
+            '🎤 Using user-selected audio device: ${preferred.first.deviceId}',
+            name: 'CameraMacOSService',
+            category: LogCategory.video,
+          );
+          return preferred.first.deviceId;
+        } else {
+          Log.warning(
+            '⚠️ User-selected audio device no longer available: $preferredId',
+            name: 'CameraMacOSService',
+            category: LogCategory.video,
+          );
+        }
+      }
+    } catch (e) {
+      Log.warning(
+        '⚠️ Failed to load audio device preference: $e',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+    }
+
+    // Auto-select: Try to find built-in microphone first
+    final builtIn = _audioDevices!.where(
+      (d) =>
+          d.deviceId.toLowerCase().contains('builtinmicrophone') ||
+          d.deviceId.toLowerCase().contains('built-in'),
+    );
+    if (builtIn.isNotEmpty) {
+      Log.info(
+        '🎤 Auto-selected built-in microphone: ${builtIn.first.deviceId}',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+      return builtIn.first.deviceId;
+    }
+
+    // Try any device with "microphone" in the name
+    final microphone = _audioDevices!.where(
+      (d) => d.deviceId.toLowerCase().contains('microphone'),
+    );
+    if (microphone.isNotEmpty) {
+      Log.info(
+        '🎤 Auto-selected microphone device: ${microphone.first.deviceId}',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+      return microphone.first.deviceId;
+    }
+
+    // Skip virtual audio devices (Zoom, etc.)
+    final nonVirtual = _audioDevices!.where(
+      (d) =>
+          !d.deviceId.toLowerCase().contains('zoom') &&
+          !d.deviceId.toLowerCase().contains('virtual') &&
+          !d.deviceId.toLowerCase().contains('aggregate'),
+    );
+    if (nonVirtual.isNotEmpty) {
+      Log.info(
+        '🎤 Auto-selected non-virtual audio device: '
+        '${nonVirtual.first.deviceId}',
+        name: 'CameraMacOSService',
+        category: LogCategory.video,
+      );
+      return nonVirtual.first.deviceId;
+    }
+
+    // Fallback to first device
+    Log.warning(
+      '⚠️ No preferred audio device found, using first: '
+      '${_audioDevices!.first.deviceId}',
+      name: 'CameraMacOSService',
+      category: LogCategory.video,
+    );
+    return _audioDevices!.first.deviceId;
+  }
+
   /// Converts [DivineFlashMode] to macOS [Torch] mode.
   ///
   /// Maps camera package flash modes to camera_macos torch settings.
@@ -436,7 +658,7 @@ class CameraMacOSService extends CameraService {
   }
 
   @override
-  double get cameraAspectRatio => 1 / _cameraSensorSize.aspectRatio;
+  double get cameraAspectRatio => _cameraSensorSize.aspectRatio;
 
   @override
   double get minZoomLevel => _minZoomLevel;

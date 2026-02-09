@@ -7,7 +7,6 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart' hide AspectRatio;
 import 'package:openvine/providers/app_providers.dart';
-import 'package:openvine/providers/user_profile_providers.dart';
 import 'package:openvine/providers/nostr_client_provider.dart';
 import 'package:openvine/services/content_deletion_service.dart';
 import 'package:divine_ui/divine_ui.dart';
@@ -16,8 +15,10 @@ import 'package:openvine/widgets/user_name.dart';
 import 'package:openvine/widgets/video_thumbnail_widget.dart';
 
 /// Composable video grid that automatically filters broken videos
-/// and provides consistent styling across Explore, Hashtag, and Search screens
-class ComposableVideoGrid extends ConsumerWidget {
+/// and provides consistent styling across Explore, Hashtag, and Search screens.
+///
+/// Supports infinite scroll pagination via [onLoadMore] callback.
+class ComposableVideoGrid extends ConsumerStatefulWidget {
   const ComposableVideoGrid({
     super.key,
     required this.videos,
@@ -28,6 +29,10 @@ class ComposableVideoGrid extends ConsumerWidget {
     this.padding,
     this.emptyBuilder,
     this.onRefresh,
+    this.onLoadMore,
+    this.isLoadingMore = false,
+    this.hasMoreContent = false,
+    this.loadMoreThreshold = 5,
   });
 
   final List<VideoEvent> videos;
@@ -42,8 +47,71 @@ class ComposableVideoGrid extends ConsumerWidget {
   final Widget Function()? emptyBuilder;
   final Future<void> Function()? onRefresh;
 
+  /// Called when user scrolls near the bottom to load more content.
+  final Future<void> Function()? onLoadMore;
+
+  /// Whether more content is currently being loaded.
+  final bool isLoadingMore;
+
+  /// Whether there is more content available to load.
+  final bool hasMoreContent;
+
+  /// Number of items from the bottom to trigger load more.
+  final int loadMoreThreshold;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ComposableVideoGrid> createState() =>
+      _ComposableVideoGridState();
+}
+
+class _ComposableVideoGridState extends ConsumerState<ComposableVideoGrid> {
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingTriggered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (widget.onLoadMore == null) return;
+    if (!widget.hasMoreContent) return;
+    if (widget.isLoadingMore) return;
+    if (_isLoadingTriggered) return;
+
+    final position = _scrollController.position;
+    final maxScroll = position.maxScrollExtent;
+    final currentScroll = position.pixels;
+
+    // Trigger load more when within 200 pixels of the bottom
+    if (currentScroll >= maxScroll - 200) {
+      _triggerLoadMore();
+    }
+  }
+
+  Future<void> _triggerLoadMore() async {
+    if (_isLoadingTriggered) return;
+    _isLoadingTriggered = true;
+
+    try {
+      await widget.onLoadMore?.call();
+    } finally {
+      if (mounted) {
+        _isLoadingTriggered = false;
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Watch broken video tracker asynchronously
     final brokenTrackerAsync = ref.watch(brokenVideoTrackerProvider);
 
@@ -52,30 +120,26 @@ class ComposableVideoGrid extends ConsumerWidget {
           Center(child: CircularProgressIndicator(color: VineTheme.vineGreen)),
       error: (error, stack) {
         // Fallback: show all videos if tracker fails
-        return _buildGrid(context, ref, videos);
+        return _buildGrid(context, widget.videos);
       },
       data: (tracker) {
         // Filter out broken videos
-        final filteredVideos = videos
+        final filteredVideos = widget.videos
             .where((video) => !tracker.isVideoBroken(video.id))
             .toList();
 
-        if (filteredVideos.isEmpty && emptyBuilder != null) {
-          return emptyBuilder!();
+        if (filteredVideos.isEmpty && widget.emptyBuilder != null) {
+          return widget.emptyBuilder!();
         }
 
-        return _buildGrid(context, ref, filteredVideos);
+        return _buildGrid(context, filteredVideos);
       },
     );
   }
 
-  Widget _buildGrid(
-    BuildContext context,
-    WidgetRef ref,
-    List<VideoEvent> videosToShow,
-  ) {
-    if (videosToShow.isEmpty && emptyBuilder != null) {
-      return emptyBuilder!();
+  Widget _buildGrid(BuildContext context, List<VideoEvent> videosToShow) {
+    if (videosToShow.isEmpty && widget.emptyBuilder != null) {
+      return widget.emptyBuilder!();
     }
 
     // Get subscribed list cache to check if videos are in lists
@@ -83,50 +147,65 @@ class ComposableVideoGrid extends ConsumerWidget {
 
     // Responsive column count: 3 for tablets/desktop (width >= 600), 2 for phones
     final screenWidth = MediaQuery.of(context).size.width;
-    final responsiveCrossAxisCount = screenWidth >= 600 ? 3 : crossAxisCount;
+    final responsiveCrossAxisCount = screenWidth >= 600
+        ? 3
+        : widget.crossAxisCount;
+
+    // Calculate total item count (videos + optional loading indicator)
+    final showLoadingIndicator =
+        widget.isLoadingMore ||
+        (widget.hasMoreContent && widget.onLoadMore != null);
+    final totalItemCount = videosToShow.length + (showLoadingIndicator ? 1 : 0);
 
     Widget buildItem(BuildContext context, int index) {
+      // If this is the last item and we're loading more, show loading indicator
+      if (index == videosToShow.length) {
+        return _LoadingMoreIndicator(isLoading: widget.isLoadingMore);
+      }
+
       final video = videosToShow[index];
       final listIds = subscribedListCache?.getListsForVideo(video.id);
       final isInSubscribedList = listIds != null && listIds.isNotEmpty;
 
       return _VideoItem(
         video: video,
-        aspectRatio: thumbnailAspectRatio,
-        onVideoTap: onVideoTap,
+        aspectRatio: widget.thumbnailAspectRatio,
+        onVideoTap: widget.onVideoTap,
         index: index,
         displayedVideos: videosToShow,
-        onLongPress: () => _showVideoContextMenu(context, ref, video),
+        onLongPress: () => _showVideoContextMenu(context, video),
         isInSubscribedList: isInSubscribedList,
       );
     }
 
-    final gridView = useMasonryLayout
+    final gridView = widget.useMasonryLayout
         ? MasonryGridView.count(
-            padding: padding ?? const EdgeInsets.all(4),
+            controller: _scrollController,
+            padding: widget.padding ?? const EdgeInsets.all(4),
             crossAxisCount: responsiveCrossAxisCount,
             mainAxisSpacing: 4,
             crossAxisSpacing: 4,
-            itemCount: videosToShow.length,
+            itemCount: totalItemCount,
             itemBuilder: buildItem,
           )
         : GridView.builder(
-            padding: padding ?? const EdgeInsets.all(12),
+            controller: _scrollController,
+            padding: widget.padding ?? const EdgeInsets.all(12),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: responsiveCrossAxisCount,
-              childAspectRatio: thumbnailAspectRatio,
+              childAspectRatio: widget.thumbnailAspectRatio,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
-            itemCount: videosToShow.length,
+            itemCount: totalItemCount,
             itemBuilder: buildItem,
           );
 
     // Wrap with RefreshIndicator if onRefresh is provided
-    if (onRefresh != null) {
+    if (widget.onRefresh != null) {
       return RefreshIndicator(
         semanticsLabel: 'searching for more videos',
-        onRefresh: onRefresh!,
+        onRefresh: widget.onRefresh!,
         displacement: 70,
         child: gridView,
         color: VineTheme.onPrimary,
@@ -138,11 +217,7 @@ class ComposableVideoGrid extends ConsumerWidget {
   }
 
   /// Show context menu for long press on video tiles
-  void _showVideoContextMenu(
-    BuildContext context,
-    WidgetRef ref,
-    VideoEvent video,
-  ) {
+  void _showVideoContextMenu(BuildContext context, VideoEvent video) {
     // Check if user owns this video
     final nostrService = ref.read(nostrServiceProvider);
     final userPubkey = nostrService.publicKey;
@@ -237,7 +312,7 @@ class ComposableVideoGrid extends ConsumerWidget {
               ),
               onTap: () {
                 context.pop();
-                _showDeleteConfirmation(context, ref, video);
+                _showDeleteConfirmation(context, video);
               },
             ),
 
@@ -251,7 +326,6 @@ class ComposableVideoGrid extends ConsumerWidget {
   /// Show delete confirmation dialog
   Future<void> _showDeleteConfirmation(
     BuildContext context,
-    WidgetRef ref,
     VideoEvent video,
   ) async {
     final confirmed = await showDialog<bool>(
@@ -292,16 +366,12 @@ class ComposableVideoGrid extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      await _deleteVideo(context, ref, video);
+      await _deleteVideo(context, video);
     }
   }
 
   /// Delete video using ContentDeletionService
-  Future<void> _deleteVideo(
-    BuildContext context,
-    WidgetRef ref,
-    VideoEvent video,
-  ) async {
+  Future<void> _deleteVideo(BuildContext context, VideoEvent video) async {
     try {
       final deletionService = await ref.read(
         contentDeletionServiceProvider.future,
@@ -335,6 +405,12 @@ class ComposableVideoGrid extends ConsumerWidget {
         video: video,
         reason: DeleteReason.personalChoice,
       );
+
+      // Remove video from local feeds after successful deletion
+      if (result.success) {
+        final videoEventService = ref.read(videoEventServiceProvider);
+        videoEventService.removeVideoCompletely(video.id);
+      }
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -393,66 +469,61 @@ class _VideoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onVideoTap(displayedVideos, index),
-      onLongPress: onLongPress,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: Stack(
-          children: [
-            _VideoThumbnail(video: video),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _VideoInfoSection(video: video),
-            ),
-            if (isInSubscribedList)
+    return Semantics(
+      identifier: 'video_thumbnail_$index',
+      label: 'Video thumbnail ${index + 1}',
+      button: true,
+      child: GestureDetector(
+        onTap: () => onVideoTap(displayedVideos, index),
+        onLongPress: onLongPress,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Stack(
+            children: [
+              _VideoThumbnail(video: video),
               Positioned(
-                top: 6,
-                left: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: VineTheme.vineGreen.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Icon(
-                    Icons.collections,
-                    size: 14,
-                    color: Colors.white,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _VideoInfoSection(video: video, index: index),
+              ),
+              if (isInSubscribedList)
+                Positioned(
+                  top: 6,
+                  left: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: VineTheme.vineGreen.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Icon(
+                      Icons.collections,
+                      size: 14,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _VideoInfoSection extends ConsumerWidget {
-  const _VideoInfoSection({required this.video});
+class _VideoInfoSection extends StatelessWidget {
+  const _VideoInfoSection({required this.video, required this.index});
 
   final VideoEvent video;
+  final int index;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final hasDescription = (video.title ?? video.content).isNotEmpty;
 
-    // Check if user has a real display name (not just truncated npub)
-    final profileAsync = ref.watch(userProfileReactiveProvider(video.pubkey));
-    final profile = profileAsync.value;
-    final hasUsername =
-        profile != null &&
-        ((profile.displayName?.isNotEmpty ?? false) ||
-            (profile.name?.isNotEmpty ?? false));
-
-    // Don't render info section if neither username nor description exist
-    if (!hasUsername && !hasDescription) {
-      return const SizedBox.shrink();
-    }
-
+    // Always show the info section with username (using bestDisplayName fallback)
+    // UserName.fromPubKey handles fallback to truncated npub when no profile name
     return Container(
       padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8, top: 50),
       decoration: const BoxDecoration(
@@ -467,9 +538,16 @@ class _VideoInfoSection extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: 0,
         children: [
-          if (hasUsername)
-            UserName.fromPubKey(
+          // Always show username - UserName.fromPubKey uses bestDisplayName
+          // which falls back to truncated npub when no profile name is set
+          Semantics(
+            identifier: 'video_thumbnail_author_$index',
+            container: true,
+            explicitChildNodes: true,
+            label: 'Video author: ${video.authorName ?? ''}',
+            child: UserName.fromPubKey(
               video.pubkey,
+              embeddedName: video.authorName,
               maxLines: 1,
               style: VineTheme.titleTinyFont(color: Colors.white).copyWith(
                 shadows: const [
@@ -481,25 +559,32 @@ class _VideoInfoSection extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
           if (hasDescription)
-            Text(
-              video.title ?? video.content,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                color: Colors.white,
-                fontSize: 14,
-                height: 20 / 14,
-                letterSpacing: 0.25,
-                shadows: [
-                  Shadow(
-                    offset: Offset(0, 1),
-                    blurRadius: 2,
-                    color: Color(0x26000000),
-                  ),
-                ],
+            Semantics(
+              identifier: 'video_thumbnail_description_$index',
+              container: true,
+              explicitChildNodes: true,
+              label: 'Video description: ${video.title ?? video.content}',
+              child: Text(
+                video.title ?? video.content,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  color: Colors.white,
+                  fontSize: 14,
+                  height: 20 / 14,
+                  letterSpacing: 0.25,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(0, 1),
+                      blurRadius: 2,
+                      color: Color(0x26000000),
+                    ),
+                  ],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
         ],
       ),
@@ -529,6 +614,31 @@ class _VideoThumbnail extends StatelessWidget {
                 ),
               ),
             ),
+    );
+  }
+}
+
+/// Loading indicator shown at the bottom of the grid during pagination
+class _LoadingMoreIndicator extends StatelessWidget {
+  const _LoadingMoreIndicator({required this.isLoading});
+
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      alignment: Alignment.center,
+      child: isLoading
+          ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: VineTheme.vineGreen,
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
