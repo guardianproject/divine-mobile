@@ -76,7 +76,7 @@ class C2paSigningService {
       final manifestJsonSource = _buildManifestJson(claimGenerator, filename, DigitalSourceType.digitalCapture.url);
       Log.info("prepared C2PA manifest json: $manifestJsonSource");
 
-      // Create signer using PEM credentials (test certificates for now)
+      // Create signer for RemoteSigning against proofsign.proofmode.org
       final signer = _createSigner();
 
       // Sign the file
@@ -168,6 +168,7 @@ class C2paSigningService {
     // Using digitalCapture source type for in-app recorded content
     // DigitalSourceType.digitalCapture.url provides the IPTC URL
     //final digitalSourceUrl = DigitalSourceType.digitalCapture.url;
+
     return '''
 {
   "claim_generator": "$claimGenerator",
@@ -203,24 +204,35 @@ class C2paSigningService {
   /// Creates a signer for C2PA operations.
   ///
   /// TODO: Replace with proper key management:
-  /// - Use HardwareSigner for Secure Enclave (iOS) / StrongBox (Android)
+  /// - Use HardwareSigner for Secure Enclave (iOS) / StrongBox (Android)x
   /// - Generate per-user keys during onboarding
   /// - Store certificates securely
   /// - Support user-provided certificates via enrollment API
   C2paSigner _createSigner() {
 
-    /**
-    return PemSigner(
-      algorithm: SigningAlgorithm.es256,
-      certificatePem: _testCertificate,
-      privateKeyPem: _testPrivateKey,
-      tsaUrl: _timeStampAuthority
-    );**/
+    var args = "?platform=";
+    if (Platform.isAndroid) {
+      // Android-specific code
+      args+="android";
 
-    return RemoteSigner(configurationUrl: DEFAULT_SIGNING_SERVER_ENDPOINT, bearerToken: DEFAULT_SIGNING_SERVER_TOKEN);
+    } else if (Platform.isIOS) {
+      // iOS-specific code
+      args+="ios";
+
+    }
+
+    return RemoteSigner(configurationUrl: SIGNING_SERVER_ENDPOINT + args, bearerToken: SIGNING_SERVER_TOKEN);
   }
-  static const DEFAULT_SIGNING_SERVER_ENDPOINT = "https://zbjspd6jfv.us-east-2.awsapprunner.com/api/v1/c2pa/configuration?platform=android";
-  static const DEFAULT_SIGNING_SERVER_TOKEN = "2d0c8b6b66c47c3b215976cc808296269322558c6d533d9ce6f3c45a9ccfe811";
-  static const String _timeStampAuthority = 'http://timestamp.digicert.com';
+
+  // add ?platform=android or ios
+  static const String SIGNING_SERVER_ENDPOINT = String.fromEnvironment(
+    'PROOFMODE_SIGNING_SERVER_ENDPOINT',
+    defaultValue: '',
+  );
+
+  static const String SIGNING_SERVER_TOKEN = String.fromEnvironment(
+    'PROOFMODE_SIGNING_SERVER_TOKEN',
+    defaultValue: '',
+  );
 
 }
