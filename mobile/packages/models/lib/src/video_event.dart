@@ -317,8 +317,7 @@ class VideoEvent {
           blurhash = tagValue as String?;
         case 'loops':
           // Original loop count from classic Vine
-          originalLoops
-          = int.tryParse(tagValue);
+          originalLoops = int.tryParse(tagValue);
         case 'likes':
           // Original like count from classic Vine
           originalLikes = int.tryParse(tagValue);

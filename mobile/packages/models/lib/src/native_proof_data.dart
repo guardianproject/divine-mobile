@@ -14,7 +14,7 @@ class NativeProofData {
     this.publicKey,
     this.deviceAttestation,
     this.timestamp,
-    this.c2paManifestId
+    this.c2paManifestId,
   });
 
   /// Create from JSON
@@ -37,7 +37,7 @@ class NativeProofData {
         pgpSignature: metadata['signature'],
         publicKey: metadata['publicKey'],
         c2paManifestId: metadata['c2pa_manifest_id'],
-        deviceAttestation: metadata['deviceAttestation']
+        deviceAttestation: metadata['deviceAttestation'],
       );
 
   /// SHA256 hash of the video file (used as proof identifier)
@@ -77,8 +77,8 @@ class NativeProofData {
       pgpSignature != null && publicKey != null && sensorDataCsv != null;
 
   /// Check if this is a mobile proof with device attestation
-  bool get hasMobileAttestation => deviceAttestation != null
-      || c2paManifestId != null;
+  bool get hasMobileAttestation =>
+      deviceAttestation != null || c2paManifestId != null;
 
   /// Get verification level for Nostr tags
   String get verificationLevel {
