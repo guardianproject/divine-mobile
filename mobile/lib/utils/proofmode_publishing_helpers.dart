@@ -3,7 +3,6 @@
 
 import 'dart:convert';
 import 'package:models/models.dart' show NativeProofData;
-import 'package:openvine/services/c2pa_signing_service.dart';
 
 /// Extract proof-verification-level from NativeProofData
 ///
