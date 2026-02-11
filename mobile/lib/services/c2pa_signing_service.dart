@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:c2pa_flutter/c2pa.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Result of a C2PA signing operation
 class C2paSigningResult {
@@ -84,7 +85,7 @@ class C2paSigningService {
         sourcePath: videoPath,
         destPath: signedPath,
         manifestJson: manifestJsonSource,
-        signer: signer,
+        signer: await signer,
       );
 
       // Verify signed file was created
@@ -208,7 +209,7 @@ class C2paSigningService {
   /// - Generate per-user keys during onboarding
   /// - Store certificates securely
   /// - Support user-provided certificates via enrollment API
-  C2paSigner _createSigner() {
+  Future<C2paSigner> _createSigner() async {
 
     var args = "?platform=";
     if (Platform.isAndroid) {
@@ -221,7 +222,16 @@ class C2paSigningService {
 
     }
 
-    return RemoteSigner(configurationUrl: SIGNING_SERVER_ENDPOINT + args, bearerToken: SIGNING_SERVER_TOKEN);
+    var keyAlias = "c2pa_signing_divine";
+    var filesDir = await getApplicationDocumentsDirectory();
+    var certFile = File('${filesDir.path}/$keyAlias.cert');
+    if (certFile.existsSync()) {
+      var certificateChainPem = await certFile.readAsStringSync();
+      return HardwareSigner(
+          certificateChainPem: certificateChainPem, keyAlias: keyAlias);
+    }
+    else
+      return RemoteSigner(configurationUrl: SIGNING_SERVER_ENDPOINT + args, bearerToken: SIGNING_SERVER_TOKEN);
   }
 
   // add ?platform=android or ios

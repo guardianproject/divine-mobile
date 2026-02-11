@@ -1,12 +1,10 @@
-package co.openvine.app
+package co.openvine.app.proofmode
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import org.witness.proofmode.notarization.NotarizationListener
 import org.witness.proofmode.notarization.NotarizationProvider
-import java.io.File
 import java.io.InputStream
 import java.security.KeyPairGenerator
 import java.security.KeyStore
@@ -48,7 +46,7 @@ class HardwareAttestationNotarizationProvider (_context: Context) : Notarization
     //https://proandroiddev.com/your-app-is-secure-but-is-the-device-android-hardware-attestation-explained-e9a531312035
     private fun completeDeviceAttestation (nonceOfIngredient: String) : String? {
 
-        val keyAlias = "attested_key"
+        val keyAlias = "attested_key_${nonceOfIngredient}"
         val keyGen = KeyPairGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore"
         )
@@ -79,6 +77,9 @@ class HardwareAttestationNotarizationProvider (_context: Context) : Notarization
                 sb.append(xCert.toString())
                 sb.append("\n\n");
             }
+
+            //and poof it is gone - no need to keep it stored locally
+            ks.deleteEntry(keyAlias)
 
             return sb.toString()
         }
