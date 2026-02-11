@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:models/models.dart' show NativeProofData;
 import 'package:openvine/services/c2pa_signing_service.dart';
+import 'package:crypto/crypto.dart' as crypto;
 
 /// Service for generating cryptographic proof using native ProofMode libraries
 ///
@@ -36,9 +37,67 @@ class NativeProofModeService {
 
       final C2paSigningService _c2paSigningService = C2paSigningService();
 
+
+      try {
+        String proofHash = await generateSha256FileHash(videoFile.path);
+        //print('SHA256 Hash of $path: $hash');
+
+        // Read proof metadata from native library
+        final metadata = await NativeProofModeService.readProofMetadata(
+          proofHash,
+        );
+        if (metadata == null) {
+          Log.warning(
+            '🔐 Could not read native proof metadata',
+            name: 'VideoRecorderProofService',
+            category: .video,
+          );
+          return null;
+        }
+
+        if (metadata.length > 1) {
+          Log.info(
+            '🔐 Found existing proof metadata fields: ${metadata.keys.join(", ")}',
+            name: 'VideoRecorderProofService',
+            category: .video,
+          );
+          final manifestInfo = await _c2paSigningService.readManifest(
+              videoFile.path);
+
+          if (manifestInfo?.activeManifest != null) {
+
+            String activeManifestId = manifestInfo!.activeManifest!;
+
+            Log.info(
+              '🔐 Found existing C2PA metadata manifest: ${activeManifestId}',
+              name: 'VideoRecorderProofService',
+              category: .video,
+            );
+
+            metadata.putIfAbsent("c2paManifestId", () => activeManifestId);
+
+            // Create NativeProofData from metadata
+            final proofData = NativeProofData.fromMetadata(metadata);
+
+            Log.info(
+              '🔐 Existing proof metadata loaded: ${proofData.verificationLevel}',
+              name: 'VideoRecorderProofService',
+              category: .video,
+            );
+
+            return proofData;
+          }
+        }
+
+      } catch (e) {
+        print('Failed to calculate hash: $e');
+      }
+
+      //no proof found, so let's sign and proof!
+
       // First, sign/embed video with C2PA content credentials
       Log.info(
-        'Signing video with C2PA...',
+        'Signing video with C2PA: File Length=${videoFile.lengthSync()}',
         name: 'VideoRecorderProofService',
         category: LogCategory.video,
       );
@@ -48,7 +107,7 @@ class NativeProofModeService {
 
       if (c2paResult.success) {
         Log.info(
-          'C2PA signing complete: $c2paResult.signedFilePath',
+          'C2PA signing complete: $c2paResult.signedFilePath : File Length=${videoFile.lengthSync()}',
           name: 'VideoRecorderProofService',
           category: LogCategory.video,
         );
@@ -61,52 +120,16 @@ class NativeProofModeService {
       }
       
       final manifestInfo = await _c2paSigningService.readManifest(c2paResult.signedFilePath);
-
       if (manifestInfo?.validationStatus != null) {
-
-          /**
-          Log.debug("C2PA Validation Status: ${manifestInfo?.validationStatus}");
-          manifestInfo?.validationErrors
-              .forEach((error) => Log.debug("C2PA Validation Error: $error"));
-          **/
-
           Log.debug("C2PA Active Manifest ID: ${manifestInfo?.activeManifest}");
-
-          /**
-          manifestInfo?.manifests.forEach((manifestId, manifest)
-          {
-
-            Log.debug("C2PA Manifest: $manifestId");
-
-            Log.debug(
-                "C2PA Claim Generator: ${manifest?.claimGenerator.toString()}");
-            Log.debug("C2PA Claim Format: ${manifest?.format}");
-            Log.debug("C2PA Claim Title: ${manifest?.title}");
-
-            manifest?.assertions.forEach((assertion) {
-              Log.debug("C2PA Assertion Label: ${assertion.label}");
-              Log.debug("C2PA Assertion Data: ${assertion.data}");
-            });
-
-            manifest?.ingredients.forEach((ingredient) {
-              Log.debug("C2PA Ingredient Data: ${ingredient.title}");
-              Log.debug("C2PA Ingredient Format: ${ingredient.format}");
-            });
-
-
-            Log.debug("C2PA Claim Signature: ${manifest?.signature?.issuer}");
-            Log.debug(
-                "C2PA Claim Serial: ${manifest?.signature?.serialNumber}");
-          });**/
-
       }
-
 
       Log.info(
         '🔐 Generating native ProofMode proof for: ${videoFile.path}',
         name: 'VideoRecorderProofService',
         category: .video,
       );
+
 
       // Generate proof using native library
       final proofHash = await NativeProofModeService.generateProof(
@@ -390,6 +413,27 @@ class NativeProofModeService {
         category: LogCategory.system,
       );
       return false;
+    }
+  }
+
+  static Future<String> generateSha256FileHash(String filePath) async {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw FileSystemException("File not found at path: $filePath");
+    }
+
+    try {
+      // Open the file as a stream of bytes
+      Stream<List<int>> fileStream = file.openRead();
+
+      // Transform the stream using the SHA-256 converter
+      var digest = await fileStream.transform(crypto.sha256).first;
+
+      // Convert the Digest object to a hexadecimal string for display/comparison
+      return digest.toString();
+    } catch (e) {
+      print("Error generating hash: $e");
+      rethrow;
     }
   }
 }
