@@ -101,7 +101,7 @@ class C2paSigningService {
       }
 
       // Log.debug("replacing original video $videoPath with signed file $signedFile");
-      var iFileNew = inputFile.renameSync(inputFile.path + ".old");
+      inputFile.renameSync(inputFile.path + ".old");
       // Log.debug("original file renamed: ${iFileNew.path} ");
       var sFileNew = signedFile.renameSync(inputFile.path);
       Log.debug("signed file renamed: ${sFileNew.path} ");
