@@ -547,7 +547,6 @@ class UploadManager {
       );
     }
 
-
     final upload = PendingUpload.create(
       localVideoPath: videoFile.path,
       nostrPubkey: nostrPubkey,

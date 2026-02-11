@@ -23,7 +23,6 @@ class NativeProofModeService {
   /// is not supported.
   static Future<NativeProofData?> proofFile(File videoFile) async {
     try {
-
       // Check if native ProofMode/C2PA is available on this platform
       final isAvailable = await NativeProofModeService.isAvailable();
       if (!isAvailable) {
@@ -36,7 +35,6 @@ class NativeProofModeService {
       }
 
       final C2paSigningService _c2paSigningService = C2paSigningService();
-
 
       try {
         String proofHash = await generateSha256FileHash(videoFile.path);
@@ -62,10 +60,10 @@ class NativeProofModeService {
             category: .video,
           );
           final manifestInfo = await _c2paSigningService.readManifest(
-              videoFile.path);
+            videoFile.path,
+          );
 
           if (manifestInfo?.activeManifest != null) {
-
             String activeManifestId = manifestInfo!.activeManifest!;
 
             Log.info(
@@ -88,7 +86,6 @@ class NativeProofModeService {
             return proofData;
           }
         }
-
       } catch (e) {
         print('Failed to calculate hash: $e');
       }
@@ -118,10 +115,12 @@ class NativeProofModeService {
           category: LogCategory.video,
         );
       }
-      
-      final manifestInfo = await _c2paSigningService.readManifest(c2paResult.signedFilePath);
+
+      final manifestInfo = await _c2paSigningService.readManifest(
+        c2paResult.signedFilePath,
+      );
       if (manifestInfo?.validationStatus != null) {
-          Log.debug("C2PA Active Manifest ID: ${manifestInfo?.activeManifest}");
+        Log.debug("C2PA Active Manifest ID: ${manifestInfo?.activeManifest}");
       }
 
       Log.info(
@@ -129,7 +128,6 @@ class NativeProofModeService {
         name: 'VideoRecorderProofService',
         category: .video,
       );
-
 
       // Generate proof using native library
       final proofHash = await NativeProofModeService.generateProof(

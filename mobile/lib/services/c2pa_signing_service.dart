@@ -44,9 +44,7 @@ class C2paSigningService {
   ///
   /// Returns the path to the signed video file, or the original path if
   /// signing fails (signing is best-effort, not blocking).
-  Future<C2paSigningResult> signVideo({
-    required String videoPath
-  }) async {
+  Future<C2paSigningResult> signVideo({required String videoPath}) async {
     try {
       Log.info(
         'Starting C2PA signing for video: $videoPath',
@@ -74,7 +72,11 @@ class C2paSigningService {
 
       var filename = inputFile.path.split("/").last;
       // Build manifest JSON for digital capture
-      final manifestJsonSource = _buildManifestJson(claimGenerator, filename, DigitalSourceType.digitalCapture.url);
+      final manifestJsonSource = _buildManifestJson(
+        claimGenerator,
+        filename,
+        DigitalSourceType.digitalCapture.url,
+      );
       Log.info("prepared C2PA manifest json: $manifestJsonSource");
 
       // Create signer for RemoteSigning against proofsign.proofmode.org
@@ -98,9 +100,9 @@ class C2paSigningService {
         );
       }
 
-     // Log.debug("replacing original video $videoPath with signed file $signedFile");
+      // Log.debug("replacing original video $videoPath with signed file $signedFile");
       var iFileNew = inputFile.renameSync(inputFile.path + ".old");
-     // Log.debug("original file renamed: ${iFileNew.path} ");
+      // Log.debug("original file renamed: ${iFileNew.path} ");
       var sFileNew = signedFile.renameSync(inputFile.path);
       Log.debug("signed file renamed: ${sFileNew.path} ");
 
@@ -111,10 +113,7 @@ class C2paSigningService {
         category: LogCategory.video,
       );
 
-      return C2paSigningResult(
-        signedFilePath: sFileNew.path,
-        success: true,
-      );
+      return C2paSigningResult(signedFilePath: sFileNew.path, success: true);
     } catch (e, stackTrace) {
       Log.error(
         'C2PA signing failed: $e',
@@ -165,7 +164,11 @@ class C2paSigningService {
   }
 
   /// Builds the manifest JSON for a freshly captured video.
-  String _buildManifestJson(String claimGenerator, String title, String digitalSourceUrl) {
+  String _buildManifestJson(
+    String claimGenerator,
+    String title,
+    String digitalSourceUrl,
+  ) {
     // Using digitalCapture source type for in-app recorded content
     // DigitalSourceType.digitalCapture.url provides the IPTC URL
     //final digitalSourceUrl = DigitalSourceType.digitalCapture.url;
@@ -201,7 +204,6 @@ class C2paSigningService {
 ''';
   }
 
-
   /// Creates a signer for C2PA operations.
   ///
   /// TODO: Replace with proper key management:
@@ -210,16 +212,13 @@ class C2paSigningService {
   /// - Store certificates securely
   /// - Support user-provided certificates via enrollment API
   Future<C2paSigner> _createSigner() async {
-
     var args = "?platform=";
     if (Platform.isAndroid) {
       // Android-specific code
-      args+="android";
-
+      args += "android";
     } else if (Platform.isIOS) {
       // iOS-specific code
-      args+="ios";
-
+      args += "ios";
     }
 
     var keyAlias = "c2pa_signing_divine";
@@ -228,10 +227,14 @@ class C2paSigningService {
     if (certFile.existsSync()) {
       var certificateChainPem = await certFile.readAsStringSync();
       return HardwareSigner(
-          certificateChainPem: certificateChainPem, keyAlias: keyAlias);
-    }
-    else
-      return RemoteSigner(configurationUrl: SIGNING_SERVER_ENDPOINT + args, bearerToken: SIGNING_SERVER_TOKEN);
+        certificateChainPem: certificateChainPem,
+        keyAlias: keyAlias,
+      );
+    } else
+      return RemoteSigner(
+        configurationUrl: SIGNING_SERVER_ENDPOINT + args,
+        bearerToken: SIGNING_SERVER_TOKEN,
+      );
   }
 
   // add ?platform=android or ios
@@ -244,5 +247,4 @@ class C2paSigningService {
     'PROOFMODE_SIGNING_SERVER_TOKEN',
     defaultValue: '',
   );
-
 }

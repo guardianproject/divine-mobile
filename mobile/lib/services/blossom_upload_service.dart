@@ -948,9 +948,7 @@ class BlossomUploadService {
       if (manifestMap['c2pa_manifest_id'] != null) {
         final signature = manifestMap['c2pa_manifest_id'] as String;
         final signatureJson = jsonEncode(signature);
-        headers['X-ProofMode-C2PA'] = base64.encode(
-          utf8.encode(signatureJson),
-        );
+        headers['X-ProofMode-C2PA'] = base64.encode(utf8.encode(signatureJson));
       }
 
       Log.info(

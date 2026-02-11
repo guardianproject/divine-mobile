@@ -60,7 +60,6 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
       final video = videoEventService.getVideoById(widget.videoId);
 
       if (video != null) {
-
         Log.info(
           '✅ Found video in cache: ${video.title}',
           name: 'VideoDetailScreen',
@@ -88,7 +87,7 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
 
       if (event != null) {
         final fetchedVideo = VideoEvent.fromNostrEvent(event);
-        
+
         Log.info(
           '✅ Fetched video from Nostr: ${fetchedVideo.title}',
           name: 'VideoDetailScreen',

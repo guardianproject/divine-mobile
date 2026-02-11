@@ -592,7 +592,9 @@ class VideoEventPublisher {
 
             //check C2PA metadata
             final C2paSigningService _c2paSigningService = C2paSigningService();
-            final manifestInfo = await _c2paSigningService.readManifest(upload.localVideoPath);
+            final manifestInfo = await _c2paSigningService.readManifest(
+              upload.localVideoPath,
+            );
             if (manifestInfo?.validationStatus != null) {
               tags.add(['c2pa_manifest_id', ?manifestInfo?.activeManifest]);
               Log.verbose(
