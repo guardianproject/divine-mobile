@@ -90,7 +90,7 @@ class VideoEvent {
       name: 'VideoEvent',
     );
 
-    final tags = <String, String>{};
+    final rawTags = <String, String>{};
     final hashtags = <String>[];
     final videoUrlCandidates = <String>[]; // Collect all video URL candidates
     String? videoUrl;
@@ -291,7 +291,7 @@ class VideoEvent {
           // We could use this for hover effects or preview on long-press.
           if (tagValue.isNotEmpty && tagValue.endsWith('.gif')) {
             // Store in tags for potential future use
-            tags['preview_gif'] = tagValue;
+            rawTags['preview_gif'] = tagValue;
             developer.log(
               '✅ Found preview GIF tag (not using as thumbnail): $tagValue',
               name: 'VideoEvent',
@@ -419,7 +419,7 @@ class VideoEvent {
       }
 
       // Store all tags for potential future use
-      tags[tagName] = tagValue;
+      rawTags[tagName] = tagValue;
     }
 
     final createdAtTimestamp = event.createdAt is DateTime
@@ -556,7 +556,7 @@ class VideoEvent {
       fileSize: fileSize,
       hashtags: hashtags,
       publishedAt: publishedAt,
-      rawTags: tags,
+      rawTags: rawTags,
       vineId: vineId,
       group: group,
       altText: altText,
