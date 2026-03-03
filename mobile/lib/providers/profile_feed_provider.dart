@@ -86,11 +86,24 @@ class ProfileFeed extends _$ProfileFeed {
           // Cache metadata for later merging with Nostr data
           _cacheVideoMetadata(tempAuthorVideos);
 
-          // Enrich with full Nostr event data (rawTags, dimensions, etc.)
-          // Awaited directly so badges render correctly on first paint.
-          authorVideos = await enrichVideosWithNostrTags(
+          // Enrich with full Nostr event data in the background so we
+          // don't block the initial render waiting on relay round-trips
+          // (up to 5s timeout). Badges appear once enrichment completes.
+          authorVideos = enrichVideosInBackground(
             tempAuthorVideos,
             nostrService: ref.read(nostrServiceProvider),
+            onEnriched: (enriched) {
+              if (!ref.mounted) return;
+              final currentState = state.asData?.value;
+              if (currentState == null) return;
+              final enrichedMap = <String, VideoEvent>{
+                for (final v in enriched) v.id: v,
+              };
+              final updated = currentState.videos
+                  .map((v) => enrichedMap[v.id] ?? v)
+                  .toList();
+              state = AsyncData(currentState.copyWith(videos: updated));
+            },
             callerName: 'ProfileFeedProvider',
           );
 
