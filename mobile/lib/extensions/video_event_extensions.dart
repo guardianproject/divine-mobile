@@ -53,7 +53,9 @@ extension VideoEventAppExtensions on VideoEvent {
   // Divine Server Detection
   // ---------------------------------------------------------------------------
 
-  /// Check if video is hosted on Divine servers.
+  /// Check if thumbnail is hosted on Divine servers.
+  /// Sometimes the videoUrl points to a local cache path,
+  /// but the thumbnail value is always a network url
   ///
   /// Matches any *.divine.video subdomain including:
   /// - cdn.divine.video (R2 blob storage)
@@ -61,7 +63,7 @@ extension VideoEventAppExtensions on VideoEvent {
   /// - media.divine.video (default Blossom server)
   /// - blossom.divine.video (Blossom protocol server)
   bool get isFromDivineServer {
-    final url = videoUrl?.toLowerCase() ?? '';
+    final url = thumbnailUrl?.toLowerCase() ?? '';
     return url.contains('divine.video');
   }
 
