@@ -184,7 +184,7 @@ class _ProofModeExplanation extends StatelessWidget {
         if (video.videoUrl != null && video.videoUrl!.isNotEmpty)
           InkWell(
             onTap: () async {
-              final checkUrl = 'https://check.proofmode.org/#${video.videoUrl}';
+              final checkUrl = 'https://check.proofmode.org/#https://media.divine.video/${video.sha256}';
               final uri = Uri.parse(checkUrl);
               if (await canLaunchUrl(uri)) {
                 await launchUrl(uri, mode: LaunchMode.externalApplication);

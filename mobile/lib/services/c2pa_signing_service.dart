@@ -225,7 +225,9 @@ class C2paSigningService {
     const keyAlias = 'c2pa_signing_divine';
     final filesDir = await getApplicationDocumentsDirectory();
     final certFile = File('${filesDir.path}/$keyAlias.cert');
-    if (certFile.existsSync()) {
+    //if (certFile.existsSync()) {
+    //only remote signing for now, for parity between Android and iOS
+    if (false) {
       final certificateChainPem = certFile.readAsStringSync();
       return HardwareSigner(
         certificateChainPem: certificateChainPem,
