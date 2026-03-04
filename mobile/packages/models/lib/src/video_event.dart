@@ -839,7 +839,8 @@ class VideoEvent {
 
   /// Original Vine: Check if this is a recovered original vine
   bool get isOriginalVine {
-    return originalLoops != null && originalLoops! > 0;
+    // original vine's don't use the sha256 hash as their vineId
+    return vineId != sha256;
   }
 
   /// Check if this is original content (not a repost)
