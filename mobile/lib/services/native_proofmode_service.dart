@@ -51,10 +51,8 @@ class NativeProofModeService {
             name: 'VideoRecorderProofService',
             category: .video,
           );
-          return null;
         }
-
-        if (metadata.length > 1) {
+	else if (metadata.length > 1) {
           Log.info(
             '🔐 Found existing proof metadata fields: ${metadata.keys.join(", ")}',
             name: 'VideoRecorderProofService',
