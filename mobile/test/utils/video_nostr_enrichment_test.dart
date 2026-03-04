@@ -14,7 +14,7 @@ import 'package:openvine/utils/video_nostr_enrichment.dart';
 class _MockNostrClient extends Mock implements NostrClient {}
 
 /// 64-char hex pubkey used across tests.
-final _testPubkey = 'a' * 64;
+final String _testPubkey = 'a' * 64;
 
 /// Create a minimal [VideoEvent] suitable for enrichment tests.
 ///
