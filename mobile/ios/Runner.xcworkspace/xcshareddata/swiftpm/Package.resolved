@@ -21,10 +21,10 @@
     {
       "identity" : "c2pa-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/contentauth/c2pa-ios.git",
+      "location" : "https://github.com/redaranj/c2pa-ios.git",
       "state" : {
-        "revision" : "614eb996eb5ccf8193d2b0ef01d7c9971bf4b809",
-        "version" : "0.0.8"
+        "revision" : "6046c3606f27f928061eca3e6230dbe587afd967",
+        "version" : "0.0.9-beta.7"
       }
     },
     {
