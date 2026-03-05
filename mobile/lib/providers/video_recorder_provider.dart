@@ -18,6 +18,8 @@ import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/clip_manager_provider.dart';
 import 'package:openvine/providers/shared_preferences_provider.dart';
 import 'package:openvine/providers/sounds_providers.dart';
+import 'package:openvine/providers/video_editor_provider.dart';
+import 'package:openvine/providers/video_publish_provider.dart';
 import 'package:openvine/screens/feed/video_feed_page.dart';
 import 'package:openvine/screens/video_editor/video_clip_editor_screen.dart';
 import 'package:openvine/services/audio_playback_service.dart';
@@ -932,6 +934,10 @@ class VideoRecorderNotifier extends Notifier<VideoRecorderProviderState> {
       name: 'VideoRecorderNotifier',
       category: .video,
     );
+
+    if (!ref.read(videoEditorProvider.notifier).isAutosavedDraft) {
+      ref.read(videoPublishProvider.notifier).clearAll();
+    }
     // Try to pop if possible, otherwise go home.
     if (context.canPop()) {
       context.pop();
