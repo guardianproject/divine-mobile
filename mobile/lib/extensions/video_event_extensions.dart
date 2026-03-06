@@ -70,9 +70,9 @@ extension VideoEventAppExtensions on VideoEvent {
   /// Shows badge for content that is:
   /// - NOT from Divine servers
   /// - AND does NOT have ProofMode verification (those show ProofMode badge)
-  /// - AND is NOT a vintage recovered vine (those show V Original badge)
+  /// - AND is NOT an original Vine archive video (those show V Original badge)
   bool get shouldShowNotDivineBadge {
-    return !isFromDivineServer && !hasProofMode && !isVintageRecoveredVine;
+    return !isFromDivineServer && !hasProofMode && !isOriginalVine;
   }
 
   // ---------------------------------------------------------------------------

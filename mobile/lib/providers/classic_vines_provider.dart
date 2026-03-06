@@ -126,7 +126,7 @@ class ClassicVinesFeed extends _$ClassicVinesFeed {
     final allVideos = videoEventService.discoveryVideos;
     final classicVideos = videoEventService.filterVideoList(
       allVideos
-          .where((v) => v.originalLoops != null && v.originalLoops! > 0)
+          .where((v) => v.isOriginalVine)
           .where((v) => v.isSupportedOnCurrentPlatform)
           .where(
             (v) => !blocklistService.shouldFilterFromFeeds(v.pubkey),

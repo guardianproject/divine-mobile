@@ -427,6 +427,7 @@ void main() {
           createdAt: 1473050841,
           content: 'classic vine',
           timestamp: DateTime.fromMillisecondsSinceEpoch(1473050841 * 1000),
+          rawTags: const {'platform': 'vine'},
           originalLoops: 3169386,
         );
 
