@@ -55,13 +55,6 @@ class VideoEditorMainBottomBar extends StatelessWidget {
                     icon: .fadersHorizontal,
                     onTap: () => scope.editor?.openFilterEditor(),
                   ),
-                  _ActionButton(
-                    // TODO(l10n): Replace with context.l10n when localization is added.
-                    label: 'Music',
-                    icon: .musicNotesSimple,
-                    // TODO(@hm21): Implement music editor
-                    onTap: () {},
-                  ),
                 ],
               ),
             ),

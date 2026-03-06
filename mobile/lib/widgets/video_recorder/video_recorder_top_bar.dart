@@ -4,53 +4,24 @@
 import 'package:divine_ui/divine_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:openvine/models/audio_event.dart';
 import 'package:openvine/providers/clip_manager_provider.dart';
-import 'package:openvine/providers/sounds_providers.dart';
 import 'package:openvine/providers/video_recorder_provider.dart';
 import 'package:openvine/utils/unified_logger.dart';
-import 'package:openvine/widgets/video_editor/audio_editor/audio_selection_bottom_sheet.dart';
 import 'package:openvine/widgets/video_editor/audio_editor/video_editor_audio_chip.dart';
-import 'package:openvine/widgets/video_editor_icon_button.dart';
 
 /// Top bar with close button, segment bar, and forward button.
 class VideoRecorderTopBar extends ConsumerWidget {
   /// Creates a video recorder top bar widget.
   const VideoRecorderTopBar({super.key});
 
-  Future<void> _selectAudio(BuildContext context, WidgetRef ref) async {
-    final videoRecorderNotifier = ref.read(videoRecorderProvider.notifier);
-    videoRecorderNotifier.pauseRemoteRecordControl();
-
-    final result = await VineBottomSheet.show<AudioEvent>(
-      context: context,
-      maxChildSize: 1,
-      initialChildSize: 1,
-      minChildSize: 0.8,
-      buildScrollBody: (scrollController) =>
-          AudioSelectionBottomSheet(scrollController: scrollController),
-    );
-
-    videoRecorderNotifier.resumeRemoteRecordControl();
-
-    if (result != null) {
-      ref.read(selectedSoundProvider.notifier).select(result);
-      Log.info(
-        'Sound selected: ${result.title ?? result.id}',
-        name: 'VideoRecorderTopBar',
-        category: LogCategory.ui,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(videoRecorderProvider.notifier);
+    final recorderState = ref.watch(videoRecorderProvider);
     final clipCount = ref.watch(clipManagerProvider.select((s) => s.clipCount));
     final hasClips = clipCount > 0;
-    final isRecording = ref.watch(
-      videoRecorderProvider.select((s) => s.isRecording),
-    );
+    final isRecording = recorderState.isRecording;
+    final selectedSound = recorderState.selectedSound;
 
     // Debug logging for Next button visibility
     Log.debug(
@@ -74,32 +45,34 @@ class VideoRecorderTopBar extends ConsumerWidget {
                     mainAxisAlignment: .spaceBetween,
                     children: [
                       // Close button
-                      VideoEditorIconButton(
-                        backgroundColor: VineTheme.scrim15,
+                      DivineIconButton(
                         // TODO(l10n): Replace with context.l10n when localization is added.
                         semanticLabel: 'Close video recorder',
-                        iconSize: 24,
+                        type: .ghostSecondary,
+                        size: .small,
                         icon: .x,
-                        onTap: () => notifier.closeVideoRecorder(context),
+                        onPressed: () => notifier.closeVideoRecorder(context),
                       ),
 
                       Flexible(
                         child: VideoEditorAudioChip(
-                          onTap: () => _selectAudio(context, ref),
+                          selectedSound: selectedSound,
+                          onSoundChanged: notifier.selectSound,
+                          onSelectionStarted: notifier.pauseRemoteRecordControl,
+                          onSelectionEnded: notifier.resumeRemoteRecordControl,
                         ),
                       ),
 
                       // Next button
                       Opacity(
                         opacity: hasClips ? 1 : 0.32,
-                        child: VideoEditorIconButton(
-                          backgroundColor: VineTheme.inverseSurface,
-                          iconColor: VineTheme.inverseOnSurface,
+                        child: DivineIconButton(
                           // TODO(l10n): Replace with context.l10n when localization is added.
                           semanticLabel: 'Continue to video editor',
+                          type: .tertiary,
+                          size: .small,
                           icon: .check,
-                          iconSize: 24,
-                          onTap: hasClips
+                          onPressed: hasClips
                               ? () => notifier.openVideoEditor(context)
                               : null,
                         ),

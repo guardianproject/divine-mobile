@@ -11,7 +11,7 @@ import 'package:openvine/widgets/video_editor/filter_editor/video_editor_filter_
 import 'package:openvine/widgets/video_editor/filter_editor/video_editor_filter_overlay_controls.dart';
 import 'package:openvine/widgets/video_editor/main_editor/video_editor_canvas.dart';
 import 'package:openvine/widgets/video_editor/main_editor/video_editor_main_bottom_bar.dart';
-import 'package:openvine/widgets/video_editor/main_editor/video_editor_main_top_bar.dart';
+import 'package:openvine/widgets/video_editor/main_editor/video_editor_main_overlay_actions.dart';
 
 import 'package:openvine/widgets/video_editor/main_editor/video_editor_remove_area.dart';
 
@@ -72,7 +72,7 @@ class _OverlayControls extends StatelessWidget {
                   key: ValueKey('Filter-Overlay-Controls'),
                 ),
               // Fallback
-              _ => const VideoEditorMainTopBar(),
+              _ => const VideoEditorMainOverlayActions(),
             };
 
             return AnimatedSwitcher(
@@ -148,6 +148,8 @@ class _BottomActions extends StatelessWidget {
                           .filter => const VideoEditorFilterBottomBar(
                             key: ValueKey('Filter-Editor-Bottom-Bar'),
                           ),
+                          // Audio-Bar (no bottom bar, timing screen has its own)
+                          .music => const SizedBox(),
                           // Main-Bar
                           _ => const VideoEditorMainBottomBar(),
                         },
