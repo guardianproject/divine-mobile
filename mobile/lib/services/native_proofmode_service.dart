@@ -149,8 +149,8 @@ class NativeProofModeService {
 
       //add iOS specific device attestation
       if (Platform.isIOS) {
-        final _appAttestationPlugin = AppDeviceIntegrity();
-        var tokenReceived = await _appAttestationPlugin
+        final appAttestationPlugin = AppDeviceIntegrity();
+        final tokenReceived = await appAttestationPlugin
             .getAttestationServiceSupport(challengeString: proofHash);
         if (tokenReceived != null) {
           final String? proofDir = await _channel.invokeMethod('getProofDir', {
@@ -158,7 +158,7 @@ class NativeProofModeService {
           });
 
           final deviceAttestation = File('$proofDir/$proofHash.attest');
-          deviceAttestation.writeAsString(tokenReceived!!);
+          deviceAttestation.writeAsString(tokenReceived);
         }
       }
 
