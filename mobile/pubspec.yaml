@@ -85,7 +85,7 @@ dependencies:
   c2pa_flutter:
     git:
       url: https://github.com/guardianproject/c2pa-flutter.git
-      ref: 0.0.2
+      ref: 0.0.3
   divine_camera:
     path: packages/divine_camera
   camera_macos_plus: ^0.0.4
