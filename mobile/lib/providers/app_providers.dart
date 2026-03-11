@@ -25,6 +25,7 @@ import 'package:openvine/providers/database_provider.dart';
 import 'package:openvine/providers/environment_provider.dart';
 import 'package:openvine/providers/nostr_client_provider.dart';
 import 'package:openvine/providers/shared_preferences_provider.dart';
+import 'package:openvine/repositories/dm_repository.dart';
 import 'package:openvine/repositories/follow_repository.dart';
 import 'package:openvine/services/account_deletion_service.dart';
 import 'package:openvine/services/account_label_service.dart';
@@ -1581,15 +1582,77 @@ AudioPlaybackService audioPlaybackService(Ref ref) {
 /// Bug report service for collecting diagnostics and sending encrypted reports
 @riverpod
 BugReportService bugReportService(Ref ref) {
-  final keyManager = ref.watch(nostrKeyManagerProvider);
   final nostrService = ref.watch(nostrServiceProvider);
 
   final nip17Service = NIP17MessageService(
-    keyManager: keyManager,
+    signer: nostrService.signer,
+    senderPublicKey: nostrService.publicKey,
     nostrService: nostrService,
   );
 
   return BugReportService(nip17MessageService: nip17Service);
+}
+
+// =============================================================================
+// DM REPOSITORY
+// =============================================================================
+
+/// Provider for NIP-17 DM repository.
+///
+/// Creates a [DmRepository] that handles receiving, decrypting, persisting,
+/// and sending encrypted direct messages. Works with any [NostrSigner]
+/// (local keys, Keycast RPC, Amber, etc.).
+///
+/// Automatically starts listening for incoming gift-wrapped messages and
+/// stops when disposed.
+///
+/// Uses `keepAlive: true` because the relay subscription must survive
+/// transient dependency rebuilds (e.g. `isNostrReadyProvider` polling,
+/// `nostrServiceProvider` auth-state changes). Without keepAlive, the
+/// provider auto-disposes during rebuild gaps, killing the subscription
+/// and causing incoming DMs to be silently dropped.
+///
+/// Non-nullable: the repository works without keys at construction time.
+/// Read operations return cached/empty data; write operations check keys.
+@Riverpod(keepAlive: true)
+DmRepository dmRepository(Ref ref) {
+  final nostrService = ref.watch(nostrServiceProvider);
+  final db = ref.watch(databaseProvider);
+
+  final repository = DmRepository(
+    nostrClient: nostrService,
+    directMessagesDao: db.directMessagesDao,
+    conversationsDao: db.conversationsDao,
+  );
+
+  ref.onDispose(repository.stopListening);
+
+  // Initialize when the signer's public key is available.
+  if (ref.watch(isNostrReadyProvider)) {
+    // Use the signer's public key as the single source of truth.
+    // This is populated by Nostr.refreshPublicKey() during initialization
+    // (guarded by isNostrReadyProvider above) and always reflects the
+    // active signer — whether local keys, Keycast RPC, Amber, or bunker.
+    final publicKey = nostrService.publicKey;
+    if (publicKey.isNotEmpty) {
+      // Reuse the signer from the main NostrClient. This is the same signer
+      // created by NostrServiceFactory.create() and is guaranteed to work for
+      // NIP-44 operations (signing, encrypting, decrypting).
+      final signer = nostrService.signer;
+
+      repository.initialize(
+        userPubkey: publicKey,
+        signer: signer,
+        messageService: NIP17MessageService(
+          signer: signer,
+          senderPublicKey: publicKey,
+          nostrService: nostrService,
+        ),
+      );
+    }
+  }
+
+  return repository;
 }
 
 // =============================================================================
