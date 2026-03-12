@@ -135,6 +135,7 @@ class _SearchScreenPureState extends ConsumerState<SearchScreenPure>
     _dispatchSearch(_searchController.text.trim());
   }
 
+  /// Dispatches to all blocs; blocs skip fetch when they already have results.
   void _dispatchSearch(String query) {
     final activeIndex = _tabController.index;
     _videoSearchBloc.add(
