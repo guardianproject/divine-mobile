@@ -222,10 +222,10 @@ class C2paSigningService {
       args += 'ios';
     }
 
-      return RemoteSigner(
-        configurationUrl: SIGNING_SERVER_ENDPOINT + args,
-        bearerToken: SIGNING_SERVER_TOKEN,
-      );
+    return RemoteSigner(
+      configurationUrl: SIGNING_SERVER_ENDPOINT + args,
+      bearerToken: SIGNING_SERVER_TOKEN,
+    );
   }
 
   // add ?platform=android or ios
