@@ -80,7 +80,7 @@ class C2paSigningService {
       );
       Log.info('prepared C2PA manifest json: $manifestJsonSource');
 
-      // Create signer for RemoteSigning against proofsign.proofmode.org
+      // Create signer for RemoteSigning against proofsign
       final signer = _createSigner();
 
       // Sign the file
@@ -222,21 +222,10 @@ class C2paSigningService {
       args += 'ios';
     }
 
-    const keyAlias = 'c2pa_signing_divine';
-    final filesDir = await getApplicationDocumentsDirectory();
-    final certFile = File('${filesDir.path}/$keyAlias.cert');
-    if (certFile.existsSync()) {
-      final certificateChainPem = certFile.readAsStringSync();
-      return HardwareSigner(
-        certificateChainPem: certificateChainPem,
-        keyAlias: keyAlias,
-      );
-    } else {
       return RemoteSigner(
         configurationUrl: SIGNING_SERVER_ENDPOINT + args,
         bearerToken: SIGNING_SERVER_TOKEN,
       );
-    }
   }
 
   // add ?platform=android or ios
