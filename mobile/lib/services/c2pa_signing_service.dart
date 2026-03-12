@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:c2pa_flutter/c2pa.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 
 /// Result of a C2PA signing operation
 class C2paSigningResult {
