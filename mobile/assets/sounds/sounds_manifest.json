@@ -216,6 +216,105 @@
       "assetPath": "assets/sounds/You_re Not My Dad.mp3",
       "durationMs": 1776,
       "tags": ["meme", "classic", "vine"]
+    },
+    {
+      "id": "freesound_oh_no_crowd",
+      "title": "Oh No No No Crowd",
+      "assetPath": "assets/sounds/oh-no-no-no-crowd.mp3",
+      "durationMs": 5982,
+      "artist": "ThePauny",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceUrl": "https://freesound.org/people/ThePauny/sounds/502915/",
+      "tags": ["crowd", "reaction", "freesound"]
+    },
+    {
+      "id": "freesound_yay",
+      "title": "YAY!",
+      "assetPath": "assets/sounds/yay.mp3",
+      "durationMs": 4762,
+      "artist": "IFartInUrGeneralDirection",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sourceUrl": "https://freesound.org/people/IFartInUrGeneralDirection/sounds/61691/",
+      "tags": ["cheer", "yay", "reaction", "freesound"]
+    },
+    {
+      "id": "freesound_countdown_fire",
+      "title": "4..3..2..1..Fire!",
+      "assetPath": "assets/sounds/countdown-fire.mp3",
+      "durationMs": 5758,
+      "artist": "RandomRecord19",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceUrl": "https://freesound.org/people/RandomRecord19/sounds/741287/",
+      "tags": ["countdown", "military", "retro", "freesound"]
+    },
+    {
+      "id": "freesound_baritone",
+      "title": "Baritone (explicit)",
+      "assetPath": "assets/sounds/baritone-explicit.mp3",
+      "durationMs": 4408,
+      "artist": "unfa",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceUrl": "https://freesound.org/people/unfa/sounds/222593/",
+      "tags": ["opera", "humor", "dramatic", "freesound"]
+    },
+    {
+      "id": "freesound_radio_tuning",
+      "title": "Radio Tuning",
+      "assetPath": "assets/sounds/radio-tuning.mp3",
+      "durationMs": 5904,
+      "artist": "Iamgiorgio",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceUrl": "https://freesound.org/people/Iamgiorgio/sounds/371779/",
+      "tags": ["radio", "tuning", "sfx", "freesound"]
+    },
+    {
+      "id": "freesound_take_your_seats",
+      "title": "Take Your Seats",
+      "assetPath": "assets/sounds/take-your-seats.mp3",
+      "durationMs": 5000,
+      "artist": "Ellis_Fullfrequency",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceUrl": "https://freesound.org/people/Ellis_Fullfrequency/sounds/338835/",
+      "tags": ["announcement", "voice", "presentation", "freesound"]
+    },
+    {
+      "id": "freesound_cops_radio",
+      "title": "Cops On Radio",
+      "assetPath": "assets/sounds/cops-on-radio.mp3",
+      "durationMs": 4668,
+      "artist": "dragonboi50120",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceUrl": "https://freesound.org/people/dragonboi50120/sounds/592684/",
+      "tags": ["police", "radio", "sfx", "freesound"]
+    },
+    {
+      "id": "freesound_hello_acapella",
+      "title": "Hello Acapella",
+      "assetPath": "assets/sounds/hello-acapella.mp3",
+      "durationMs": 4041,
+      "artist": "Dave_Girtsman",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "sourceUrl": "https://freesound.org/people/Dave_Girtsman/sounds/560625/",
+      "tags": ["acapella", "hello", "singing", "freesound"]
+    },
+    {
+      "id": "freesound_321_fight",
+      "title": "3..2..1..FIGHT!",
+      "assetPath": "assets/sounds/three-two-one-fight.mp3",
+      "durationMs": 5662,
+      "artist": "Audeption",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "sourceUrl": "https://freesound.org/people/Audeption/sounds/541822/",
+      "tags": ["countdown", "fight", "game", "voice", "freesound"]
     }
   ]
 }

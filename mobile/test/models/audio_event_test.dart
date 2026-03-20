@@ -298,6 +298,49 @@ void main() {
 
         expect(audioEvent.duration, equals(4.5));
       });
+
+      test('passes source attribution from VineSound with artist', () {
+        final vineSound = VineSound(
+          id: 'freesound_crowd',
+          title: 'Oh No No No Crowd',
+          assetPath: 'assets/sounds/oh-no-no-no-crowd.mp3',
+          duration: const Duration(milliseconds: 5943),
+          artist: 'ThePauny',
+          license: 'CC0',
+          sourceUrl: 'https://freesound.org/people/ThePauny/sounds/502915/',
+        );
+
+        final audioEvent = AudioEvent.fromBundledSound(vineSound);
+
+        expect(audioEvent.source, equals('ThePauny via Freesound'));
+      });
+
+      test('omits source when VineSound has no artist or sourceUrl', () {
+        final vineSound = VineSound(
+          id: 'meme_bruh',
+          title: 'Bruh Sound Effect',
+          assetPath: 'assets/sounds/bruh.mp3',
+          duration: const Duration(seconds: 1),
+        );
+
+        final audioEvent = AudioEvent.fromBundledSound(vineSound);
+
+        expect(audioEvent.source, isNull);
+      });
+
+      test('uses artist without via Freesound when no sourceUrl', () {
+        final vineSound = VineSound(
+          id: 'custom_sound',
+          title: 'Custom Sound',
+          assetPath: 'assets/sounds/custom.mp3',
+          duration: const Duration(seconds: 3),
+          artist: 'SomeArtist',
+        );
+
+        final audioEvent = AudioEvent.fromBundledSound(vineSound);
+
+        expect(audioEvent.source, equals('SomeArtist'));
+      });
     });
 
     group('toTags', () {
