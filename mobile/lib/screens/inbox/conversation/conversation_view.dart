@@ -71,13 +71,13 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
       case MoreSheetResult.unfollow:
         await followRepository.toggleFollow(otherPubkey);
       case MoreSheetResult.blockConfirmed:
-        blocklistService.blockUser(
+        await blocklistService.blockUser(
           otherPubkey,
           ourPubkey: ref.read(authServiceProvider).currentPublicKeyHex ?? '',
         );
         if (mounted) context.pop();
       case MoreSheetResult.unblockConfirmed:
-        blocklistService.unblockUser(otherPubkey);
+        await blocklistService.unblockUser(otherPubkey);
     }
   }
 
@@ -240,6 +240,10 @@ class _MessageList extends StatelessWidget {
     switch (action) {
       case MessageAction.copy:
         await ClipboardUtils.copy(context, message.content);
+      case MessageAction.delete:
+        context.read<ConversationBloc>().add(
+          ConversationMessageDeleted(rumorId: message.id),
+        );
       case MessageAction.report:
         if (!context.mounted) return;
         await showDialog<void>(
