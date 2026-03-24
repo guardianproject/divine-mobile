@@ -249,13 +249,15 @@ extension VideoEventAppExtensions on VideoEvent {
   /// Get the optimal video URL for initial playback.
   ///
   /// **Strategy**:
-  /// - Divine videos default to progressive MP4 720p (faststart, moov at front)
-  ///   for fastest startup with short videos (1 request, no manifest overhead).
+  /// - Classic Vine originals use the raw blob directly (/{hash}) because the
+  ///   source is already 480p or lower — transcoded variants are upscales at
+  ///   best and may not exist, causing needless 404s.
+  /// - Other Divine videos default to progressive MP4 720p (faststart, moov at
+  ///   front) for fastest startup with short videos (1 request, no manifest
+  ///   overhead).
   /// - Developer options can override to HLS or other formats for A/B testing.
   /// - If MP4 fails (e.g. not yet transcoded after upload), [getFallbackUrl]
   ///   provides an HLS fallback via the quality variant error handler.
-  /// - The raw blob (/{hash}) is 7-21 Mbps and exists only for archival/
-  ///   protocol purposes.
   ///
   /// Non-Divine videos always use original (no transcoded variants exist).
   String? getOptimalVideoUrlForPlatform() {
@@ -264,6 +266,10 @@ extension VideoEventAppExtensions on VideoEvent {
 
     final hash = _extractVideoHash(videoUrl);
     if (hash == null) return videoUrl;
+
+    // Classic Vine originals are 480p or lower — serve the raw blob directly.
+    // Transcoded 720p variants are pointless upscales and may not exist.
+    if (isOriginalVine) return '$_divineMediaBase/$hash';
 
     // Developer format override takes priority
     final override = videoFormatPreference.format;
