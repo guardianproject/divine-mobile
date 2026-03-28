@@ -1796,7 +1796,7 @@ class VideoOverlayActionColumn extends ConsumerWidget {
         RepostActionButton(video: video, isPreviewMode: isPreviewMode),
         ShareActionButton(video: video),
         Padding(
-          padding: const .only(top: 8),
+          padding: const EdgeInsets.only(top: 8),
           child: MoreActionButton(video: video),
         ),
       ],
