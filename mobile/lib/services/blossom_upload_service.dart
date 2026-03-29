@@ -98,6 +98,13 @@ class _DivineUploadCapability {
   final String? dataHost;
 }
 
+class _CachedCapability {
+  _CachedCapability(this.capability, this.expiresAt);
+
+  final _DivineUploadCapability capability;
+  final DateTime expiresAt;
+}
+
 class BlossomUploadService {
   static const String _blossomServerKey = 'blossom_server_url';
   static const String _useBlossomKey = 'use_blossom_upload';
@@ -107,16 +114,25 @@ class BlossomUploadService {
   static const int _maxChunkRetries = 2;
   static const Duration _chunkRetryDelay = Duration(seconds: 1);
 
+  /// How long a cached capability discovery result stays valid.
+  static const Duration _capabilityCacheTtl = Duration(minutes: 5);
+
   final AuthService authService;
   final Dio dio;
   final String _defaultServerUrl;
+  final DateTime Function() _clock;
+
+  /// In-memory cache of capability discovery results keyed by server URL.
+  final Map<String, _CachedCapability> _capabilityCache = {};
 
   BlossomUploadService({
     required this.authService,
     Dio? dio,
     String? defaultServerUrl,
+    DateTime Function()? clock,
   }) : dio = dio ?? Dio(),
-       _defaultServerUrl = defaultServerUrl ?? defaultBlossomServer;
+       _defaultServerUrl = defaultServerUrl ?? defaultBlossomServer,
+       _clock = clock ?? DateTime.now;
 
   /// Determine which Blossom server to use for upload
   ///
@@ -351,6 +367,16 @@ class BlossomUploadService {
   Future<_DivineUploadCapability> _fetchDivineUploadCapability(
     String serverUrl,
   ) async {
+    final cached = _capabilityCache[serverUrl];
+    if (cached != null && _clock().isBefore(cached.expiresAt)) {
+      Log.debug(
+        'Using cached capability for $serverUrl',
+        name: 'BlossomUploadService',
+        category: LogCategory.video,
+      );
+      return cached.capability;
+    }
+
     try {
       final response = await dio.head(
         '$serverUrl/upload',
@@ -370,18 +396,33 @@ class BlossomUploadService {
               .contains(DivineUploadExtensions.resumableSessions) ??
           false;
 
-      return _DivineUploadCapability(
+      final result = _DivineUploadCapability(
         supportsResumable: supportsResumable,
         controlHost: response.headers.value(DivineUploadHeaders.controlHost),
         dataHost: response.headers.value(DivineUploadHeaders.dataHost),
       );
+
+      _capabilityCache[serverUrl] = _CachedCapability(
+        result,
+        _clock().add(_capabilityCacheTtl),
+      );
+
+      return result;
     } on DioException catch (error) {
       Log.warning(
         'Capability discovery failed for $serverUrl: ${error.message}',
         name: 'BlossomUploadService',
         category: LogCategory.video,
       );
-      return const _DivineUploadCapability(supportsResumable: false);
+
+      const fallback = _DivineUploadCapability(supportsResumable: false);
+
+      _capabilityCache[serverUrl] = _CachedCapability(
+        fallback,
+        _clock().add(_capabilityCacheTtl),
+      );
+
+      return fallback;
     }
   }
 
