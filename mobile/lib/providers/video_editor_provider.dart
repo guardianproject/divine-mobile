@@ -21,6 +21,7 @@ import 'package:openvine/providers/clip_manager_provider.dart';
 import 'package:openvine/providers/database_provider.dart';
 import 'package:openvine/providers/video_publish_provider.dart';
 import 'package:openvine/providers/video_recorder_provider.dart';
+import 'package:openvine/services/device_auth/proofsign_provider.dart';
 import 'package:openvine/services/draft_storage_service.dart';
 import 'package:openvine/services/file_cleanup_service.dart';
 import 'package:openvine/services/video_editor/video_editor_render_service.dart';
@@ -980,5 +981,73 @@ class VideoEditorNotifier extends Notifier<VideoEditorProviderState> {
           ),
       ],
     );
+
+    try {
+      // Render clips into single video file
+      final outputPath = await VideoEditorRenderService.renderVideo(
+        clips: _clips,
+        aspectRatio: _clips.first.targetAspectRatio,
+        enableAudio: !state.isMuted,
+        usePersistentStorage: true,
+        parameters: state.editorEditingParameters,
+      );
+      String? proofManifestJson;
+
+      // Generate proofmode attestation if render successful
+      if (outputPath != null) {
+        Log.info(
+          '✅ Video rendered to: $outputPath',
+          name: 'VideoEditorNotifier',
+          category: .video,
+        );
+
+        Log.debug(
+          '🔐 Generating proofmode attestation for video',
+          name: 'VideoEditorNotifier',
+          category: .video,
+        );
+        final authProvider = await ref.read(
+          proofSignAuthProvider.future,
+        );
+        final proofData = await NativeProofModeService.proofFile(
+          File(outputPath),
+          authProvider: authProvider,
+        );
+
+        if (proofData != null) {
+          proofManifestJson = jsonEncode(proofData);
+          Log.info(
+            '✅ Proofmode attestation generated',
+            name: 'VideoEditorNotifier',
+            category: .video,
+          );
+        } else {
+          Log.warning(
+            '⚠️ No proofmode data available',
+            name: 'VideoEditorNotifier',
+            category: .video,
+          );
+        }
+      } else {
+        Log.error(
+          '❌ Video rendering failed',
+          name: 'VideoEditorNotifier',
+          category: .video,
+        );
+      }
+
+      state = state.copyWith(isProcessing: false);
+      return (outputPath, proofManifestJson);
+    } catch (e, stackTrace) {
+      Log.error(
+        '❌ Video rendering error: $e',
+        name: 'VideoEditorNotifier',
+        category: .video,
+        error: e,
+        stackTrace: stackTrace,
+      );
+      state = state.copyWith(isProcessing: false);
+      return (null, null);
+    }
   }
 }

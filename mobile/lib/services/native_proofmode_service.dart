@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:models/models.dart' show NativeProofData;
 import 'package:openvine/models/divine_video_clip.dart';
 import 'package:openvine/services/c2pa_signing_service.dart';
+import 'package:openvine/services/device_auth/device_auth_provider.dart';
 import 'package:openvine/services/nostr_creator_binding_service.dart';
 import 'package:unified_logger/unified_logger.dart';
 
@@ -36,6 +37,7 @@ class NativeProofModeService {
     bool enableAdvancedCawgEmbedding = false,
     List<DivineVideoClip>? clips,
     Map<String, dynamic>? editorStateHistory,
+    DeviceAuthProvider? authProvider,
   }) async {
     try {
       // TODO(n8fr8): Incorporate clip-level proof data into the final
@@ -61,7 +63,9 @@ class NativeProofModeService {
         return null;
       }
 
-      final C2paSigningService c2paSigningService = C2paSigningService();
+      final c2paSigningService = C2paSigningService(
+        authProvider: authProvider,
+      );
 
       try {
         final String proofHash = await generateSha256FileHash(videoFile.path);
