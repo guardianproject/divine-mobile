@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
+import 'package:openvine/features/feature_flags/screens/feature_flag_screen.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/developer_mode_tap_provider.dart';
 import 'package:openvine/providers/environment_provider.dart';
@@ -232,6 +233,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 title: 'Nostr Settings',
                 subtitle: 'Relays, media servers, keys, and account',
                 onTap: () => context.push(NostrSettingsScreen.path),
+              ),
+              _SettingsTile(
+                icon: Icons.science,
+                title: 'Experimental Features',
+                subtitle: 'Tweaks that may hiccup—try them if you are curious.',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const FeatureFlagScreen(),
+                  ),
+                ),
               ),
               _SettingsTile(
                 icon: Icons.gavel,
