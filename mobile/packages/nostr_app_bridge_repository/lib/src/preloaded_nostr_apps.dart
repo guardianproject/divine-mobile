@@ -175,6 +175,37 @@ final List<NostrAppDirectoryEntry> preloadedNostrApps = List.unmodifiable([
   ),
 ]);
 
+/// Per-app localStorage seeding scripts keyed by slug.
+///
+/// These scripts run after the NIP-07 bridge is installed.
+/// Use `{{PUBKEY}}` as a placeholder for the user's hex pubkey.
+/// The host replaces the placeholder at injection time.
+/// Soapbox-based apps (Ditto, Nostr Nests) share the same localStorage
+/// session format.
+const String _soapboxAutoLoginScript = '''
+localStorage.setItem('soapbox:auth:me', '{{PUBKEY}}');
+localStorage.setItem('soapbox:auth:users', JSON.stringify({
+  '{{PUBKEY}}': { type: 'extension' }
+}));
+''';
+
+const Map<String, String> _autoLoginScripts = {
+  // Primal reads loginType + pubkey from localStorage on page load
+  // to auto-restore an extension session.
+  'primal': '''
+localStorage.setItem('loginMethod', 'extension');
+localStorage.setItem('pubkey', '{{PUBKEY}}');
+''',
+  // Ditto and Nostr Nests share the @soapbox/soapbox login system.
+  'ditto': _soapboxAutoLoginScript,
+  'nostrnests': _soapboxAutoLoginScript,
+  // zap.stream stores login method and pubkey for session restoration.
+  'zap-stream': '''
+localStorage.setItem('login-method', 'nip7');
+localStorage.setItem('pubkey', '{{PUBKEY}}');
+''',
+};
+
 NostrAppDirectoryEntry _buildPreloadedApp({
   required String id,
   required String slug,
@@ -205,5 +236,6 @@ NostrAppDirectoryEntry _buildPreloadedApp({
     sortOrder: sortOrder,
     createdAt: null,
     updatedAt: null,
+    autoLoginScript: _autoLoginScripts[slug],
   );
 }
