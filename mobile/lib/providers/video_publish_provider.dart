@@ -21,6 +21,7 @@ import 'package:openvine/providers/video_editor_provider.dart';
 import 'package:openvine/providers/video_recorder_provider.dart';
 import 'package:openvine/screens/profile_screen_router.dart';
 import 'package:openvine/services/cawg_verifier_client.dart';
+import 'package:openvine/services/device_auth/proofsign_provider.dart';
 import 'package:openvine/services/draft_storage_service.dart';
 import 'package:openvine/services/native_proofmode_service.dart';
 import 'package:openvine/services/nostr_creator_binding_service.dart';

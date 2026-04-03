@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:models/models.dart' show NativeProofData;
 import 'package:openvine/services/c2pa_signing_service.dart';
+import 'package:openvine/services/device_auth/device_auth_provider.dart';
 import 'package:openvine/services/nostr_creator_binding_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
@@ -33,6 +34,7 @@ class NativeProofModeService {
     Map<String, dynamic>? cawgIdentityAssertion,
     Map<String, dynamic>? verifiedIdentityBundle,
     bool enableAdvancedCawgEmbedding = false,
+    DeviceAuthProvider? authProvider,
   }) async {
     try {
       // Check if native ProofMode/C2PA is available on this platform
@@ -46,7 +48,9 @@ class NativeProofModeService {
         return null;
       }
 
-      final C2paSigningService c2paSigningService = C2paSigningService();
+      final c2paSigningService = C2paSigningService(
+        authProvider: authProvider,
+      );
 
       try {
         final String proofHash = await generateSha256FileHash(videoFile.path);
