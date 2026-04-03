@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import AVFoundation
+import DeviceCheck
 import LibProofMode
 import ZendeskCoreSDK
 import SupportSDK
@@ -22,6 +23,9 @@ import SupportProvidersSDK
 
     // Set up Camera Zoom Detector platform channel
     setupCameraZoomDetectorChannel()
+
+    // Set up App Attest platform channel for ProofSign device auth
+    setupAppAttestChannel()
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -450,5 +454,123 @@ import SupportProvidersSDK
     }
 
     NSLog("✅ CameraZoomDetector: Platform channel registered")
+  }
+
+  private func setupAppAttestChannel() {
+    guard let controller = window?.rootViewController as? FlutterViewController else {
+      NSLog("AppAttest: Could not get FlutterViewController")
+      return
+    }
+
+    let channel = FlutterMethodChannel(
+      name: "com.openvine/app_attest",
+      binaryMessenger: controller.binaryMessenger
+    )
+
+    channel.setMethodCallHandler { (call, result) in
+      guard #available(iOS 14.0, *) else {
+        result(FlutterError(
+          code: "UNSUPPORTED",
+          message: "App Attest requires iOS 14.0+",
+          details: nil
+        ))
+        return
+      }
+
+      let service = DCAppAttestService.shared
+      guard service.isSupported else {
+        result(FlutterError(
+          code: "UNSUPPORTED",
+          message: "App Attest is not supported on this device",
+          details: nil
+        ))
+        return
+      }
+
+      switch call.method {
+      case "generateKey":
+        service.generateKey { keyId, error in
+          if let error = error {
+            result(FlutterError(
+              code: "KEY_GENERATION_FAILED",
+              message: error.localizedDescription,
+              details: nil
+            ))
+            return
+          }
+          result(keyId)
+        }
+
+      case "attestKey":
+        guard let args = call.arguments as? [String: Any],
+              let keyId = args["keyId"] as? String,
+              let hashData = args["clientDataHash"] as? FlutterStandardTypedData else {
+          result(FlutterError(
+            code: "INVALID_ARGUMENT",
+            message: "keyId and clientDataHash are required",
+            details: nil
+          ))
+          return
+        }
+        service.attestKey(keyId, clientDataHash: hashData.data) { attestation, error in
+          if let error = error {
+            result(FlutterError(
+              code: "ATTESTATION_FAILED",
+              message: error.localizedDescription,
+              details: nil
+            ))
+            return
+          }
+          guard let attestation = attestation else {
+            result(FlutterError(
+              code: "ATTESTATION_FAILED",
+              message: "Attestation returned nil",
+              details: nil
+            ))
+            return
+          }
+          result(FlutterStandardTypedData(bytes: attestation))
+        }
+
+      case "generateAssertion":
+        guard let args = call.arguments as? [String: Any],
+              let keyId = args["keyId"] as? String,
+              let hashData = args["clientDataHash"] as? FlutterStandardTypedData else {
+          result(FlutterError(
+            code: "INVALID_ARGUMENT",
+            message: "keyId and clientDataHash are required",
+            details: nil
+          ))
+          return
+        }
+        service.generateAssertion(keyId, clientDataHash: hashData.data) { assertion, error in
+          if let error = error {
+            result(FlutterError(
+              code: "ASSERTION_FAILED",
+              message: error.localizedDescription,
+              details: nil
+            ))
+            return
+          }
+          guard let assertion = assertion else {
+            result(FlutterError(
+              code: "ASSERTION_FAILED",
+              message: "Assertion returned nil",
+              details: nil
+            ))
+            return
+          }
+          result(FlutterStandardTypedData(bytes: assertion))
+        }
+
+      case "isSupported":
+        result(service.isSupported)
+
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
+    NSLog("AppAttest: Platform channel registered")
   }
 }

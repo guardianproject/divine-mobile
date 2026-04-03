@@ -17,6 +17,7 @@ import 'package:openvine/providers/clip_manager_provider.dart';
 import 'package:openvine/providers/sounds_providers.dart';
 import 'package:openvine/providers/video_publish_provider.dart';
 import 'package:openvine/providers/video_recorder_provider.dart';
+import 'package:openvine/services/device_auth/proofsign_provider.dart';
 import 'package:openvine/services/draft_storage_service.dart';
 import 'package:openvine/services/file_cleanup_service.dart';
 import 'package:openvine/services/native_proofmode_service.dart';
@@ -1081,8 +1082,12 @@ class VideoEditorNotifier extends Notifier<VideoEditorProviderState> {
           name: 'VideoEditorNotifier',
           category: .video,
         );
+        final authProvider = await ref.read(
+          proofSignAuthProvider.future,
+        );
         final proofData = await NativeProofModeService.proofFile(
           File(outputPath),
+          authProvider: authProvider,
         );
 
         if (proofData != null) {

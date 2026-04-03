@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/services.dart';
 import 'package:models/models.dart' show NativeProofData;
 import 'package:openvine/services/c2pa_signing_service.dart';
+import 'package:openvine/services/device_auth/device_auth_provider.dart';
 import 'package:openvine/utils/unified_logger.dart';
 
 /// Service for generating cryptographic proof using native ProofMode libraries
@@ -22,7 +23,10 @@ class NativeProofModeService {
   /// Returns [NativeProofData] if proof generation succeeds, null otherwise.
   /// Handles platform availability checks and graceful fallback if ProofMode
   /// is not supported.
-  static Future<NativeProofData?> proofFile(File videoFile) async {
+  static Future<NativeProofData?> proofFile(
+    File videoFile, {
+    DeviceAuthProvider? authProvider,
+  }) async {
     try {
       // Check if native ProofMode/C2PA is available on this platform
       final isAvailable = await NativeProofModeService.isAvailable();
@@ -35,7 +39,9 @@ class NativeProofModeService {
         return null;
       }
 
-      final C2paSigningService c2paSigningService = C2paSigningService();
+      final c2paSigningService = C2paSigningService(
+        authProvider: authProvider,
+      );
 
       try {
         final String proofHash = await generateSha256FileHash(videoFile.path);

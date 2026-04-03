@@ -18,6 +18,7 @@ import 'package:openvine/providers/sounds_providers.dart';
 import 'package:openvine/providers/video_editor_provider.dart';
 import 'package:openvine/providers/video_recorder_provider.dart';
 import 'package:openvine/screens/profile_screen_router.dart';
+import 'package:openvine/services/device_auth/proofsign_provider.dart';
 import 'package:openvine/services/draft_storage_service.dart';
 import 'package:openvine/services/native_proofmode_service.dart';
 import 'package:openvine/services/video_publish/video_publish_service.dart';
@@ -211,7 +212,13 @@ class VideoPublishNotifier extends Notifier<VideoPublishProviderState> {
         // can read the first clip directly. Multiple clips are only required to
         // restore the editor state from drafts.
         final filePath = await publishDraft.clips.first.video.safeFilePath();
-        final result = await NativeProofModeService.proofFile(File(filePath));
+        final authProvider = await ref.read(
+          proofSignAuthProvider.future,
+        );
+        final result = await NativeProofModeService.proofFile(
+          File(filePath),
+          authProvider: authProvider,
+        );
         final String? proofManifestJson = result == null
             ? null
             : jsonEncode(result);
