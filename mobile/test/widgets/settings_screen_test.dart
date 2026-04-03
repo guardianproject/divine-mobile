@@ -5,18 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:openvine/features/feature_flags/models/feature_flag.dart';
+import 'package:openvine/features/feature_flags/providers/feature_flag_providers.dart';
 import 'package:openvine/providers/app_providers.dart';
-import 'package:openvine/providers/route_feed_providers.dart';
 import 'package:openvine/providers/shared_preferences_provider.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
-import 'package:openvine/screens/apps/apps_permissions_screen.dart';
-import 'package:openvine/screens/explore_screen.dart';
 import 'package:openvine/screens/settings/settings_screen.dart';
 import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/widgets/user_avatar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../helpers/go_router.dart';
 
 class _MockAuthService extends Mock implements AuthService {}
 
@@ -48,9 +45,8 @@ void main() {
 
     Widget buildSubject({
       AuthState authState = AuthState.authenticated,
-      MockGoRouter? goRouter,
     }) {
-      final app = ProviderScope(
+      return ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
           authServiceProvider.overrideWithValue(mockAuthService),
@@ -61,12 +57,6 @@ void main() {
         ],
         child: const MaterialApp(home: SettingsScreen()),
       );
-
-      if (goRouter == null) {
-        return app;
-      }
-
-      return MockGoRouterProvider(goRouter: goRouter, child: app);
     }
 
     testWidgets('renders app bar with title', (tester) async {
@@ -118,8 +108,6 @@ void main() {
         'Content Preferences',
         'Moderation Controls',
         'Nostr Settings',
-        'Integrated Apps',
-        'Integration Permissions',
       ]) {
         await tester.scrollUntilVisible(
           find.text(title),
@@ -128,83 +116,6 @@ void main() {
         );
         expect(find.text(title), findsOneWidget);
       }
-
-      expect(
-        find.text('Approved third-party apps that run inside Divine'),
-        findsOneWidget,
-      );
-
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump();
-    });
-
-    testWidgets('tapping Integration Permissions opens the permissions route', (
-      tester,
-    ) async {
-      final mockGoRouter = MockGoRouter();
-      when(() => mockGoRouter.push(any())).thenAnswer((_) async => null);
-
-      await tester.pumpWidget(buildSubject(goRouter: mockGoRouter));
-      await tester.pumpAndSettle();
-
-      final scrollable = find.byType(Scrollable);
-      await tester.scrollUntilVisible(
-        find.text('Integration Permissions'),
-        300,
-        scrollable: scrollable,
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Integration Permissions'));
-      await tester.pumpAndSettle();
-
-      verify(() => mockGoRouter.push(AppsPermissionsScreen.path)).called(1);
-
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump();
-    });
-
-    testWidgets('tapping Integrated Apps opens the directory route', (
-      tester,
-    ) async {
-      final mockGoRouter = MockGoRouter();
-      when(() => mockGoRouter.go(any())).thenReturn(null);
-
-      final container = ProviderContainer(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-          authServiceProvider.overrideWithValue(mockAuthService),
-          currentAuthStateProvider.overrideWith(
-            (ref) => AuthState.authenticated,
-          ),
-          userProfileReactiveProvider.overrideWith(
-            (ref, pubkey) => Stream.value(null),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MockGoRouterProvider(
-            goRouter: mockGoRouter,
-            child: const MaterialApp(home: SettingsScreen()),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final scrollable = find.byType(Scrollable);
-      await tester.scrollUntilVisible(
-        find.text('Integrated Apps'),
-        100,
-        scrollable: scrollable,
-      );
-      await tester.tap(find.text('Integrated Apps'));
-      await tester.pumpAndSettle();
-
-      verify(() => mockGoRouter.go(ExploreScreen.path)).called(1);
-      expect(container.read(forceExploreTabNameProvider), 'apps');
 
       await tester.pumpWidget(const SizedBox());
       await tester.pump();
@@ -299,5 +210,54 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pump();
     });
+
+    testWidgets(
+      'hides Bluesky Publishing tile when feature flag is off',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Bluesky Publishing'), findsNothing);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump();
+      },
+    );
+
+    testWidgets(
+      'shows Bluesky Publishing tile when feature flag is on',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+              authServiceProvider.overrideWithValue(mockAuthService),
+              currentAuthStateProvider.overrideWith(
+                (ref) => AuthState.authenticated,
+              ),
+              userProfileReactiveProvider.overrideWith(
+                (ref, pubkey) => Stream.value(null),
+              ),
+              isFeatureEnabledProvider(
+                FeatureFlag.blueskyPublishing,
+              ).overrideWith((ref) => true),
+            ],
+            child: const MaterialApp(home: SettingsScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final scrollable = find.byType(Scrollable);
+        await tester.scrollUntilVisible(
+          find.text('Bluesky Publishing'),
+          100,
+          scrollable: scrollable,
+        );
+        expect(find.text('Bluesky Publishing'), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump();
+      },
+    );
   });
 }

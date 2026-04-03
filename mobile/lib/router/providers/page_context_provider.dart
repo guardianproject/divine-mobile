@@ -34,6 +34,7 @@ import 'package:openvine/screens/pure/search_screen_pure.dart';
 import 'package:openvine/screens/relay_diagnostic_screen.dart';
 import 'package:openvine/screens/relay_settings_screen.dart';
 import 'package:openvine/screens/safety_settings_screen.dart';
+import 'package:openvine/screens/settings/bluesky_settings_screen.dart';
 import 'package:openvine/screens/settings/content_preferences_screen.dart';
 import 'package:openvine/screens/settings/legal_screen.dart';
 import 'package:openvine/screens/settings/nostr_settings_screen.dart';
@@ -88,6 +89,7 @@ enum RouteType {
   supportCenter, // Support center (bug reports, logs, FAQ, legal links)
   legal, // Legal screen (ToS, Privacy, Safety, DMCA, Licenses)
   nostrSettings, // Nostr settings (relays, media servers, keys, account)
+  blueskySettings, // Bluesky crosspost publishing settings
   secureAccount,
   pooledVideoFeed, // Pooled fullscreen video feed (uses pooled_video_player)
   videoDetail, // Video detail screen (deep link to specific video)
@@ -323,6 +325,9 @@ RouteContext parseRoute(String path) {
     case 'nostr-settings':
       return const RouteContext(type: RouteType.nostrSettings);
 
+    case 'bluesky-settings':
+      return const RouteContext(type: RouteType.blueskySettings);
+
     case 'edit-profile':
     case 'setup-profile':
       // Profile editing screens - standalone routes outside ShellRoute
@@ -543,6 +548,9 @@ String buildRoute(RouteContext context) {
 
     case RouteType.nostrSettings:
       return NostrSettingsScreen.path;
+
+    case RouteType.blueskySettings:
+      return BlueskySettingsScreen.path;
 
     case RouteType.editProfile:
       return ProfileSetupScreen.editPath;

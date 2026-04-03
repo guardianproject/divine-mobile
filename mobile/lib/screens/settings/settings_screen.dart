@@ -8,27 +8,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
-import 'package:openvine/features/feature_flags/screens/feature_flag_screen.dart';
+import 'package:openvine/features/feature_flags/models/feature_flag.dart';
+import 'package:openvine/features/feature_flags/providers/feature_flag_providers.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/developer_mode_tap_provider.dart';
 import 'package:openvine/providers/environment_provider.dart';
 import 'package:openvine/providers/nip05_verification_provider.dart';
-import 'package:openvine/providers/route_feed_providers.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
-import 'package:openvine/screens/apps/apps_permissions_screen.dart';
 import 'package:openvine/screens/auth/secure_account_screen.dart';
 import 'package:openvine/screens/auth/welcome_screen.dart';
 import 'package:openvine/screens/creator_analytics_screen.dart';
-import 'package:openvine/screens/explore_screen.dart';
 import 'package:openvine/screens/notification_settings_screen.dart';
 import 'package:openvine/screens/safety_settings_screen.dart';
+import 'package:openvine/screens/settings/bluesky_settings_screen.dart';
 import 'package:openvine/screens/settings/content_preferences_screen.dart';
 import 'package:openvine/screens/settings/legal_screen.dart';
 import 'package:openvine/screens/settings/nostr_settings_screen.dart';
 import 'package:openvine/screens/settings/support_center_screen.dart';
 import 'package:openvine/services/auth_service.dart' hide UserProfile;
 import 'package:openvine/services/nip05_verification_service.dart';
-import 'package:openvine/utils/nostr_apps_platform_support.dart';
 import 'package:openvine/utils/nostr_key_utils.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:openvine/widgets/user_avatar.dart';
@@ -164,6 +162,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final authService = ref.watch(authServiceProvider);
     final authState = ref.watch(currentAuthStateProvider);
     final isAuthenticated = authState == AuthState.authenticated;
+    final showBluesky = ref.watch(
+      isFeatureEnabledProvider(FeatureFlag.blueskyPublishing),
+    );
 
     return Scaffold(
       appBar: DiVineAppBar(
@@ -232,33 +233,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 subtitle: 'Blocked users, muted content, and reports',
                 onTap: () => context.push(SafetySettingsScreen.path),
               ),
+              if (showBluesky)
+                _SettingsTile(
+                  icon: Icons.cloud_upload,
+                  title: 'Bluesky Publishing',
+                  subtitle: 'Manage crossposting to Bluesky',
+                  onTap: () => context.push(BlueskySettingsScreen.path),
+                ),
               _SettingsTile(
                 icon: Icons.hub,
                 title: 'Nostr Settings',
                 subtitle: 'Relays, media servers, keys, and account',
                 onTap: () => context.push(NostrSettingsScreen.path),
-              ),
-              if (nostrAppsSandboxSupported)
-                _SettingsTile(
-                  icon: Icons.apps,
-                  title: 'Integrated Apps',
-                  subtitle: 'Approved third-party apps that run inside Divine',
-                  onTap: () {
-                    ref.read(forceExploreTabNameProvider.notifier).state =
-                        'apps';
-                    context.go(ExploreScreen.path);
-                  },
-                ),
-              _SettingsTile(
-                icon: Icons.science,
-                title: 'Experimental Features',
-                subtitle: 'Tweaks that may hiccup—try them if you are curious.',
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const FeatureFlagScreen(),
-                  ),
-                ),
               ),
               _SettingsTile(
                 icon: Icons.gavel,
@@ -267,12 +253,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     'Terms of Service, Privacy Policy, Safety Standards, '
                     'DMCA, Open Source Licenses',
                 onTap: () => context.push(LegalScreen.path),
-              ),
-              _SettingsTile(
-                icon: Icons.lock_open,
-                title: 'Integration Permissions',
-                subtitle: 'Review and revoke remembered integration approvals',
-                onTap: () => context.push(AppsPermissionsScreen.path),
               ),
 
               const SizedBox(height: 24),
