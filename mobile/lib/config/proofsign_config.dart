@@ -40,6 +40,13 @@ class ProofSignConfig {
     bearerToken: String.fromEnvironment('PROOFSIGN_BEARER_TOKEN'),
   );
 
+  /// When true, forces the Android client to use hardware Key Attestation
+  /// even on devices with Play Services. Useful for testing the Key
+  /// Attestation path on normal Android devices without degoogling them.
+  static const bool forceKeyAttestation = bool.fromEnvironment(
+    'PROOFSIGN_FORCE_KEY_ATTESTATION',
+  );
+
   /// Whether ProofSign is configured (server URL is set)
   bool get isConfigured => serverUrl.isNotEmpty;
 }
