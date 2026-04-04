@@ -10,10 +10,10 @@ import 'package:openvine/services/device_auth/app_attest_provider.dart';
 import 'package:openvine/services/device_auth/device_auth_provider.dart';
 import 'package:openvine/services/device_auth/key_attestation_provider.dart';
 import 'package:openvine/services/device_auth/play_integrity_provider.dart';
-import 'package:openvine/utils/unified_logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unified_logger/unified_logger.dart';
 
 part 'proofsign_provider.g.dart';
 
@@ -105,8 +105,9 @@ Future<DeviceAuthProvider?> _createIosProvider(
 Future<DeviceAuthProvider?> _createAndroidProvider(
   ProofSignConfig config,
 ) async {
-  // Check if Play Services is available
-  final hasPlayServices = await _checkPlayServices();
+  // Check if Play Services is available (can be forced off for testing)
+  final hasPlayServices =
+      !ProofSignConfig.forceKeyAttestation && await _checkPlayServices();
 
   // Restore registration state from persistent storage
   final prefs = await SharedPreferences.getInstance();

@@ -101,7 +101,10 @@ class KeyAttestationChannel {
             keyStore.deleteEntry(KEY_ALIAS)
         }
 
-        val challengeBytes = challenge.toByteArray(Charsets.UTF_8)
+        // Server sends challenge as hex-encoded string; the attestation
+        // extension must contain the raw decoded bytes, not the UTF-8
+        // bytes of the hex string.
+        val challengeBytes = hexDecode(challenge)
 
         // Try StrongBox first (Android 9+), fall back to TEE
         val useStrongBox = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
@@ -146,6 +149,16 @@ class KeyAttestationChannel {
         )
         keyPairGenerator.initialize(paramSpec)
         keyPairGenerator.generateKeyPair()
+    }
+
+    /**
+     * Decode a hex-encoded string into its raw bytes.
+     */
+    private fun hexDecode(hex: String): ByteArray {
+        require(hex.length % 2 == 0) { "Hex string must have even length" }
+        return ByteArray(hex.length / 2) { i ->
+            hex.substring(i * 2, i * 2 + 2).toInt(16).toByte()
+        }
     }
 
     /**

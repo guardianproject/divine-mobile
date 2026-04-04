@@ -15,6 +15,14 @@ import 'package:uuid/uuid.dart';
 /// Uses the Play Integrity API to generate integrity tokens that prove the
 /// request comes from a genuine app on a genuine Android device with
 /// Google Play Services.
+///
+/// Flow:
+/// 1. [register]: Generate device ID -> request integrity token ->
+///    POST to /api/v1/play_integrity/verify (creates verification record)
+/// 2. [buildSigningRequest]: Send just device_id -- the server's middleware
+///    validates the existing verification record created during [register].
+/// 3. Server verification records expire after 7 days. [refreshVerification]
+///    re-runs the verify flow when the server returns 428.
 class PlayIntegrityProvider implements DeviceAuthProvider {
   PlayIntegrityProvider({
     required this.gcpProjectNumber,
@@ -24,6 +32,7 @@ class PlayIntegrityProvider implements DeviceAuthProvider {
   static const _channel = MethodChannel('com.openvine/play_integrity');
   static const _tag = 'PlayIntegrityProvider';
   static const _uuid = Uuid();
+  static const _registrationTimeout = Duration(seconds: 30);
 
   /// Google Cloud project number for Play Integrity verification
   final String gcpProjectNumber;
@@ -32,6 +41,8 @@ class PlayIntegrityProvider implements DeviceAuthProvider {
   final String packageName;
 
   String? _deviceId;
+  String? _serverUrl;
+  http.Client? _client;
 
   /// The device ID, or null if not registered.
   String? get deviceId => _deviceId;
@@ -43,16 +54,13 @@ class PlayIntegrityProvider implements DeviceAuthProvider {
   Future<void> register(String serverUrl, http.Client client) async {
     Log.info('Registering device with Play Integrity', name: _tag);
 
-    // Play Integrity does not have a separate registration endpoint.
-    // Device verification happens inline with each signing request via
-    // the /api/v1/c2pa/sign endpoint which calls /api/v1/play_integrity/verify.
-    // We just generate a local device ID for tracking.
+    _serverUrl = serverUrl;
+    _client = client;
     _deviceId = _uuid.v4();
 
-    Log.debug(
-      'Play Integrity device ID generated',
-      name: _tag,
-    );
+    await _verifyWithServer();
+
+    Log.info('Play Integrity registration complete', name: _tag);
   }
 
   @override
@@ -66,21 +74,13 @@ class PlayIntegrityProvider implements DeviceAuthProvider {
       );
     }
 
-    final dataBytes = base64Decode(claim);
-    final clientDataHash = base64Encode(sha256.convert(dataBytes).bytes);
-    final nonce = _generateNonce(_deviceId!, clientDataHash);
-
-    // Request a fresh Play Integrity token via method channel
-    final integrityToken = await _requestIntegrityToken(nonce);
-
+    // The server's device_auth middleware validates the existing
+    // verification record created during register(). No need to send
+    // integrity_token/nonce/client_data_hash again.
     return {
       'claim': claim,
       'platform': 'android',
       'device_id': _deviceId,
-      'integrity_token': integrityToken,
-      'client_data_hash': clientDataHash,
-      'nonce': nonce,
-      'package_name': packageName,
     };
   }
 
@@ -89,7 +89,8 @@ class PlayIntegrityProvider implements DeviceAuthProvider {
 
   @override
   Future<void> refreshVerification() async {
-    // Play Integrity generates a fresh token per request, no refresh needed
+    Log.info('Refreshing Play Integrity verification', name: _tag);
+    await _verifyWithServer();
   }
 
   /// Restore a previously registered device ID (e.g., from persistent storage).
@@ -97,13 +98,50 @@ class PlayIntegrityProvider implements DeviceAuthProvider {
     _deviceId = deviceId;
   }
 
-  /// Generate a nonce binding the device ID and claim data together.
+  /// Request a fresh integrity token and POST it to the server's
+  /// /api/v1/play_integrity/verify endpoint to create or refresh the
+  /// device verification record.
+  Future<void> _verifyWithServer() async {
+    final serverUrl = _serverUrl;
+    final client = _client;
+    final deviceId = _deviceId;
+    if (serverUrl == null || client == null || deviceId == null) {
+      throw const DeviceAuthException(
+        'Play Integrity verification requires register() to be called first',
+      );
+    }
+
+    final nonce = _generateNonce(deviceId);
+    final integrityToken = await _requestIntegrityToken(nonce);
+
+    final response = await client
+        .post(
+          Uri.parse('$serverUrl/api/v1/play_integrity/verify'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'device_id': deviceId,
+            'integrity_token': integrityToken,
+            'nonce': nonce,
+            'package_name': packageName,
+          }),
+        )
+        .timeout(_registrationTimeout);
+
+    if (response.statusCode != 200) {
+      throw DeviceAuthException(
+        'Play Integrity verification failed: '
+        '${response.statusCode} ${response.body}',
+      );
+    }
+  }
+
+  /// Generate a nonce for Play Integrity token binding.
   ///
   /// Play Integrity requires base64url encoding without padding.
-  String _generateNonce(String deviceId, String clientDataHash) {
+  String _generateNonce(String deviceId) {
     final combined =
         '$deviceId:${DateTime.now().millisecondsSinceEpoch}:'
-        '${_uuid.v4()}:$clientDataHash';
+        '${_uuid.v4()}';
     final hash = sha256.convert(utf8.encode(combined)).bytes;
     return base64Url.encode(hash).replaceAll('=', '');
   }
