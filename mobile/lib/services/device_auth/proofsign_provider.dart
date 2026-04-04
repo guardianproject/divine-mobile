@@ -105,8 +105,9 @@ Future<DeviceAuthProvider?> _createIosProvider(
 Future<DeviceAuthProvider?> _createAndroidProvider(
   ProofSignConfig config,
 ) async {
-  // Check if Play Services is available
-  final hasPlayServices = await _checkPlayServices();
+  // Check if Play Services is available (can be forced off for testing)
+  final hasPlayServices = !ProofSignConfig.forceKeyAttestation &&
+      await _checkPlayServices();
 
   // Restore registration state from persistent storage
   final prefs = await SharedPreferences.getInstance();

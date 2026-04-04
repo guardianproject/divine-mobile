@@ -143,6 +143,9 @@ dependencies {
     // AndroidX AppCompat required by Zendesk SDK
     implementation("androidx.appcompat:appcompat:1.6.1")
 
+    // Play Integrity API for ProofSign device attestation
+    implementation("com.google.android.play:integrity:1.4.0")
+
     // BouncyCastle for CSR generation
     implementation("org.bouncycastle:bcprov-jdk18on:1.81")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.81")
