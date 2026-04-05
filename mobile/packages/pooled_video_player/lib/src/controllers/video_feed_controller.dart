@@ -203,11 +203,18 @@ class VideoFeedController extends ChangeNotifier {
   int _staleGraceHeartbeats = 0;
 
   /// Number of consecutive stale heartbeats before triggering recovery.
-  /// With a 100ms heartbeat interval, this means ~300ms of confirmed
-  /// frozen video before recovery kicks in. False positives cause only
-  /// a brief ~200ms micro-stutter (pause+seek+play at same position),
-  /// which is far less disruptive than a multi-second visible freeze.
-  static const _staleHeartbeatThreshold = 3;
+  /// With a 100ms heartbeat interval, this means ~800ms of confirmed
+  /// frozen video before recovery kicks in.
+  ///
+  /// Raised from 3 (300ms) to 8 (800ms) because iOS AVFoundation/media_kit
+  /// decoders can legitimately pause position updates for 300-500ms during
+  /// normal playback (B-frame reordering, keyframe seeks) without being
+  /// actually stuck. The shorter threshold caused visible pause-seek-play
+  /// stutter on healthy videos. Since PR #2746 added robust buffer-based
+  /// stall recovery via `_readyVideosAwaitingRecovery`, this heartbeat
+  /// watchdog is now a last-resort safety net for decoder freezes where
+  /// buffering events never fire — so a longer window is safe.
+  static const _staleHeartbeatThreshold = 8;
 
   /// After this many failed seek-recovery attempts with no position progress,
   /// give up and mark the video as error.
@@ -1039,6 +1046,11 @@ class VideoFeedController extends ChangeNotifier {
 
     if (index == _currentIndex && _isActive && !_isPaused) {
       // This is the current video - play it with audio
+      _logDebug(
+        'STUTTER_DEBUG buffer_ready_play index=$index '
+        'positionMs=${player.state.position.inMilliseconds} '
+        '${_videoDebugDetails(index)}',
+      );
       unawaited(player.setVolume(100));
 
       // Start position callback timer for current video
@@ -1133,6 +1145,18 @@ class VideoFeedController extends ChangeNotifier {
             }
           }
 
+          // Always call play() on rebuffer completion — even when
+          // player.state.playing reports true. mpv can report
+          // playing=true while the decoder is actually stalled with no
+          // frame output, especially after a seek or network hiccup.
+          // The play() call nudges the decoder to resume frame output.
+          _logDebug(
+            'rebuffer_auto_play index=$index '
+            'positionMs=${player.state.position.inMilliseconds} '
+            'playing=${player.state.playing} '
+            'wasRecovering=$wasRecovering '
+            '${_videoDebugDetails(index)}',
+          );
           unawaited(player.play());
         }
       }
@@ -1355,7 +1379,21 @@ class VideoFeedController extends ChangeNotifier {
     if (_lastHeartbeatPositionMs != null &&
         positionMs == _lastHeartbeatPositionMs) {
       _staleHeartbeatCount++;
+      _logDebug(
+        'STUTTER_DEBUG stale_heartbeat index=$index '
+        'count=$_staleHeartbeatCount/$_staleHeartbeatThreshold '
+        'positionMs=$positionMs '
+        'playing=${player.state.playing} '
+        'buffering=${player.state.buffering}',
+      );
     } else {
+      if (_staleHeartbeatCount > 0) {
+        _logDebug(
+          'STUTTER_DEBUG stale_cleared index=$index '
+          'wasCount=$_staleHeartbeatCount '
+          'prevMs=$_lastHeartbeatPositionMs newMs=$positionMs',
+        );
+      }
       _staleHeartbeatCount = 0;
     }
     _lastHeartbeatPositionMs = positionMs;
@@ -1405,7 +1443,13 @@ class VideoFeedController extends ChangeNotifier {
 
     unawaited(() async {
       try {
+        _logDebug(
+          'STUTTER_DEBUG recovery_pause index=$index positionMs=$positionMs',
+        );
         await player.pause();
+        _logDebug(
+          'STUTTER_DEBUG recovery_seek index=$index positionMs=$positionMs',
+        );
         await player.seek(Duration(milliseconds: positionMs));
 
         // Guard: user may have swiped away during the seek.
@@ -1419,6 +1463,10 @@ class VideoFeedController extends ChangeNotifier {
         }
 
         await player.setVolume(100);
+        _logDebug(
+          'STUTTER_DEBUG recovery_play index=$index '
+          'positionMs=${player.state.position.inMilliseconds}',
+        );
         await player.play();
         _logDebug(
           'stale_recovery_complete index=$index '
