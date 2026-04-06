@@ -993,6 +993,354 @@ void main() {
       });
     });
 
+    group('Follow Notification Deduplication', () {
+      test(
+        'consolidates follow notifications keeping earliest timestamp',
+        () async {
+          // Server returns multiple follow notifications from same pubkey
+          // (caused by Kind 3 contact list republishing)
+          when(
+            () => mockApiService.getNotifications(
+              pubkey: any(named: 'pubkey'),
+              types: any(named: 'types'),
+              unreadOnly: any(named: 'unreadOnly'),
+              limit: any(named: 'limit'),
+              before: any(named: 'before'),
+            ),
+          ).thenAnswer(
+            (_) async => NotificationsResponse(
+              notifications: [
+                // Latest Kind 3 event (user followed someone else)
+                createMockRelayNotification(
+                  id: 'follow_new',
+                  sourcePubkey: 'follower_abc',
+                  notificationType: 'follow',
+                  createdAtSeconds: 1700000200,
+                ),
+                // Original follow event
+                createMockRelayNotification(
+                  id: 'follow_original',
+                  sourcePubkey: 'follower_abc',
+                  notificationType: 'follow',
+                  createdAtSeconds: 1700000100,
+                ),
+                // Different follower (should be kept)
+                createMockRelayNotification(
+                  id: 'follow_other',
+                  sourcePubkey: 'follower_xyz',
+                  notificationType: 'follow',
+                  createdAtSeconds: 1700000150,
+                ),
+              ],
+              unreadCount: 3,
+            ),
+          );
+
+          final container = createTestContainer();
+          final result = await waitForLoadComplete(container);
+
+          // Should consolidate to 2 follow notifications (one per pubkey)
+          final follows = result.notifications
+              .where((n) => n.type == NotificationType.follow)
+              .toList();
+          expect(follows.length, 2);
+
+          // The follower_abc entry should use the earliest timestamp
+          final abcFollow = follows.firstWhere(
+            (n) => n.actorPubkey == 'follower_abc',
+          );
+          expect(
+            abcFollow.timestamp,
+            DateTime.fromMillisecondsSinceEpoch(1700000100 * 1000),
+            reason: 'Should keep earliest follow timestamp, not latest',
+          );
+
+          container.dispose();
+        },
+      );
+
+      test(
+        'insertFromWebSocket deduplicates follow by actor pubkey',
+        () async {
+          // Initial load has one follow notification
+          when(
+            () => mockApiService.getNotifications(
+              pubkey: any(named: 'pubkey'),
+              types: any(named: 'types'),
+              unreadOnly: any(named: 'unreadOnly'),
+              limit: any(named: 'limit'),
+              before: any(named: 'before'),
+            ),
+          ).thenAnswer(
+            (_) async => NotificationsResponse(
+              notifications: [
+                createMockRelayNotification(
+                  id: 'existing_follow',
+                  sourcePubkey: 'follower_abc',
+                  notificationType: 'follow',
+                  createdAtSeconds: 1700000100,
+                ),
+              ],
+              unreadCount: 1,
+            ),
+          );
+
+          final container = createTestContainer();
+          await waitForLoadComplete(container);
+
+          // WebSocket delivers a new Kind 3 event from the same actor
+          final duplicateFollow = NotificationModel(
+            id: 'new_kind3_event',
+            type: NotificationType.follow,
+            actorPubkey: 'follower_abc', // Same actor
+            actorName: 'Follower',
+            message: 'Follower started following you',
+            timestamp: DateTime.fromMillisecondsSinceEpoch(1700000200 * 1000),
+          );
+
+          await container
+              .read(relayNotificationsProvider.notifier)
+              .insertFromWebSocket(duplicateFollow);
+
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          final state = container.read(relayNotificationsProvider);
+          final result = state.value!;
+
+          // Should still have only one follow notification
+          final follows = result.notifications
+              .where((n) => n.type == NotificationType.follow)
+              .toList();
+          expect(
+            follows.length,
+            1,
+            reason:
+                'Duplicate follow from same actor via WebSocket should be '
+                'dropped',
+          );
+          expect(follows.first.id, 'existing_follow');
+
+          container.dispose();
+        },
+      );
+
+      test(
+        'insertFromWebSocket allows follow from different actor',
+        () async {
+          when(
+            () => mockApiService.getNotifications(
+              pubkey: any(named: 'pubkey'),
+              types: any(named: 'types'),
+              unreadOnly: any(named: 'unreadOnly'),
+              limit: any(named: 'limit'),
+              before: any(named: 'before'),
+            ),
+          ).thenAnswer(
+            (_) async => NotificationsResponse(
+              notifications: [
+                createMockRelayNotification(
+                  id: 'existing_follow',
+                  sourcePubkey: 'follower_abc',
+                  notificationType: 'follow',
+                  createdAtSeconds: 1700000100,
+                ),
+              ],
+              unreadCount: 1,
+            ),
+          );
+
+          final container = createTestContainer();
+          await waitForLoadComplete(container);
+
+          // WebSocket delivers a follow from a different actor
+          final newFollow = NotificationModel(
+            id: 'new_follow_event',
+            type: NotificationType.follow,
+            actorPubkey: 'follower_xyz', // Different actor
+            actorName: 'New Follower',
+            message: 'New Follower started following you',
+            timestamp: DateTime.fromMillisecondsSinceEpoch(1700000200 * 1000),
+          );
+
+          await container
+              .read(relayNotificationsProvider.notifier)
+              .insertFromWebSocket(newFollow);
+
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          final state = container.read(relayNotificationsProvider);
+          final result = state.value!;
+
+          // Should have both follows
+          final follows = result.notifications
+              .where((n) => n.type == NotificationType.follow)
+              .toList();
+          expect(
+            follows.length,
+            2,
+            reason: 'Follow from a different actor should be allowed',
+          );
+
+          container.dispose();
+        },
+      );
+
+      test(
+        'insertFromWebSocket allows non-follow from same actor',
+        () async {
+          when(
+            () => mockApiService.getNotifications(
+              pubkey: any(named: 'pubkey'),
+              types: any(named: 'types'),
+              unreadOnly: any(named: 'unreadOnly'),
+              limit: any(named: 'limit'),
+              before: any(named: 'before'),
+            ),
+          ).thenAnswer(
+            (_) async => NotificationsResponse(
+              notifications: [
+                createMockRelayNotification(
+                  id: 'existing_follow',
+                  sourcePubkey: 'actor_abc',
+                  notificationType: 'follow',
+                  createdAtSeconds: 1700000100,
+                ),
+              ],
+              unreadCount: 1,
+            ),
+          );
+
+          final container = createTestContainer();
+          await waitForLoadComplete(container);
+
+          // Same actor sends a like (non-follow, should not be deduped)
+          final like = NotificationModel(
+            id: 'like_event',
+            type: NotificationType.like,
+            actorPubkey: 'actor_abc', // Same actor
+            actorName: 'Actor',
+            message: 'Actor liked your video',
+            timestamp: DateTime.fromMillisecondsSinceEpoch(1700000200 * 1000),
+          );
+
+          await container
+              .read(relayNotificationsProvider.notifier)
+              .insertFromWebSocket(like);
+
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          final state = container.read(relayNotificationsProvider);
+          final result = state.value!;
+
+          expect(
+            result.notifications.length,
+            2,
+            reason: 'Non-follow notification from same actor should be allowed',
+          );
+
+          container.dispose();
+        },
+      );
+    });
+
+    group('Cross-batch follow consolidation (loadMore)', () {
+      test(
+        'loadMore replaces follow with earlier timestamp from later batch',
+        () async {
+          // Batch 1 must have >= 10 items so _fetchRawNotifications auto-fetch
+          // does NOT pull batch 2 early.  Batch 2 contains an older follow
+          // from the same actor — loadMore should swap to the earlier one.
+          var callCount = 0;
+          when(
+            () => mockApiService.getNotifications(
+              pubkey: any(named: 'pubkey'),
+              types: any(named: 'types'),
+              unreadOnly: any(named: 'unreadOnly'),
+              limit: any(named: 'limit'),
+              before: any(named: 'before'),
+            ),
+          ).thenAnswer((_) async {
+            callCount++;
+            if (callCount == 1) {
+              return NotificationsResponse(
+                notifications: [
+                  createMockRelayNotification(
+                    id: 'follow_new',
+                    sourcePubkey: 'follower_abc',
+                    notificationType: 'follow',
+                    createdAtSeconds: 1700000200, // T2 — latest
+                  ),
+                  for (var i = 0; i < 9; i++)
+                    createMockRelayNotification(
+                      id: 'like_$i',
+                      createdAtSeconds: 1700000100 + i,
+                    ),
+                ],
+                unreadCount: 10,
+                nextCursor: 'cursor_1',
+                hasMore: true,
+              );
+            } else {
+              return NotificationsResponse(
+                notifications: [
+                  createMockRelayNotification(
+                    id: 'follow_original',
+                    sourcePubkey: 'follower_abc',
+                    notificationType: 'follow',
+                    createdAtSeconds: 1700000050, // T1 — original (earlier)
+                  ),
+                ],
+                unreadCount: 10,
+              );
+            }
+          });
+
+          final container = createTestContainer();
+          await waitForLoadComplete(container);
+
+          // Verify batch 1 has the T2 follow
+          var state = container.read(relayNotificationsProvider).value!;
+          var follows = state.notifications
+              .where((n) => n.type == NotificationType.follow)
+              .toList();
+          expect(follows.length, 1);
+          expect(
+            follows.first.timestamp,
+            DateTime.fromMillisecondsSinceEpoch(1700000200 * 1000),
+          );
+
+          // Load more — should get the older follow from batch 2
+          await container.read(relayNotificationsProvider.notifier).loadMore();
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          state = container.read(relayNotificationsProvider).value!;
+          follows = state.notifications
+              .where((n) => n.type == NotificationType.follow)
+              .toList();
+
+          // Should have exactly 1 follow for follower_abc — with the earliest
+          // timestamp (T1), not the latest (T2)
+          expect(
+            follows.length,
+            1,
+            reason:
+                'Cross-batch consolidation should keep one follow per '
+                'actor',
+          );
+          expect(
+            follows.first.timestamp,
+            DateTime.fromMillisecondsSinceEpoch(1700000050 * 1000),
+            reason: 'Should keep earliest follow timestamp across batches',
+          );
+
+          // 9 likes + 1 consolidated follow = 10
+          expect(state.notifications.length, 10);
+
+          container.dispose();
+        },
+      );
+    });
+
     group('NotificationFeedState', () {
       test('copyWith creates correct copy', () {
         const original = NotificationFeedState(
