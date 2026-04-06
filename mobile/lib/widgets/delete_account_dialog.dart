@@ -8,6 +8,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nostr_key_manager/nostr_key_manager.dart'
+    show SecureKeyStorageException;
 import 'package:openvine/services/account_deletion_service.dart';
 import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
@@ -326,15 +328,33 @@ Future<void> executeAccountDeletion({
 
       // Step 3: Sign out and delete local keys
       // Router will automatically redirect to /welcome when auth state
-      // becomes unauthenticated
-      await authService.signOut(deleteKeys: true);
+      // becomes unauthenticated.
+      // signOut may throw SecureKeyStorageException if platform key
+      // deletion failed — the user IS signed out but keys may remain.
+      String? keyDeletionWarning;
+      try {
+        await authService.signOut(deleteKeys: true);
+      } on SecureKeyStorageException catch (e) {
+        Log.warning(
+          'Key deletion failed during account deletion: $e',
+          name: screenName,
+          category: LogCategory.auth,
+        );
+        keyDeletionWarning =
+            'Account deleted, but your keys may '
+            'not have been fully removed from this device. '
+            'Go to Settings → Nostr Keys → Remove Keys to retry.';
+      }
 
-      // Close loading indicator and show success snackbar
+      // Close loading indicator and show result snackbar
       // Router will automatically redirect to /welcome after sign out
       dismissDialog();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          DivineSnackbarContainer.snackBar('Your account has been deleted'),
+          DivineSnackbarContainer.snackBar(
+            keyDeletionWarning ?? 'Your account has been deleted',
+            error: keyDeletionWarning != null,
+          ),
         );
       }
     } else {
