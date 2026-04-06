@@ -1224,22 +1224,19 @@ HashtagService hashtagService(Ref ref) {
   return HashtagService(videoEventService, cacheService);
 }
 
-/// Social service depends on Nostr service, Auth service, and ProfileRepository
+/// Social service for follow sets (NIP-51 Kind 30000).
+///
+/// Follower count stats have moved to [FollowRepository].
 @Riverpod(keepAlive: true)
 SocialService socialService(Ref ref) {
   final nostrService = ref.watch(nostrServiceProvider);
   final authService = ref.watch(authServiceProvider);
   final personalEventCache = ref.watch(personalEventCacheServiceProvider);
-  final profileRepository = ref.watch(profileRepositoryProvider);
-
-  final env = ref.watch(currentEnvironmentProvider);
 
   return SocialService(
     nostrService,
     authService,
     personalEventCache: personalEventCache,
-    profileRepository: profileRepository,
-    indexerRelayUrls: env.indexerRelays,
   );
 }
 
@@ -1290,10 +1287,13 @@ FollowRepository followRepository(Ref ref) {
 
   final env = ref.watch(currentEnvironmentProvider);
 
+  final profileStatsDao = ref.watch(databaseProvider).profileStatsDao;
+
   final repository = FollowRepository(
     nostrClient: nostrClient,
     personalEventCache: personalEventCache,
     funnelcakeApiClient: funnelcakeApiClient,
+    profileStatsDao: profileStatsDao,
     indexerRelayUrls: env.indexerRelays,
     isOnline: () => connectionStatus.isOnline,
     queueOfflineAction: pendingActionService != null
@@ -1306,11 +1306,6 @@ FollowRepository followRepository(Ref ref) {
             );
           }
         : null,
-    fetchFollowerCount: (pubkey) async {
-      final socialService = ref.read(socialServiceProvider);
-      final stats = await socialService.getFollowerStats(pubkey);
-      return stats['followers'] ?? 0;
-    },
   );
 
   // Register executors with pending action service for sync
