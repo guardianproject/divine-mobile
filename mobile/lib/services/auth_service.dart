@@ -16,9 +16,12 @@ import 'package:nostr_key_manager/nostr_key_manager.dart'
         SecureKeyStorage,
         SecureKeyStorageException;
 import 'package:nostr_sdk/nostr_sdk.dart';
+import 'package:openvine/models/authentication_source.dart';
 import 'package:openvine/models/known_account.dart';
 import 'package:openvine/services/background_activity_manager.dart';
 import 'package:openvine/services/crash_reporting_service.dart';
+import 'package:openvine/services/local_key_signer.dart';
+import 'package:openvine/services/nostr_identity.dart';
 import 'package:openvine/services/pending_verification_service.dart';
 import 'package:openvine/services/relay_discovery_service.dart';
 import 'package:openvine/services/user_data_cleanup_service.dart';
@@ -28,6 +31,8 @@ import 'package:openvine/utils/nostr_timestamp.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+export 'package:openvine/models/authentication_source.dart';
 
 // Key for persisted authentication source
 const _kAuthSourceKey = 'authentication_source';
@@ -41,28 +46,6 @@ const _kBunkerInfoKey = 'bunker_info';
 // Keys for Amber (NIP-55) connection persistence
 const _kAmberPubkeyKey = 'amber_pubkey';
 const _kAmberPackageKey = 'amber_package';
-
-/// Source of authentication used to restore session at startup
-enum AuthenticationSource {
-  none('none'),
-  divineOAuth('divineOAuth'),
-  importedKeys('imported_keys'),
-  automatic('automatic'),
-  bunker('bunker'),
-  amber('amber')
-  ;
-
-  const AuthenticationSource(this.code);
-
-  final String code;
-
-  static AuthenticationSource fromCode(String? code) {
-    return AuthenticationSource.values
-            .where((s) => s.code == code)
-            .firstOrNull ??
-        AuthenticationSource.none;
-  }
-}
 
 /// Authentication state for the user
 enum AuthState {
@@ -199,6 +182,9 @@ class AuthService implements BackgroundAwareService {
   // NIP-46 nostrconnect:// session state (for client-initiated connections)
   NostrConnectSession? _nostrConnectSession;
 
+  // Atomic signing identity — couples pubkey with signing mechanism
+  NostrIdentity? _currentIdentity;
+
   // Relay discovery state (NIP-65)
   List<DiscoveredRelay> _userRelays = [];
   bool _hasExistingProfile = false;
@@ -208,8 +194,28 @@ class AuthService implements BackgroundAwareService {
   /// when discovery completes (avoids race where client is built before discovery).
   UserRelaysDiscoveredCallback? _onUserRelaysDiscovered;
 
-  /// Returns the active remote signer (Amber > bunker > OAuth RPC)
-  NostrSigner? get rpcSigner => _amberSigner ?? _bunkerSigner ?? _keycastSigner;
+  /// The current user's atomic signing identity, or null if not authenticated.
+  ///
+  /// Use [requireIdentity] in code that runs only when authenticated
+  /// (post-router-gate) to get a guaranteed non-null value.
+  NostrIdentity? get currentIdentity => _currentIdentity;
+
+  /// The current user's signing identity, guaranteed non-null.
+  ///
+  /// Throws [StateError] if called when no identity is set. This should only
+  /// happen if the caller bypasses the router's authentication gate.
+  /// Use this in post-authentication code instead of [currentIdentity]!.
+  NostrIdentity get requireIdentity {
+    final identity = _currentIdentity;
+    if (identity == null) {
+      throw StateError(
+        'requireIdentity called with no active NostrIdentity. '
+        'This code path should only execute when authenticated.',
+      );
+    }
+    return identity;
+  }
+
   final OAuthConfig _oauthConfig;
 
   // Streaming controllers for reactive auth state
@@ -230,18 +236,28 @@ class AuthService implements BackgroundAwareService {
   /// Stream of profile changes
   Stream<UserProfile?> get profileStream => _profileController.stream;
 
-  /// Current public key (npub format)
-  String? get currentNpub => _currentKeyContainer?.npub;
-
-  /// Current public key (hex format)
-  /// Works for both local keys (via keyContainer) and bunker auth (via profile)
-  String? get currentPublicKeyHex =>
-      _currentKeyContainer?.publicKeyHex ?? _currentProfile?.publicKeyHex;
-
-  /// Current secure key container (null if not authenticated)
+  /// Current public key (npub format).
   ///
-  /// Used by NostrClientProvider to create AuthServiceSigner.
-  /// The container provides secure access to private key operations.
+  /// Reads from [currentIdentity] when available (post-authentication),
+  /// falls back to [_currentKeyContainer] during the auth-screen lifecycle.
+  String? get currentNpub =>
+      _currentIdentity?.npub ?? _currentKeyContainer?.npub;
+
+  /// Current public key (hex format).
+  ///
+  /// Reads from [currentIdentity] when available (post-authentication),
+  /// falls back to [_currentKeyContainer] or [_currentProfile] during the
+  /// auth-screen lifecycle.
+  String? get currentPublicKeyHex =>
+      _currentIdentity?.pubkey ??
+      _currentKeyContainer?.publicKeyHex ??
+      _currentProfile?.publicKeyHex;
+
+  /// Current secure key container (null if not authenticated).
+  ///
+  /// Production code should use [currentIdentity] instead. This getter
+  /// exists for tests that need direct access to the key container.
+  @visibleForTesting
   SecureKeyContainer? get currentKeyContainer => _currentKeyContainer;
 
   /// Check if user is authenticated
@@ -1213,6 +1229,23 @@ class AuthService implements BackgroundAwareService {
             final sessionMap = jsonDecode(sessionJson) as Map<String, dynamic>;
             final session = KeycastSession.fromJson(sessionMap);
             await session.save(_flutterSecureStorage);
+            // Also restore the refresh token and auth handle to their
+            // standalone keys — KeycastOAuth.refreshSession() reads these
+            // separately from the session JSON, and _oauthClient.logout()
+            // clears them. Without this, expired restored sessions can
+            // never be refreshed.
+            if (session.refreshToken != null) {
+              await _flutterSecureStorage.write(
+                key: 'keycast_refresh_token',
+                value: session.refreshToken,
+              );
+            }
+            if (session.authorizationHandle != null) {
+              await _flutterSecureStorage.write(
+                key: 'keycast_auth_handle',
+                value: session.authorizationHandle,
+              );
+            }
           }
 
         case AuthenticationSource.automatic:
@@ -1530,6 +1563,8 @@ class AuthService implements BackgroundAwareService {
       }
 
       _currentKeyContainer = SecureKeyContainer.fromPublicKey(userPubkey);
+      _authSource = AuthenticationSource.bunker;
+      _currentIdentity = _buildIdentity();
 
       // Create a minimal profile for the bunker user
       final npub = NostrKeyUtils.encodePubKey(userPubkey);
@@ -1538,8 +1573,6 @@ class AuthService implements BackgroundAwareService {
         publicKeyHex: userPubkey,
         displayName: NostrKeyUtils.maskKey(npub),
       );
-
-      _authSource = AuthenticationSource.bunker;
 
       _setAuthState(AuthState.authenticated);
       _profileController.add(_currentProfile);
@@ -1757,6 +1790,8 @@ class AuthService implements BackgroundAwareService {
       _amberSigner = AndroidNostrSigner(pubkey: pubkey, package: package);
 
       _currentKeyContainer = SecureKeyContainer.fromPublicKey(pubkey);
+      _authSource = AuthenticationSource.amber;
+      _currentIdentity = _buildIdentity();
 
       // Create a minimal profile for the Amber user
       final npub = NostrKeyUtils.encodePubKey(pubkey);
@@ -1765,8 +1800,6 @@ class AuthService implements BackgroundAwareService {
         publicKeyHex: pubkey,
         displayName: NostrKeyUtils.maskKey(npub),
       );
-
-      _authSource = AuthenticationSource.amber;
 
       _setAuthState(AuthState.authenticated);
       _profileController.add(_currentProfile);
@@ -2473,14 +2506,14 @@ class AuthService implements BackgroundAwareService {
       // Clear TOS acceptance on any logout - user must re-accept when logging
       // back in
       final prefs = await SharedPreferences.getInstance();
-      // Only clear the auth source on destructive sign-out. Non-destructive
-      // sign-out (switch account) preserves it so that initialize() can
-      // reconnect to the same external signer (Amber/Bunker) when the user
-      // returns.
-      if (deleteKeys) {
-        await prefs.remove(_kAuthSourceKey);
-        await prefs.remove(_kLastUsedNpubKey);
-      }
+      // On destructive sign-out, redirect recovery prefs to the next
+      // remaining account so initialize() can restore it. Only clear when
+      // no accounts remain — otherwise the user loses access to account A
+      // after deleting account B.
+      // Deferred: the actual redirect runs after _removeFromKnownAccounts
+      // so the deleted account is excluded from the remaining list.
+      // Non-destructive sign-out (switch account) preserves these so that
+      // initialize() can reconnect to the same external signer.
       await prefs.remove('age_verified_16_plus');
       await prefs.remove('terms_accepted_at');
 
@@ -2580,6 +2613,7 @@ class AuthService implements BackgroundAwareService {
       }
 
       // Clear session
+      _currentIdentity = null;
       _currentKeyContainer?.dispose();
       _currentKeyContainer = null;
       _currentProfile = null;
@@ -2619,7 +2653,7 @@ class AuthService implements BackgroundAwareService {
 
       try {
         if (_oauthClient != null) {
-          _oauthClient.logout();
+          await _oauthClient.logout();
         } else {
           await KeycastSession.clear(_flutterSecureStorage);
         }
@@ -2628,6 +2662,13 @@ class AuthService implements BackgroundAwareService {
       // Clear any pending verification data
       // (fire-and-forget since it's best-effort)
       unawaited(_pendingVerificationService?.clear());
+
+      // Redirect recovery prefs AFTER all signer cleanup so that
+      // _restoreSignerInfo can re-stage the remaining account's archived
+      // session without it being wiped by _oauthClient.logout() above.
+      if (deleteKeys) {
+        await _redirectRecoveryToRemainingAccount(prefs);
+      }
 
       _setAuthState(AuthState.unauthenticated);
 
@@ -2663,6 +2704,63 @@ class AuthService implements BackgroundAwareService {
       throw SecureKeyStorageException(
         'Signed out but key deletion failed: $keyDeletionError',
       );
+    }
+  }
+
+  /// After destructive sign-out, point [_kLastUsedNpubKey] and
+  /// [_kAuthSourceKey] at the most recently used remaining known account
+  /// so that [initialize] can restore it on next launch.  If no accounts
+  /// remain, both prefs are cleared (fresh-install behaviour).
+  ///
+  /// For OAuth/bunker/amber accounts this also calls [_restoreSignerInfo]
+  /// to pre-stage the archived session into the active slot. This must
+  /// run AFTER [_oauthClient.logout()] / [KeycastSession.clear()] so the
+  /// restored session is not immediately wiped.
+  Future<void> _redirectRecoveryToRemainingAccount(
+    SharedPreferences prefs,
+  ) async {
+    try {
+      final remaining = await getKnownAccounts();
+      if (remaining.isEmpty) {
+        await prefs.remove(_kAuthSourceKey);
+        await prefs.remove(_kLastUsedNpubKey);
+        Log.info(
+          'signOut: no remaining accounts — cleared recovery prefs',
+          name: 'AuthService',
+          category: LogCategory.auth,
+        );
+        return;
+      }
+
+      // Pick the most recently used account.
+      remaining.sort((a, b) => b.lastUsedAt.compareTo(a.lastUsedAt));
+      final next = remaining.first;
+      final nextNpub = NostrKeyUtils.encodePubKey(next.pubkeyHex);
+
+      await prefs.setString(_kLastUsedNpubKey, nextNpub);
+      await prefs.setString(_kAuthSourceKey, next.authSource.code);
+
+      // Pre-stage the remaining account's archived signer info into the
+      // active slots so initialize() can find it.  For divineOAuth this
+      // restores the KeycastSession, for bunker/amber the connection info.
+      await _restoreSignerInfo(next.pubkeyHex, next.authSource);
+
+      Log.info(
+        'signOut: redirected recovery to remaining account '
+        'pubkey=${next.pubkeyHex}, source=${next.authSource.name}',
+        name: 'AuthService',
+        category: LogCategory.auth,
+      );
+    } catch (e) {
+      // Best-effort: if this fails, the fallback scan in
+      // _restoreLastUsedAccountOrFallback will still find the account.
+      Log.warning(
+        'signOut: failed to redirect recovery prefs: $e',
+        name: 'AuthService',
+        category: LogCategory.auth,
+      );
+      await prefs.remove(_kAuthSourceKey);
+      await prefs.remove(_kLastUsedNpubKey);
     }
   }
 
@@ -2735,7 +2833,8 @@ class AuthService implements BackgroundAwareService {
     String? biometricPrompt,
     int? createdAt,
   }) async {
-    if (!isAuthenticated || _currentKeyContainer == null) {
+    final identity = _currentIdentity;
+    if (!isAuthenticated || identity == null) {
       Log.error(
         'Cannot sign event - user not authenticated',
         name: 'AuthService',
@@ -2758,10 +2857,12 @@ class AuthService implements BackgroundAwareService {
         eventTags.add(['expiration', expirationTimestamp.toString()]);
       }
 
-      // Create the unsigned event object
+      // Create the unsigned event with the identity's pubkey — both the
+      // pubkey and the signing key come from the same identity instance,
+      // structurally preventing the PRIMARY-slot desync bug (#2233).
       final driftTolerance = NostrTimestamp.getDriftToleranceForKind(kind);
       final event = Event(
-        _currentKeyContainer!.publicKeyHex,
+        identity.pubkey,
         kind,
         eventTags,
         content,
@@ -2769,48 +2870,31 @@ class AuthService implements BackgroundAwareService {
             createdAt ?? NostrTimestamp.now(driftTolerance: driftTolerance),
       );
 
-      // 2. Branch Signing Logic (Local vs RPC)
-      Event? signedEvent;
+      // 2. Sign via the identity — delegates to the correct signer
+      Log.info(
+        'Signing kind $kind via ${identity.runtimeType} '
+        '(authSource=${_authSource.name}, '
+        'eventPubkey=${event.pubkey})',
+        name: 'AuthService',
+        category: LogCategory.auth,
+      );
+      final signedEvent = await identity.signEvent(event);
 
-      if (rpcSigner case final rpcSigner?) {
-        Log.info(
-          '🚀 Signing kind $kind via Remote RPC '
-          '(authSource=${_authSource.name}, '
-          'eventPubkey=${event.pubkey})',
-          name: 'AuthService',
-          category: LogCategory.auth,
-        );
-        signedEvent = await rpcSigner.signEvent(event);
-      } else {
-        Log.info(
-          '🔐 Signing kind $kind via Local Secure Storage '
-          '(authSource=${_authSource.name}, '
-          'eventPubkey=${event.pubkey})',
-          name: 'AuthService',
-          category: LogCategory.auth,
-        );
-        signedEvent = await _keyStorage.withPrivateKey<Event?>((privateKey) {
-          event.sign(privateKey);
-          return event;
-        }, biometricPrompt: biometricPrompt);
-      }
-
-      // 3. Post-Signing Validation and Debugging
+      // 3. Post-Signing Validation
       if (signedEvent == null) {
         Log.error(
-          '❌ Signing failed: Signer returned null',
+          'Signing failed: Signer returned null',
           name: 'AuthService',
         );
         return null;
       }
 
-      // CRITICAL: Verify signature is actually valid
       if (!signedEvent.isSigned) {
         Log.error(
-          '❌ Event signature validation FAILED! '
+          'Event signature validation FAILED! '
           'kind=$kind, eventPubkey=${signedEvent.pubkey}, '
           'authSource=${_authSource.name}, '
-          'currentPubkey=${_currentKeyContainer?.publicKeyHex}',
+          'identityPubkey=${identity.pubkey}',
           name: 'AuthService',
           category: LogCategory.auth,
         );
@@ -2819,12 +2903,8 @@ class AuthService implements BackgroundAwareService {
 
       if (!signedEvent.isValid) {
         Log.error(
-          '❌ Event structure validation FAILED!',
-          name: 'AuthService',
-          category: LogCategory.auth,
-        );
-        Log.error(
-          '   Event ID does not match computed hash',
+          'Event structure validation FAILED! '
+          'Event ID does not match computed hash',
           name: 'AuthService',
           category: LogCategory.auth,
         );
@@ -2832,7 +2912,7 @@ class AuthService implements BackgroundAwareService {
       }
 
       Log.info(
-        '✅ Event signed and validated: ${signedEvent.id}',
+        'Event signed and validated: ${signedEvent.id}',
         name: 'AuthService',
         category: LogCategory.auth,
       );
@@ -2913,8 +2993,88 @@ class AuthService implements BackgroundAwareService {
       _reportStorageError(e, stack, '_restoreLastUsedAccountOrFallback');
     }
 
+    // Before falling through to _checkExistingAuth (which only checks
+    // PRIMARY storage), scan known accounts for per-identity keys.
+    // This covers the case where signOut(deleteKeys:true) wiped PRIMARY
+    // but another account's keys still exist in per-identity storage.
+    if (await _tryRestoreFromKnownAccounts(source)) return;
+
     // Fall back to the original behaviour (load primary key, or create new).
     await _checkExistingAuth();
+  }
+
+  /// Scans known accounts and attempts to restore the first one that has
+  /// restorable credentials.  For local-key accounts this checks per-identity
+  /// key containers; for OAuth/bunker/amber it delegates to [signInForAccount]
+  /// which restores archived signer info and triggers the appropriate flow.
+  /// Returns true if an account was restored, false otherwise.
+  Future<bool> _tryRestoreFromKnownAccounts(
+    AuthenticationSource source,
+  ) async {
+    try {
+      final accounts = await getKnownAccounts();
+      if (accounts.isEmpty) return false;
+
+      // Try most recently used first.
+      accounts.sort((a, b) => b.lastUsedAt.compareTo(a.lastUsedAt));
+      for (final account in accounts) {
+        // OAuth, bunker, and amber accounts don't store per-identity local
+        // keys — they rely on archived signer info.  Use signInForAccount
+        // which handles _restoreSignerInfo + the source-specific sign-in.
+        if (account.authSource == AuthenticationSource.divineOAuth ||
+            account.authSource == AuthenticationSource.bunker ||
+            account.authSource == AuthenticationSource.amber) {
+          try {
+            Log.info(
+              '_tryRestoreFromKnownAccounts: '
+              'trying signInForAccount for ${account.pubkeyHex} '
+              '(source=${account.authSource.name})',
+              name: 'AuthService',
+              category: LogCategory.auth,
+            );
+            await signInForAccount(account.pubkeyHex, account.authSource);
+            return true;
+          } catch (e) {
+            Log.warning(
+              '_tryRestoreFromKnownAccounts: '
+              'signInForAccount failed for ${account.pubkeyHex}: $e',
+              name: 'AuthService',
+              category: LogCategory.auth,
+            );
+            continue;
+          }
+        }
+
+        // Local-key accounts: look for per-identity key containers.
+        final npub = NostrKeyUtils.encodePubKey(account.pubkeyHex);
+        final container = await _keyStorage.getIdentityKeyContainer(npub);
+        if (container != null) {
+          Log.info(
+            '_tryRestoreFromKnownAccounts: '
+            'found keys for ${account.pubkeyHex} '
+            '(source=${account.authSource.name})',
+            name: 'AuthService',
+            category: LogCategory.auth,
+          );
+          await _keyStorage.switchToIdentity(npub);
+          await _setupUserSession(container, account.authSource);
+          return true;
+        }
+      }
+      Log.info(
+        '_tryRestoreFromKnownAccounts: '
+        'no restorable account found among known accounts',
+        name: 'AuthService',
+        category: LogCategory.auth,
+      );
+    } catch (e) {
+      Log.warning(
+        '_tryRestoreFromKnownAccounts: scan failed: $e',
+        name: 'AuthService',
+        category: LogCategory.auth,
+      );
+    }
+    return false;
   }
 
   SecureKeyContainer? _restoreFromLoadedPrimaryIdentity(String lastNpub) {
@@ -3077,6 +3237,63 @@ class AuthService implements BackgroundAwareService {
     await prefs.setBool('age_verified_16_plus', true);
   }
 
+  /// Builds a [NostrIdentity] from the current mutable signer fields.
+  ///
+  /// Must be called AFTER signer fields (_keycastSigner, _bunkerSigner,
+  /// _amberSigner) and _currentKeyContainer have been set for the session.
+  ///
+  /// Throws [StateError] if no valid identity can be constructed — this
+  /// indicates a programming error in the auth flow, not a user-facing
+  /// condition.
+  NostrIdentity _buildIdentity() {
+    final keyContainer = _currentKeyContainer;
+    if (keyContainer == null) {
+      throw StateError(
+        '_buildIdentity called with no key container. '
+        'Auth flow must set _currentKeyContainer before building identity.',
+      );
+    }
+
+    final pubkey = keyContainer.publicKeyHex;
+
+    // Priority matches rpcSigner: Amber > Bunker > Keycast > Local
+    if (_amberSigner case final signer?) {
+      return AmberNostrIdentity(pubkey: pubkey, amberSigner: signer);
+    }
+    if (_bunkerSigner case final signer?) {
+      return BunkerNostrIdentity(pubkey: pubkey, remoteSigner: signer);
+    }
+    if (_keycastSigner case final rpc?) {
+      // When a matching local nsec exists, sign locally for speed.
+      LocalKeySigner? localSigner;
+      if (keyContainer.hasPrivateKey) {
+        localSigner = LocalKeySigner(keyContainer);
+      }
+      return KeycastNostrIdentity(
+        pubkey: pubkey,
+        rpcSigner: rpc,
+        localSigner: localSigner,
+      );
+    }
+    // Local keys only — private key required.
+    if (keyContainer.hasPrivateKey) {
+      if (_authSource == AuthenticationSource.divineOAuth) {
+        Log.warning(
+          '_buildIdentity: falling back to LocalNostrIdentity for '
+          'divineOAuth source — OAuth session likely expired',
+          name: 'AuthService',
+          category: LogCategory.auth,
+        );
+      }
+      return LocalNostrIdentity(keyContainer: keyContainer);
+    }
+    // Pub-key-only container with no remote signer — cannot sign.
+    throw StateError(
+      '_buildIdentity: pub-key-only container with no remote signer. '
+      'source=${_authSource.name}, pubkey=$pubkey',
+    );
+  }
+
   /// Set up user session after successful authentication
   Future<void> _setupUserSession(
     SecureKeyContainer keyContainer,
@@ -3126,6 +3343,9 @@ class AuthService implements BackgroundAwareService {
       _amberSigner!.close();
       _amberSigner = null;
     }
+
+    // Build atomic identity AFTER stale signers are cleared.
+    _currentIdentity = _buildIdentity();
 
     // Create user profile
     _currentProfile = UserProfile(
