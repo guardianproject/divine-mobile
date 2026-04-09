@@ -3244,6 +3244,7 @@ void main() {
           verify(setup.player.play).called(greaterThanOrEqualTo(1));
         },
       );
+
       test(
         'loop-boundary rebuffer skips redundant play() when player '
         'is already playing with known duration',
