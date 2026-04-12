@@ -16,9 +16,11 @@ class UserDataCleanupService {
   final SharedPreferences _prefs;
 
   /// Optional callback invoked during cleanup to clear user-specific
-  /// database tables (DMs, conversations, notifications, etc.).
+  /// database tables (DMs, conversations, notifications, per-user DAOs).
   /// Set by the provider layer which has access to DAOs.
-  Future<void> Function()? onDatabaseCleanup;
+  /// Receives the signing-out user's pubkey so per-user tables can scope
+  /// their deletion. May be null when pubkey is unavailable.
+  Future<void> Function(String? userPubkey)? onDatabaseCleanup;
 
   /// Keys that store user-specific data and should be cleared on identity change.
   /// Device/app settings like relay URLs, analytics preferences are NOT included.
@@ -115,6 +117,7 @@ class UserDataCleanupService {
   Future<int> clearUserSpecificData({
     String? reason,
     bool isIdentityChange = false,
+    String? userPubkey,
   }) async {
     final cleanupReason = reason ?? 'unspecified';
     Log.info(
@@ -141,7 +144,7 @@ class UserDataCleanupService {
     // Clear user-specific database tables (DMs, conversations, notifications)
     if (onDatabaseCleanup != null) {
       try {
-        await onDatabaseCleanup!();
+        await onDatabaseCleanup!(userPubkey);
         Log.info(
           'Database cleanup complete',
           name: 'UserDataCleanupService',

@@ -51,6 +51,7 @@ void main() {
       when(
         () => mockCleanupService.clearUserSpecificData(
           reason: any(named: 'reason'),
+          userPubkey: any(named: 'userPubkey'),
         ),
       ).thenAnswer((_) async => 0);
     });
@@ -98,6 +99,7 @@ void main() {
         verify(
           () => mockCleanupService.clearUserSpecificData(
             reason: 'explicit_logout',
+            userPubkey: any(named: 'userPubkey'),
           ),
         ).called(1);
       },
@@ -129,6 +131,7 @@ void main() {
         verify(
           () => mockCleanupService.clearUserSpecificData(
             reason: 'explicit_logout',
+            userPubkey: any(named: 'userPubkey'),
           ),
         ).called(1);
 
@@ -228,6 +231,7 @@ void main() {
           verifyNever(
             () => mockCleanupService.clearUserSpecificData(
               reason: any(named: 'reason'),
+              userPubkey: any(named: 'userPubkey'),
             ),
           );
         },

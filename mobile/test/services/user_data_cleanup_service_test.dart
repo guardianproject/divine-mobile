@@ -232,6 +232,34 @@ void main() {
         // Matching prefix should be cleared
         expect(prefs.containsKey('following_list_abc123'), isFalse);
       });
+
+      test('passes userPubkey to onDatabaseCleanup callback', () async {
+        String? receivedPubkey;
+        service.onDatabaseCleanup = (String? pubkey) async {
+          receivedPubkey = pubkey;
+        };
+
+        await service.clearUserSpecificData(
+          reason: 'explicit_logout',
+          userPubkey: 'abc123',
+        );
+
+        expect(receivedPubkey, equals('abc123'));
+      });
+
+      test(
+        'passes null to onDatabaseCleanup when userPubkey omitted',
+        () async {
+          String? receivedPubkey = 'sentinel';
+          service.onDatabaseCleanup = (String? pubkey) async {
+            receivedPubkey = pubkey;
+          };
+
+          await service.clearUserSpecificData(reason: 'explicit_logout');
+
+          expect(receivedPubkey, isNull);
+        },
+      );
     });
 
     group('userSpecificKeys', () {

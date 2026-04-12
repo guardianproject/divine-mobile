@@ -1300,10 +1300,10 @@ UserDataCleanupService userDataCleanupService(Ref ref) {
   final db = ref.watch(databaseProvider);
   final service = UserDataCleanupService(prefs);
 
-  // Wire database cleanup callback so signOut() clears DM and notification data.
+  // Wire database cleanup callback so signOut() clears per-user data.
   // Stop DM listening FIRST to prevent in-flight event handlers from writing
   // to tables that are being cleared (H3 race condition fix).
-  service.onDatabaseCleanup = () async {
+  service.onDatabaseCleanup = (String? userPubkey) async {
     try {
       await ref.read(dmRepositoryProvider).stopListening();
     } catch (_) {
@@ -1316,6 +1316,16 @@ UserDataCleanupService userDataCleanupService(Ref ref) {
     // Clear DM sync cursors so the next login triggers a full re-fetch
     // from relays instead of using stale `since:` boundaries.
     await DmSyncState(prefs).clearAll();
+
+    // Clear per-user data scoped by pubkey (#2999)
+    if (userPubkey != null) {
+      await db.draftsDao.deleteAllForUser(userPubkey);
+      await db.clipsDao.deleteAllForUser(userPubkey);
+      await db.pendingUploadsDao.deleteAllForUser(userPubkey);
+      await db.personalReactionsDao.deleteAllForUser(userPubkey);
+      await db.personalRepostsDao.deleteAllForUser(userPubkey);
+      await db.pendingActionsDao.clearAll(userPubkey);
+    }
   };
 
   return service;

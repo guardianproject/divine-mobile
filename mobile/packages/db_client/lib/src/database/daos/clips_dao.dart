@@ -181,6 +181,17 @@ class ClipsDao extends DatabaseAccessor<AppDatabase> with _$ClipsDaoMixin {
     return delete(clips).go();
   }
 
+  /// Delete all clips owned by [ownerPubkey].
+  ///
+  /// Legacy clips with NULL ownerPubkey are preserved because they
+  /// cannot be attributed to any specific account.
+  /// Used when signing out to prevent cross-account data leaks.
+  Future<int> deleteAllForUser(String ownerPubkey) {
+    return (delete(
+      clips,
+    )..where((t) => t.ownerPubkey.equals(ownerPubkey))).go();
+  }
+
   /// Check if a filename is referenced by any clip's file_path
   /// or thumbnail_path.
   Future<bool> isFileReferenced(String filename) async {

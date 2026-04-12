@@ -245,6 +245,17 @@ class DraftsDao extends DatabaseAccessor<AppDatabase> with _$DraftsDaoMixin {
     return delete(drafts).go();
   }
 
+  /// Delete all drafts owned by [ownerPubkey].
+  ///
+  /// Legacy drafts with NULL ownerPubkey are preserved because they
+  /// cannot be attributed to any specific account.
+  /// Used when signing out to prevent cross-account data leaks.
+  Future<int> deleteAllForUser(String ownerPubkey) {
+    return (delete(
+      drafts,
+    )..where((t) => t.ownerPubkey.equals(ownerPubkey))).go();
+  }
+
   /// Check if a filename is referenced by any draft's
   /// rendered_file_path or rendered_thumbnail_path.
   Future<bool> isRenderedFileReferenced(String filename) async {

@@ -339,10 +339,7 @@ void main() {
           data: '{}',
         );
 
-        final result = await dao.updateOrderIndex(
-          id: 'clip_1',
-          orderIndex: 5,
-        );
+        final result = await dao.updateOrderIndex(id: 'clip_1', orderIndex: 5);
 
         expect(result, isTrue);
         final clip = await dao.getClipById('clip_1');
@@ -983,86 +980,80 @@ void main() {
         expect(idsB, isNot(contains('clip_a')));
       });
 
-      test(
-        'getLibraryClips without ownerPubkey returns all clips',
-        () async {
-          await dao.upsertClip(
-            id: 'clip_a',
-            orderIndex: 0,
-            durationMs: 1000,
-            recordedAt: DateTime(2023, 11, 14, 10),
-            filePath: 'a.mp4',
-            thumbnailPath: 'a.jpeg',
-            data: '{}',
-            ownerPubkey: pubkeyA,
-          );
-          await dao.upsertClip(
-            id: 'clip_b',
-            orderIndex: 0,
-            durationMs: 2000,
-            recordedAt: DateTime(2023, 11, 14, 11),
-            filePath: 'b.mp4',
-            thumbnailPath: 'b.jpeg',
-            data: '{}',
-            ownerPubkey: pubkeyB,
-          );
-          await dao.upsertClip(
-            id: 'clip_legacy',
-            orderIndex: 0,
-            durationMs: 3000,
-            recordedAt: DateTime(2023, 11, 14, 12),
-            filePath: 'legacy.mp4',
-            thumbnailPath: 'legacy.jpeg',
-            data: '{}',
-          );
+      test('getLibraryClips without ownerPubkey returns all clips', () async {
+        await dao.upsertClip(
+          id: 'clip_a',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'a.mp4',
+          thumbnailPath: 'a.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyA,
+        );
+        await dao.upsertClip(
+          id: 'clip_b',
+          orderIndex: 0,
+          durationMs: 2000,
+          recordedAt: DateTime(2023, 11, 14, 11),
+          filePath: 'b.mp4',
+          thumbnailPath: 'b.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyB,
+        );
+        await dao.upsertClip(
+          id: 'clip_legacy',
+          orderIndex: 0,
+          durationMs: 3000,
+          recordedAt: DateTime(2023, 11, 14, 12),
+          filePath: 'legacy.mp4',
+          thumbnailPath: 'legacy.jpeg',
+          data: '{}',
+        );
 
-          final allClips = await dao.getLibraryClips();
-          expect(allClips, hasLength(3));
-        },
-      );
+        final allClips = await dao.getLibraryClips();
+        expect(allClips, hasLength(3));
+      });
 
-      test(
-        'watchLibraryClips filters by ownerPubkey',
-        () async {
-          await dao.upsertClip(
-            id: 'clip_a',
-            orderIndex: 0,
-            durationMs: 1000,
-            recordedAt: DateTime(2023, 11, 14, 10),
-            filePath: 'a.mp4',
-            thumbnailPath: 'a.jpeg',
-            data: '{}',
-            ownerPubkey: pubkeyA,
-          );
-          await dao.upsertClip(
-            id: 'clip_b',
-            orderIndex: 0,
-            durationMs: 2000,
-            recordedAt: DateTime(2023, 11, 14, 11),
-            filePath: 'b.mp4',
-            thumbnailPath: 'b.jpeg',
-            data: '{}',
-            ownerPubkey: pubkeyB,
-          );
-          await dao.upsertClip(
-            id: 'clip_legacy',
-            orderIndex: 0,
-            durationMs: 3000,
-            recordedAt: DateTime(2023, 11, 14, 12),
-            filePath: 'legacy.mp4',
-            thumbnailPath: 'legacy.jpeg',
-            data: '{}',
-          );
+      test('watchLibraryClips filters by ownerPubkey', () async {
+        await dao.upsertClip(
+          id: 'clip_a',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'a.mp4',
+          thumbnailPath: 'a.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyA,
+        );
+        await dao.upsertClip(
+          id: 'clip_b',
+          orderIndex: 0,
+          durationMs: 2000,
+          recordedAt: DateTime(2023, 11, 14, 11),
+          filePath: 'b.mp4',
+          thumbnailPath: 'b.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyB,
+        );
+        await dao.upsertClip(
+          id: 'clip_legacy',
+          orderIndex: 0,
+          durationMs: 3000,
+          recordedAt: DateTime(2023, 11, 14, 12),
+          filePath: 'legacy.mp4',
+          thumbnailPath: 'legacy.jpeg',
+          data: '{}',
+        );
 
-          final stream = dao.watchLibraryClips(ownerPubkey: pubkeyA);
-          final results = await stream.first;
+        final stream = dao.watchLibraryClips(ownerPubkey: pubkeyA);
+        final results = await stream.first;
 
-          expect(results, hasLength(2));
-          final ids = results.map((c) => c.id).toSet();
-          expect(ids, containsAll(['clip_a', 'clip_legacy']));
-          expect(ids, isNot(contains('clip_b')));
-        },
-      );
+        expect(results, hasLength(2));
+        final ids = results.map((c) => c.id).toSet();
+        expect(ids, containsAll(['clip_a', 'clip_legacy']));
+        expect(ids, isNot(contains('clip_b')));
+      });
 
       test('clips of user A are invisible to user B', () async {
         await dao.upsertClip(
@@ -1078,6 +1069,107 @@ void main() {
 
         final clipsB = await dao.getLibraryClips(ownerPubkey: pubkeyB);
         expect(clipsB, isEmpty);
+      });
+    });
+
+    group('deleteAllForUser', () {
+      const pubkeyA =
+          'aaaa1111aaaa1111aaaa1111aaaa1111'
+          'aaaa1111aaaa1111aaaa1111aaaa1111';
+      const pubkeyB =
+          'bbbb2222bbbb2222bbbb2222bbbb2222'
+          'bbbb2222bbbb2222bbbb2222bbbb2222';
+
+      test('deletes all clips for user', () async {
+        await dao.upsertClip(
+          id: 'clip_a1',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'a1.mp4',
+          thumbnailPath: 'a1.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyA,
+        );
+        await dao.upsertClip(
+          id: 'clip_a2',
+          orderIndex: 1,
+          durationMs: 2000,
+          recordedAt: DateTime(2023, 11, 14, 11),
+          filePath: 'a2.mp4',
+          thumbnailPath: 'a2.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyA,
+        );
+
+        final deleted = await dao.deleteAllForUser(pubkeyA);
+
+        expect(deleted, equals(2));
+        final remaining = await dao.getAllClips();
+        expect(remaining, isEmpty);
+      });
+
+      test('does not delete clips for other users', () async {
+        await dao.upsertClip(
+          id: 'clip_a',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'a.mp4',
+          thumbnailPath: 'a.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyA,
+        );
+        await dao.upsertClip(
+          id: 'clip_b',
+          orderIndex: 0,
+          durationMs: 2000,
+          recordedAt: DateTime(2023, 11, 14, 11),
+          filePath: 'b.mp4',
+          thumbnailPath: 'b.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyB,
+        );
+
+        await dao.deleteAllForUser(pubkeyA);
+
+        final remaining = await dao.getAllClips();
+        expect(remaining, hasLength(1));
+        expect(remaining.first.id, equals('clip_b'));
+      });
+
+      test('does not delete legacy clips with null ownerPubkey', () async {
+        await dao.upsertClip(
+          id: 'clip_a',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'a.mp4',
+          thumbnailPath: 'a.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyA,
+        );
+        await dao.upsertClip(
+          id: 'clip_legacy',
+          orderIndex: 0,
+          durationMs: 2000,
+          recordedAt: DateTime(2023, 11, 14, 11),
+          filePath: 'legacy.mp4',
+          thumbnailPath: 'legacy.jpeg',
+          data: '{}',
+        );
+
+        await dao.deleteAllForUser(pubkeyA);
+
+        final remaining = await dao.getAllClips();
+        expect(remaining, hasLength(1));
+        expect(remaining.first.id, equals('clip_legacy'));
+      });
+
+      test('returns 0 when no clips exist', () async {
+        final deleted = await dao.deleteAllForUser(pubkeyA);
+
+        expect(deleted, equals(0));
       });
     });
   });

@@ -2897,6 +2897,7 @@ class AuthService implements BackgroundAwareService {
       // Clear user-specific cached data on explicit logout
       await _userDataCleanupService.clearUserSpecificData(
         reason: 'explicit_logout',
+        userPubkey: _currentKeyContainer?.publicKeyHex,
       );
 
       // Clear configured relays so next login re-discovers from NIP-65
@@ -3742,15 +3743,18 @@ class AuthService implements BackgroundAwareService {
       );
 
       if (shouldClean) {
+        final oldPubkey = prefs.getString('current_user_pubkey_hex');
         Log.info(
           '_setupUserSession: identity change detected — '
-          'clearing user-specific data',
+          'clearing user-specific data for old pubkey '
+          '${oldPubkey ?? "unknown"}',
           name: 'AuthService',
           category: LogCategory.auth,
         );
         await _userDataCleanupService.clearUserSpecificData(
           reason: 'identity_change',
           isIdentityChange: true,
+          userPubkey: oldPubkey,
         );
         // restore the TOS acceptance since we wouldn't be here otherwise
         await acceptTerms();

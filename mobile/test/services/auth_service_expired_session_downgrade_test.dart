@@ -37,6 +37,7 @@ void main() {
       when(
         () => mockCleanupService.clearUserSpecificData(
           reason: any(named: 'reason'),
+          userPubkey: any(named: 'userPubkey'),
         ),
       ).thenAnswer((_) async => 0);
 

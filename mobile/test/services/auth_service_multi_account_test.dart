@@ -114,6 +114,7 @@ void main() {
       () => mockCleanupService.clearUserSpecificData(
         reason: any(named: 'reason'),
         isIdentityChange: any(named: 'isIdentityChange'),
+        userPubkey: any(named: 'userPubkey'),
       ),
     ).thenAnswer((_) async => 0);
 

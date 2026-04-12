@@ -179,4 +179,13 @@ class PendingUploadsDao extends DatabaseAccessor<AppDatabase>
   Future<int> clearAll() {
     return delete(pendingUploads).go();
   }
+
+  /// Delete all uploads for [nostrPubkey].
+  ///
+  /// Used when signing out to prevent cross-account data leaks.
+  Future<int> deleteAllForUser(String nostrPubkey) {
+    return (delete(
+      pendingUploads,
+    )..where((t) => t.nostrPubkey.equals(nostrPubkey))).go();
+  }
 }
