@@ -6,16 +6,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:blossom_upload_service/blossom_upload_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:models/models.dart' show NativeProofData;
-import 'package:nostr_sdk/event.dart';
-import 'package:openvine/services/auth_service.dart';
-import 'package:openvine/services/blossom_upload_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class _MockAuthService extends Mock implements AuthService {}
+class _MockAuthProvider extends Mock implements BlossomAuthProvider {}
 
 class _MockDio extends Mock implements Dio {}
 
@@ -33,6 +30,11 @@ const _pgpSignatureString =
     'iQIcBAABCAAGBQJpw5g6AAoJEJf6B+TEST1234\n'
     '=abcd\n'
     '-----END PGP SIGNATURE-----\n';
+
+/// SHA-256 hash of `[1, 2, 3]`.
+const _sha256Of123 =
+    '039058c6f2c0cb492c533b0a4d14ef77'
+    'cc0f78abccced5287d84a1a2011cfb81';
 
 const _deviceAttestationString =
     'Certificate:\n'
@@ -53,15 +55,15 @@ void main() {
 
   group(BlossomUploadService, () {
     late BlossomUploadService service;
-    late _MockAuthService mockAuthService;
+    late _MockAuthProvider mockAuthProvider;
     late _MockDio mockDio;
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
-      mockAuthService = _MockAuthService();
+      mockAuthProvider = _MockAuthProvider();
       mockDio = _MockDio();
       service = BlossomUploadService(
-        authService: mockAuthService,
+        authProvider: mockAuthProvider,
         dio: mockDio,
       );
     });
@@ -73,27 +75,31 @@ void main() {
     void arrangeUploadMocks() {
       capturedOptions = null;
 
-      when(() => mockAuthService.isAuthenticated).thenReturn(true);
-      when(
-        () => mockAuthService.currentPublicKeyHex,
-      ).thenReturn(_testPubkey);
+      when(() => mockAuthProvider.isAuthenticated).thenReturn(true);
 
       when(
-        () => mockAuthService.createAndSignEvent(
+        () => mockAuthProvider.createAndSignEvent(
           kind: any(named: 'kind'),
           content: any(named: 'content'),
           tags: any(named: 'tags'),
         ),
       ).thenAnswer(
-        (_) async => Event(_testPubkey, 24242, [
-          ['t', 'upload'],
-          ['expiration', '9999999999'],
-          ['size', '3'],
-          [
-            'x',
-            '039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81',
-          ],
-        ], 'Upload to Blossom'),
+        (_) async => const BlossomSignedEvent(
+          json: {
+            'id': 'test_id',
+            'pubkey': _testPubkey,
+            'created_at': 0,
+            'kind': 24242,
+            'tags': [
+              ['t', 'upload'],
+              ['expiration', '9999999999'],
+              ['size', '3'],
+              ['x', _sha256Of123],
+            ],
+            'content': 'Upload to Blossom',
+            'sig': 'test_sig',
+          },
+        ),
       );
 
       final mockResponse = _MockResponse();
@@ -279,12 +285,12 @@ void main() {
           arrangeUploadMocks();
           final mockFile = createMockFile();
 
-          final manifest = jsonEncode(
-            const NativeProofData(
-              videoHash: 'abc123',
-              c2paManifestId: 'c2pa-test-id',
-            ).toJson(),
-          );
+          // Inline the NativeProofData JSON shape since models package
+          // is not a dependency of blossom_upload_service.
+          final manifest = jsonEncode({
+            'videoHash': 'abc123',
+            'c2paManifestId': 'c2pa-test-id',
+          });
 
           await service.uploadVideo(
             description: 'test',

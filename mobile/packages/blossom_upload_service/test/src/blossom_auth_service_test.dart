@@ -1,23 +1,20 @@
 // ABOUTME: Tests for Blossom BUD-01 authentication service (kind 24242)
-// ABOUTME: Validates creation of signed auth events for age-restricted content access
+// ABOUTME: Validates creation of signed auth events for age-restricted content
+// access
 
+import 'package:blossom_upload_service/blossom_upload_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:nostr_sdk/event.dart';
-import 'package:openvine/services/auth_service.dart';
-import 'package:openvine/services/blossom_auth_service.dart';
 
-class MockAuthService extends Mock implements AuthService {}
-
-class MockEvent extends Mock implements Event {}
+class _MockAuthProvider extends Mock implements BlossomAuthProvider {}
 
 void main() {
-  late MockAuthService mockAuthService;
+  late _MockAuthProvider mockAuthProvider;
   late BlossomAuthService blossomAuthService;
 
   setUp(() {
-    mockAuthService = MockAuthService();
-    blossomAuthService = BlossomAuthService(authService: mockAuthService);
+    mockAuthProvider = _MockAuthProvider();
+    blossomAuthService = BlossomAuthService(authProvider: mockAuthProvider);
   });
 
   tearDown(() {
@@ -29,7 +26,7 @@ void main() {
       'createGetAuthHeader returns null when user not authenticated',
       () async {
         // Arrange
-        when(() => mockAuthService.isAuthenticated).thenReturn(false);
+        when(() => mockAuthProvider.isAuthenticated).thenReturn(false);
 
         // Act
         final result = await blossomAuthService.createGetAuthHeader(
@@ -46,43 +43,31 @@ void main() {
       'createGetAuthHeader creates kind 24242 event with correct tags',
       () async {
         // Arrange
-        when(() => mockAuthService.isAuthenticated).thenReturn(true);
+        when(() => mockAuthProvider.isAuthenticated).thenReturn(true);
 
-        final mockEvent = MockEvent();
-        when(() => mockEvent.id).thenReturn('event123');
-        when(() => mockEvent.kind).thenReturn(24242);
-        when(() => mockEvent.pubkey).thenReturn('pubkey123');
-        when(() => mockEvent.createdAt).thenReturn(1234567890);
-        when(
-          () => mockEvent.content,
-        ).thenReturn('Get blob from Blossom server');
-        when(() => mockEvent.tags).thenReturn([
-          ['t', 'get'],
-          ['x', 'abc123'],
-          ['expiration', '1234570000'],
-        ]);
-        when(() => mockEvent.sig).thenReturn('signature123');
-        when(mockEvent.toJson).thenReturn({
-          'id': 'event123',
-          'kind': 24242,
-          'pubkey': 'pubkey123',
-          'created_at': 1234567890,
-          'content': 'Get blob from Blossom server',
-          'tags': [
-            ['t', 'get'],
-            ['x', 'abc123'],
-            ['expiration', '1234570000'],
-          ],
-          'sig': 'signature123',
-        });
+        const signedEvent = BlossomSignedEvent(
+          json: {
+            'id': 'event123',
+            'kind': 24242,
+            'pubkey': 'pubkey123',
+            'created_at': 1234567890,
+            'content': 'Get blob from Blossom server',
+            'tags': [
+              ['t', 'get'],
+              ['x', 'abc123'],
+              ['expiration', '1234570000'],
+            ],
+            'sig': 'signature123',
+          },
+        );
 
         when(
-          () => mockAuthService.createAndSignEvent(
+          () => mockAuthProvider.createAndSignEvent(
             kind: 24242,
             content: any(named: 'content'),
             tags: any(named: 'tags'),
           ),
-        ).thenAnswer((_) async => mockEvent);
+        ).thenAnswer((_) async => signedEvent);
 
         // Act
         final result = await blossomAuthService.createGetAuthHeader(
@@ -96,7 +81,7 @@ void main() {
 
         // Verify correct event creation
         final captured = verify(
-          () => mockAuthService.createAndSignEvent(
+          () => mockAuthProvider.createAndSignEvent(
             kind: 24242,
             content: captureAny(named: 'content'),
             tags: captureAny(named: 'tags'),
@@ -115,30 +100,31 @@ void main() {
       'createGetAuthHeader includes server tag when serverUrl provided',
       () async {
         // Arrange
-        when(() => mockAuthService.isAuthenticated).thenReturn(true);
+        when(() => mockAuthProvider.isAuthenticated).thenReturn(true);
 
-        final mockEvent = MockEvent();
-        when(mockEvent.toJson).thenReturn({
-          'id': 'event123',
-          'kind': 24242,
-          'pubkey': 'pubkey123',
-          'created_at': 1234567890,
-          'content': 'Get blob from Blossom server',
-          'tags': [
-            ['t', 'get'],
-            ['x', 'abc123'],
-            ['server', 'https://blossom.example.com'],
-          ],
-          'sig': 'signature123',
-        });
+        const signedEvent = BlossomSignedEvent(
+          json: {
+            'id': 'event123',
+            'kind': 24242,
+            'pubkey': 'pubkey123',
+            'created_at': 1234567890,
+            'content': 'Get blob from Blossom server',
+            'tags': [
+              ['t', 'get'],
+              ['x', 'abc123'],
+              ['server', 'https://blossom.example.com'],
+            ],
+            'sig': 'signature123',
+          },
+        );
 
         when(
-          () => mockAuthService.createAndSignEvent(
+          () => mockAuthProvider.createAndSignEvent(
             kind: any(named: 'kind'),
             content: any(named: 'content'),
             tags: any(named: 'tags'),
           ),
-        ).thenAnswer((_) async => mockEvent);
+        ).thenAnswer((_) async => signedEvent);
 
         // Act
         await blossomAuthService.createGetAuthHeader(
@@ -148,7 +134,7 @@ void main() {
 
         // Assert
         final captured = verify(
-          () => mockAuthService.createAndSignEvent(
+          () => mockAuthProvider.createAndSignEvent(
             kind: any(named: 'kind'),
             content: any(named: 'content'),
             tags: captureAny(named: 'tags'),
@@ -168,26 +154,26 @@ void main() {
 
     test('createGetAuthHeader caches tokens to avoid re-signing', () async {
       // Arrange
-      when(() => mockAuthService.isAuthenticated).thenReturn(true);
+      when(() => mockAuthProvider.isAuthenticated).thenReturn(true);
 
-      final mockEvent = MockEvent();
-      when(() => mockEvent.id).thenReturn('event123');
-      when(mockEvent.toJson).thenReturn({
-        'id': 'event123',
-        'kind': 24242,
-        'tags': [
-          ['t', 'get'],
-          ['x', 'abc123'],
-        ],
-      });
+      const signedEvent = BlossomSignedEvent(
+        json: {
+          'id': 'event123',
+          'kind': 24242,
+          'tags': [
+            ['t', 'get'],
+            ['x', 'abc123'],
+          ],
+        },
+      );
 
       when(
-        () => mockAuthService.createAndSignEvent(
+        () => mockAuthProvider.createAndSignEvent(
           kind: any(named: 'kind'),
           content: any(named: 'content'),
           tags: any(named: 'tags'),
         ),
-      ).thenAnswer((_) async => mockEvent);
+      ).thenAnswer((_) async => signedEvent);
 
       // Act
       final result1 = await blossomAuthService.createGetAuthHeader(
@@ -200,7 +186,7 @@ void main() {
       // Assert
       expect(result1, equals(result2));
       verify(
-        () => mockAuthService.createAndSignEvent(
+        () => mockAuthProvider.createAndSignEvent(
           kind: any(named: 'kind'),
           content: any(named: 'content'),
           tags: any(named: 'tags'),
@@ -210,33 +196,33 @@ void main() {
 
     test('createGetAuthHeader sets expiration 1 hour in future', () async {
       // Arrange
-      when(() => mockAuthService.isAuthenticated).thenReturn(true);
+      when(() => mockAuthProvider.isAuthenticated).thenReturn(true);
 
-      final mockEvent = MockEvent();
-      when(() => mockEvent.id).thenReturn('event123');
-      when(mockEvent.toJson).thenReturn({
-        'id': 'event123',
-        'kind': 24242,
-        'tags': [
-          ['t', 'get'],
-          ['x', 'abc123'],
-        ],
-      });
+      const signedEvent = BlossomSignedEvent(
+        json: {
+          'id': 'event123',
+          'kind': 24242,
+          'tags': [
+            ['t', 'get'],
+            ['x', 'abc123'],
+          ],
+        },
+      );
 
       when(
-        () => mockAuthService.createAndSignEvent(
+        () => mockAuthProvider.createAndSignEvent(
           kind: any(named: 'kind'),
           content: any(named: 'content'),
           tags: any(named: 'tags'),
         ),
-      ).thenAnswer((_) async => mockEvent);
+      ).thenAnswer((_) async => signedEvent);
 
       // Act
       await blossomAuthService.createGetAuthHeader(sha256Hash: 'abc123');
 
       // Assert
       final captured = verify(
-        () => mockAuthService.createAndSignEvent(
+        () => mockAuthProvider.createAndSignEvent(
           kind: any(named: 'kind'),
           content: any(named: 'content'),
           tags: captureAny(named: 'tags'),
@@ -258,25 +244,25 @@ void main() {
   group('BlossomAuthService - cache management', () {
     test('clearCache removes all cached tokens', () async {
       // Arrange
-      when(() => mockAuthService.isAuthenticated).thenReturn(true);
+      when(() => mockAuthProvider.isAuthenticated).thenReturn(true);
 
-      final mockEvent = MockEvent();
-      when(() => mockEvent.id).thenReturn('event123');
-      when(mockEvent.toJson).thenReturn({
-        'id': 'event123',
-        'kind': 24242,
-        'tags': [
-          ['t', 'get'],
-        ],
-      });
+      const signedEvent = BlossomSignedEvent(
+        json: {
+          'id': 'event123',
+          'kind': 24242,
+          'tags': [
+            ['t', 'get'],
+          ],
+        },
+      );
 
       when(
-        () => mockAuthService.createAndSignEvent(
+        () => mockAuthProvider.createAndSignEvent(
           kind: any(named: 'kind'),
           content: any(named: 'content'),
           tags: any(named: 'tags'),
         ),
-      ).thenAnswer((_) async => mockEvent);
+      ).thenAnswer((_) async => signedEvent);
 
       // Create cached token
       await blossomAuthService.createGetAuthHeader(sha256Hash: 'abc123');
@@ -289,7 +275,7 @@ void main() {
 
       // Assert
       verify(
-        () => mockAuthService.createAndSignEvent(
+        () => mockAuthProvider.createAndSignEvent(
           kind: any(named: 'kind'),
           content: any(named: 'content'),
           tags: any(named: 'tags'),
