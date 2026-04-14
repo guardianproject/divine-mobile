@@ -390,5 +390,73 @@ void main() {
         expect(deleted, equals(0));
       });
     });
+
+    group('claimLegacyRows', () {
+      const pubkeyA =
+          'aaaa1111aaaa1111aaaa1111aaaa1111'
+          'aaaa1111aaaa1111aaaa1111aaaa1111';
+      const pubkeyB =
+          'bbbb2222bbbb2222bbbb2222bbbb2222'
+          'bbbb2222bbbb2222bbbb2222bbbb2222';
+
+      Future<void> insertDraft({
+        required String id,
+        String? ownerPubkey,
+      }) async {
+        await dao.upsertDraft(
+          id: id,
+          title: 'Draft $id',
+          description: '',
+          publishStatus: 'draft',
+          createdAt: DateTime(2023, 11, 14),
+          lastModified: DateTime(2023, 11, 14),
+          renderedFilePath: null,
+          renderedThumbnailPath: null,
+          data: '{}',
+          ownerPubkey: ownerPubkey,
+        );
+      }
+
+      test('claims NULL-owner rows for the given pubkey', () async {
+        await insertDraft(id: 'draft_legacy1');
+        await insertDraft(id: 'draft_legacy2');
+
+        final claimed = await dao.claimLegacyRows(pubkeyA);
+
+        expect(claimed, equals(2));
+        final all = await dao.getAllDrafts(ownerPubkey: pubkeyA);
+        expect(all, hasLength(2));
+        for (final draft in all) {
+          expect(draft.ownerPubkey, equals(pubkeyA));
+        }
+      });
+
+      test('does not modify already-owned rows', () async {
+        await insertDraft(id: 'draft_b', ownerPubkey: pubkeyB);
+        await insertDraft(id: 'draft_legacy');
+
+        await dao.claimLegacyRows(pubkeyA);
+
+        final draftB = await dao.getDraftById('draft_b');
+        expect(draftB!.ownerPubkey, equals(pubkeyB));
+      });
+
+      test('claimed rows are no longer visible to other users', () async {
+        await insertDraft(id: 'draft_legacy');
+
+        await dao.claimLegacyRows(pubkeyA);
+
+        final draftsB = await dao.getAllDrafts(ownerPubkey: pubkeyB);
+        expect(draftsB, isEmpty);
+      });
+
+      test('returns 0 when no legacy rows exist', () async {
+        await insertDraft(id: 'draft_a', ownerPubkey: pubkeyA);
+
+        final claimed = await dao.claimLegacyRows(pubkeyA);
+
+        expect(claimed, equals(0));
+      });
+    });
   });
 }

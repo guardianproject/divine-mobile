@@ -18,9 +18,20 @@ class UserDataCleanupService {
   /// Optional callback invoked during cleanup to clear user-specific
   /// database tables (DMs, conversations, notifications, per-user DAOs).
   /// Set by the provider layer which has access to DAOs.
-  /// Receives the signing-out user's pubkey so per-user tables can scope
-  /// their deletion. May be null when pubkey is unavailable.
-  Future<void> Function(String? userPubkey)? onDatabaseCleanup;
+  ///
+  /// Parameters:
+  /// - [userPubkey]: the signing-out user's pubkey for scoped deletion.
+  /// - [deleteUserData]: when true, per-user DAO rows (drafts, clips,
+  ///   uploads, reactions, reposts, pending actions) are deleted.
+  ///   False on non-destructive sign-out (account switch) to preserve data.
+  Future<void> Function({String? userPubkey, bool deleteUserData})?
+  onDatabaseCleanup;
+
+  /// Optional callback invoked during session setup to claim legacy
+  /// database rows (NULL ownerPubkey) for the current user.
+  /// This prevents pre-multi-account rows from leaking across accounts.
+  /// Set by the provider layer which has access to DAOs.
+  Future<void> Function(String userPubkey)? onClaimLegacyRows;
 
   /// Keys that store user-specific data and should be cleared on identity change.
   /// Device/app settings like relay URLs, analytics preferences are NOT included.
@@ -64,8 +75,6 @@ class UserDataCleanupService {
   static const List<String> identityChangePrefixes = [
     'following_list_', // follow cache per pubkey
     'relay_discovery_', // relay discovery cache per npub
-    'dm.newestSyncedAt.', // DM sync cursor per pubkey
-    'dm.oldestSyncedAt.', // DM sync cursor per pubkey
   ];
 
   /// Checks if user-specific data should be cleared for the given pubkey.
@@ -118,11 +127,14 @@ class UserDataCleanupService {
     String? reason,
     bool isIdentityChange = false,
     String? userPubkey,
+    bool deleteUserData = false,
   }) async {
     final cleanupReason = reason ?? 'unspecified';
     Log.info(
       'Starting user data cleanup (reason: $cleanupReason, '
       'identityChange: $isIdentityChange, '
+      'deleteUserData: $deleteUserData, '
+      'userPubkey: ${userPubkey ?? "null"}, '
       'checking ${userSpecificKeys.length} keys'
       '${isIdentityChange ? ' + ${identityChangePrefixes.length} prefixes' : ''})',
       name: 'UserDataCleanupService',
@@ -141,10 +153,14 @@ class UserDataCleanupService {
       }
     }
 
-    // Clear user-specific database tables (DMs, conversations, notifications)
+    // Clear user-specific database tables (DMs, conversations, notifications,
+    // and optionally per-user DAO rows when deleteUserData is true)
     if (onDatabaseCleanup != null) {
       try {
-        await onDatabaseCleanup!(userPubkey);
+        await onDatabaseCleanup!(
+          userPubkey: userPubkey,
+          deleteUserData: deleteUserData,
+        );
         Log.info(
           'Database cleanup complete',
           name: 'UserDataCleanupService',
@@ -197,5 +213,27 @@ class UserDataCleanupService {
     }
 
     return clearedCount;
+  }
+
+  /// Claims legacy database rows (NULL ownerPubkey) for [userPubkey].
+  ///
+  /// Should be called during session setup so pre-multi-account data is
+  /// attributed to the current user and no longer visible to other accounts.
+  Future<void> claimLegacyRows(String userPubkey) async {
+    if (onClaimLegacyRows == null) return;
+    try {
+      await onClaimLegacyRows!(userPubkey);
+      Log.info(
+        'Legacy row claim complete for $userPubkey',
+        name: 'UserDataCleanupService',
+        category: LogCategory.auth,
+      );
+    } catch (e) {
+      Log.error(
+        'Legacy row claim failed: $e',
+        name: 'UserDataCleanupService',
+        category: LogCategory.auth,
+      );
+    }
   }
 }

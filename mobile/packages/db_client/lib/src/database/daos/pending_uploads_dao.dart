@@ -94,9 +94,7 @@ class PendingUploadsDao extends DatabaseAccessor<AppDatabase>
   Future<List<PendingUpload>> getPendingUploads() async {
     final query = select(pendingUploads)
       ..where((t) => t.status.isNotIn(['published', 'failed']))
-      ..orderBy([
-        (t) => OrderingTerm(expression: t.createdAt),
-      ]);
+      ..orderBy([(t) => OrderingTerm(expression: t.createdAt)]);
     final rows = await query.get();
     return rows.map(_rowToModel).toList();
   }
@@ -169,9 +167,7 @@ class PendingUploadsDao extends DatabaseAccessor<AppDatabase>
   Stream<List<PendingUpload>> watchPendingUploads() {
     final query = select(pendingUploads)
       ..where((t) => t.status.isNotIn(['published', 'failed']))
-      ..orderBy([
-        (t) => OrderingTerm(expression: t.createdAt),
-      ]);
+      ..orderBy([(t) => OrderingTerm(expression: t.createdAt)]);
     return query.watch().map((rows) => rows.map(_rowToModel).toList());
   }
 
@@ -180,12 +176,12 @@ class PendingUploadsDao extends DatabaseAccessor<AppDatabase>
     return delete(pendingUploads).go();
   }
 
-  /// Delete all uploads for [nostrPubkey].
+  /// Delete all uploads for [userPubkey].
   ///
-  /// Used when signing out to prevent cross-account data leaks.
-  Future<int> deleteAllForUser(String nostrPubkey) {
+  /// Used on destructive sign-out to prevent cross-account data leaks.
+  Future<int> deleteAllForUser(String userPubkey) {
     return (delete(
       pendingUploads,
-    )..where((t) => t.nostrPubkey.equals(nostrPubkey))).go();
+    )..where((t) => t.nostrPubkey.equals(userPubkey))).go();
   }
 }

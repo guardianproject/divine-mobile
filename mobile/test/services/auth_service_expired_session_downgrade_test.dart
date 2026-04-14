@@ -38,8 +38,12 @@ void main() {
         () => mockCleanupService.clearUserSpecificData(
           reason: any(named: 'reason'),
           userPubkey: any(named: 'userPubkey'),
+          deleteUserData: any(named: 'deleteUserData'),
         ),
       ).thenAnswer((_) async => 0);
+      when(
+        () => mockCleanupService.claimLegacyRows(any()),
+      ).thenAnswer((_) async {});
 
       // In-memory secure storage backing
       secureStorage = {};

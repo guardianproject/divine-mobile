@@ -462,9 +462,7 @@ void main() {
       });
 
       test('does not delete uploads for other users', () async {
-        await dao.upsertUpload(
-          createTestUpload(id: 'u_a'),
-        );
+        await dao.upsertUpload(createTestUpload(id: 'u_a'));
         await dao.upsertUpload(
           createTestUpload(id: 'u_b', nostrPubkey: testPubkey2),
         );

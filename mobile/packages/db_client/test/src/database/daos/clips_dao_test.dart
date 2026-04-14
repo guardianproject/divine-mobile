@@ -1172,5 +1172,105 @@ void main() {
         expect(deleted, equals(0));
       });
     });
+
+    group('claimLegacyRows', () {
+      const pubkeyA =
+          'aaaa1111aaaa1111aaaa1111aaaa1111'
+          'aaaa1111aaaa1111aaaa1111aaaa1111';
+      const pubkeyB =
+          'bbbb2222bbbb2222bbbb2222bbbb2222'
+          'bbbb2222bbbb2222bbbb2222bbbb2222';
+
+      test('claims NULL-owner rows for the given pubkey', () async {
+        await dao.upsertClip(
+          id: 'clip_legacy1',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'l1.mp4',
+          thumbnailPath: 'l1.jpeg',
+          data: '{}',
+        );
+        await dao.upsertClip(
+          id: 'clip_legacy2',
+          orderIndex: 1,
+          durationMs: 2000,
+          recordedAt: DateTime(2023, 11, 14, 11),
+          filePath: 'l2.mp4',
+          thumbnailPath: 'l2.jpeg',
+          data: '{}',
+        );
+
+        final claimed = await dao.claimLegacyRows(pubkeyA);
+
+        expect(claimed, equals(2));
+        final all = await dao.getAllClips(ownerPubkey: pubkeyA);
+        expect(all, hasLength(2));
+        for (final clip in all) {
+          expect(clip.ownerPubkey, equals(pubkeyA));
+        }
+      });
+
+      test('does not modify already-owned rows', () async {
+        await dao.upsertClip(
+          id: 'clip_b',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'b.mp4',
+          thumbnailPath: 'b.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyB,
+        );
+        await dao.upsertClip(
+          id: 'clip_legacy',
+          orderIndex: 0,
+          durationMs: 2000,
+          recordedAt: DateTime(2023, 11, 14, 11),
+          filePath: 'legacy.mp4',
+          thumbnailPath: 'legacy.jpeg',
+          data: '{}',
+        );
+
+        await dao.claimLegacyRows(pubkeyA);
+
+        final clipB = await dao.getClipById('clip_b');
+        expect(clipB!.ownerPubkey, equals(pubkeyB));
+      });
+
+      test('claimed rows are no longer visible to other users', () async {
+        await dao.upsertClip(
+          id: 'clip_legacy',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'legacy.mp4',
+          thumbnailPath: 'legacy.jpeg',
+          data: '{}',
+        );
+
+        await dao.claimLegacyRows(pubkeyA);
+
+        final clipsB = await dao.getAllClips(ownerPubkey: pubkeyB);
+        expect(clipsB, isEmpty);
+      });
+
+      test('returns 0 when no legacy rows exist', () async {
+        await dao.upsertClip(
+          id: 'clip_a',
+          orderIndex: 0,
+          durationMs: 1000,
+          recordedAt: DateTime(2023, 11, 14, 10),
+          filePath: 'a.mp4',
+          thumbnailPath: 'a.jpeg',
+          data: '{}',
+          ownerPubkey: pubkeyA,
+        );
+
+        final claimed = await dao.claimLegacyRows(pubkeyA);
+
+        expect(claimed, equals(0));
+      });
+    });
   });
 }
