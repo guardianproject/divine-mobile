@@ -1319,6 +1319,9 @@ UserDataCleanupService userDataCleanupService(Ref ref) {
         await db.conversationsDao.clearAll();
         await db.notificationsDao.clearAll();
         await NotificationServiceEnhanced.instance.clearAllData();
+        // Clear DM sync cursors so the next login triggers a full re-fetch
+        // from relays instead of using stale `since:` boundaries.
+        await DmSyncState(prefs).clearAll();
 
         // Per-user data cleanup (#2999): only on destructive paths
         if (deleteUserData && userPubkey != null) {

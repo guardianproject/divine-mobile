@@ -188,6 +188,9 @@ void main() {
             '["pubkey1","pubkey2"]',
           );
           await prefs.setString('relay_discovery_npub1abc', 'relay_data');
+          // DM sync cursors are also per-pubkey and should be cleared
+          await prefs.setInt('dm.newestSyncedAt.abc123', 1700000000);
+          await prefs.setInt('dm.oldestSyncedAt.abc123', 1699000000);
 
           await service.clearUserSpecificData(
             reason: 'identity_change',
@@ -197,6 +200,8 @@ void main() {
           // Dynamic prefix keys should be cleared on identity change
           expect(prefs.containsKey('following_list_abc123'), isFalse);
           expect(prefs.containsKey('relay_discovery_npub1abc'), isFalse);
+          expect(prefs.containsKey('dm.newestSyncedAt.abc123'), isFalse);
+          expect(prefs.containsKey('dm.oldestSyncedAt.abc123'), isFalse);
         },
       );
 
@@ -331,6 +336,8 @@ void main() {
 
         expect(prefixes, contains('following_list_'));
         expect(prefixes, contains('relay_discovery_'));
+        expect(prefixes, contains('dm.newestSyncedAt.'));
+        expect(prefixes, contains('dm.oldestSyncedAt.'));
       });
 
       test('does NOT contain non-dynamic prefixes', () {
