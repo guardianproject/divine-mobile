@@ -223,16 +223,10 @@ class WebVideoFeedState extends State<WebVideoFeed> {
   }
 
   GlobalKey<WebVideoPlayerState> _getPlayerKey(int index) {
-    return _playerKeys.putIfAbsent(
-      index,
-      GlobalKey<WebVideoPlayerState>.new,
-    );
+    return _playerKeys.putIfAbsent(index, GlobalKey<WebVideoPlayerState>.new);
   }
 
-  void _attachCompletionListener(
-    int index,
-    VideoPlayerController controller,
-  ) {
+  void _attachCompletionListener(int index, VideoPlayerController controller) {
     final previousController = _controllers.value[index];
     if (identical(previousController, controller) &&
         _controllerListeners.containsKey(index)) {
@@ -256,10 +250,7 @@ class WebVideoFeedState extends State<WebVideoFeed> {
     controller.addListener(listener);
   }
 
-  void _detachCompletionListener(
-    int index,
-    VideoPlayerController controller,
-  ) {
+  void _detachCompletionListener(int index, VideoPlayerController controller) {
     final listener = _controllerListeners.remove(index);
     if (listener != null) {
       try {
