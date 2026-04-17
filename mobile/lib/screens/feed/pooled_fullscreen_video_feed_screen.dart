@@ -43,6 +43,7 @@ import 'package:openvine/widgets/video_feed_item/pooled_video_error_overlay.dart
 import 'package:openvine/widgets/video_feed_item/subtitle_overlay.dart';
 import 'package:openvine/widgets/video_feed_item/video_feed_item.dart';
 import 'package:openvine/widgets/video_feed_item/video_player_subtitle_layer.dart';
+import 'package:openvine/widgets/web_video_auth_header_provider.dart';
 import 'package:openvine/widgets/web_video_feed.dart';
 import 'package:openvine/widgets/web_video_player.dart';
 import 'package:pooled_video_player/pooled_video_player.dart';
@@ -456,6 +457,18 @@ class _FullscreenFeedContentState extends ConsumerState<FullscreenFeedContent>
     _handleAutoAdvanceCompleted();
   }
 
+  /// Treat auth-gated web playback as the existing age-restricted state,
+  /// not as a broken video. This keeps 401/403 out of the #3107 404-removal
+  /// path, which is only for confirmed missing assets.
+  void _handleWebPlayerRequiresAuth(VideoEvent video, int index) {
+    final bloc = context.read<FullscreenFeedBloc>();
+    if (index != bloc.state.currentIndex) return;
+    context.read<VideoPlaybackStatusCubit>().report(
+      video.id,
+      PlaybackStatus.ageRestricted,
+    );
+  }
+
   /// Dispatch a [FullscreenFeedVideoUnavailable] event for the active video
   /// when the cubit reports [PlaybackStatus.notFound]. Replaces the prior
   /// per-item post-frame callback that violated the "no business logic in
@@ -674,6 +687,19 @@ class _FullscreenFeedContentState extends ConsumerState<FullscreenFeedContent>
                   )
                 : null;
 
+            // Wire the NIP-98 auth header provider into WebVideoFeed only
+            // when running on web AND the HLS auth web player flag is on.
+            // When either condition is false, authHeaderProvider stays null
+            // and the legacy VideoPlayerController path is used unchanged.
+            final hlsAuthWebPlayerEnabled = ref.watch(
+              isFeatureEnabledProvider(FeatureFlag.hlsAuthWebPlayer),
+            );
+            final webAuthHeaderProvider = kIsWeb && hlsAuthWebPlayerEnabled
+                ? buildWebVideoAuthHeaderProvider(
+                    ref.watch(mediaViewerAuthServiceProvider),
+                  )
+                : null;
+
             return Scaffold(
               backgroundColor: VineTheme.backgroundColor,
               extendBodyBehindAppBar: true,
@@ -695,6 +721,7 @@ class _FullscreenFeedContentState extends ConsumerState<FullscreenFeedContent>
                       controllerFactory:
                           widget.webControllerFactory ??
                           defaultWebVideoPlayerControllerFactory,
+                      authHeaderProvider: webAuthHeaderProvider,
                       onActiveVideoChanged: (video, index) {
                         _pagePosition.value = index.toDouble();
                         _resumeAutoAdvanceAfterSwipe();
@@ -708,6 +735,7 @@ class _FullscreenFeedContentState extends ConsumerState<FullscreenFeedContent>
                       },
                       onCompleted: (_) => _handleAutoAdvanceCompleted(),
                       onErrored: _handleWebPlayerErrored,
+                      onRequiresAuth: _handleWebPlayerRequiresAuth,
                       onNearEnd: (index) => _onNearEnd(state, index),
                       itemBuilder:
                           (
