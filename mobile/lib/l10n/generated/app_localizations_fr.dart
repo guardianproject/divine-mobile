@@ -841,18 +841,18 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get videoGridDeleteVideoSubtitle =>
-      'Retirer ce contenu définitivement';
+      'Retire cette vidéo de Divine. Elle peut encore apparaître sur d\'autres clients Nostr.';
 
   @override
   String get videoGridDeleteConfirmTitle => 'Supprimer la vidéo';
 
   @override
   String get videoGridDeleteConfirmMessage =>
-      'Tu es sûr de vouloir supprimer cette vidéo ?';
+      'Cette vidéo sera supprimée définitivement de Divine. Elle peut encore apparaître sur d\'autres clients Nostr qui utilisent d\'autres relays.';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'Cette action envoie une requête de suppression (NIP-09) à tous les relays. Certains relays peuvent garder le contenu.';
+      'Cette action envoie une requête de suppression aux relays. Note : certains relays peuvent encore avoir des copies en cache.';
 
   @override
   String get videoGridDeleteCancel => 'Annuler';
@@ -866,11 +866,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get videoGridDeleteSuccess =>
       'Demande de suppression envoyée avec succès';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'Échec de la suppression : $error';
-  }
 
   @override
   String get exploreTabClassics => 'Classiques';
@@ -3006,7 +3001,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shareMenuDeleteVideoSubtitle =>
-      'Retirer ce contenu définitivement';
+      'Retire cette vidéo de Divine. Elle peut encore apparaître sur d\'autres clients Nostr.';
 
   @override
   String get shareMenuVideoInTheseLists => 'La vidéo est dans ces listes :';
@@ -3021,11 +3016,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get shareMenuDeleteConfirmation =>
-      'Tu es sûr de vouloir supprimer cette vidéo ?';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'Cette action envoie une requête de suppression (NIP-09) à tous les relays. Certains relays peuvent garder le contenu.';
+      'Cette vidéo sera supprimée définitivement de Divine. Elle peut encore apparaître sur d\'autres clients Nostr qui utilisent d\'autres relays.';
 
   @override
   String get shareMenuCancel => 'Annuler';
@@ -3037,13 +3028,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shareMenuDeletingContent => 'Suppression du contenu...';
 
   @override
-  String get shareMenuDeleteRequestSent =>
-      'Demande de suppression envoyée avec succès';
+  String get shareMenuDeleteRequestSent => 'Vidéo supprimée';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'Échec de la suppression du contenu : $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      'La suppression n\'est pas prête. Réessaie dans un instant.';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner =>
+      'Tu peux supprimer uniquement tes propres vidéos.';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated =>
+      'Reconnecte-toi, puis réessaie de supprimer.';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign =>
+      'Impossible de signer la demande de suppression. Réessaie.';
+
+  @override
+  String get shareMenuDeleteFailedGeneric =>
+      'Impossible de supprimer cette vidéo. Réessaie.';
 
   @override
   String get shareMenuFollowSetName => 'Nom de l\'ensemble d\'abonnements';
@@ -3110,13 +3115,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette action envoie une requête de suppression aux relays. Note : certains relays peuvent encore avoir des copies en cache.';
 
   @override
-  String get shareMenuVideoDeletionRequested =>
-      'Suppression de la vidéo demandée';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return 'Échec de la suppression de la vidéo : $error';
-  }
+  String get shareMenuVideoDeletionRequested => 'Vidéo supprimée';
 
   @override
   String get shareMenuContentLabels => 'Étiquettes de contenu';

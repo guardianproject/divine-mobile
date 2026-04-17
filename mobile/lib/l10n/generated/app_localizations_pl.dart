@@ -833,18 +833,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get videoGridDeleteVideo => 'Usuń film';
 
   @override
-  String get videoGridDeleteVideoSubtitle => 'Trwale usuń tę treść';
+  String get videoGridDeleteVideoSubtitle =>
+      'Usuń ten film z Divine. Inne klienty Nostr mogą go nadal pokazywać.';
 
   @override
   String get videoGridDeleteConfirmTitle => 'Usuń film';
 
   @override
   String get videoGridDeleteConfirmMessage =>
-      'Na pewno chcesz usunąć ten film?';
+      'Ten film zostanie trwale usunięty z Divine. Może nadal być widoczny w innych klientach Nostr korzystających z innych przekaźników.';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'To wyślе żądanie usunięcia (NIP-09) do wszystkich przekaźników. Niektóre przekaźniki mogą nadal zachować treść.';
+      'To wyślе żądanie usunięcia do przekaźników. Uwaga: Niektóre przekaźniki mogą nadal mieć zbuforowane kopie.';
 
   @override
   String get videoGridDeleteCancel => 'Anuluj';
@@ -857,11 +858,6 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get videoGridDeleteSuccess => 'Żądanie usunięcia wysłane pomyślnie';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'Nie udało się usunąć treści: $error';
-  }
 
   @override
   String get exploreTabClassics => 'Klasyki';
@@ -3053,7 +3049,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shareMenuDeleteVideo => 'Usuń film';
 
   @override
-  String get shareMenuDeleteVideoSubtitle => 'Trwale usuń tę treść';
+  String get shareMenuDeleteVideoSubtitle =>
+      'Usuń ten film z Divine. Inne klienty Nostr mogą go nadal pokazywać.';
 
   @override
   String get shareMenuVideoInTheseLists => 'Film jest na tych listach:';
@@ -3075,11 +3072,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shareMenuClose => 'Zamknij';
 
   @override
-  String get shareMenuDeleteConfirmation => 'Na pewno chcesz usunąć ten film?';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'To wyślе żądanie usunięcia (NIP-09) do wszystkich przekaźników. Niektóre przekaźniki mogą nadal zachować treść.';
+  String get shareMenuDeleteConfirmation =>
+      'Ten film zostanie trwale usunięty z Divine. Może nadal być widoczny w innych klientach Nostr korzystających z innych przekaźników.';
 
   @override
   String get shareMenuCancel => 'Anuluj';
@@ -3091,13 +3085,27 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shareMenuDeletingContent => 'Usuwanie treści...';
 
   @override
-  String get shareMenuDeleteRequestSent =>
-      'Żądanie usunięcia wysłane pomyślnie';
+  String get shareMenuDeleteRequestSent => 'Film usunięty';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'Nie udało się usunąć treści: $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      'Usuwanie nie jest jeszcze gotowe. Spróbuj ponownie za chwilę.';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner =>
+      'Możesz usuwać tylko własne filmy.';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated =>
+      'Zaloguj się ponownie i spróbuj usunąć.';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign =>
+      'Nie udało się podpisać żądania usunięcia. Spróbuj ponownie.';
+
+  @override
+  String get shareMenuDeleteFailedGeneric =>
+      'Nie udało się usunąć tego filmu. Spróbuj ponownie.';
 
   @override
   String get shareMenuFollowSetName => 'Nazwa zestawu obserwowanych';
@@ -3163,12 +3171,7 @@ class AppLocalizationsPl extends AppLocalizations {
       'To wyślе żądanie usunięcia do przekaźników. Uwaga: Niektóre przekaźniki mogą nadal mieć zbuforowane kopie.';
 
   @override
-  String get shareMenuVideoDeletionRequested => 'Zażądano usunięcia filmu';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return 'Nie udało się usunąć filmu: $error';
-  }
+  String get shareMenuVideoDeletionRequested => 'Film usunięty';
 
   @override
   String get shareMenuContentLabels => 'Etykiety treści';

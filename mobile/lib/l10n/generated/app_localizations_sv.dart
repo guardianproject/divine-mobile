@@ -809,18 +809,18 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get videoGridDeleteVideoSubtitle =>
-      'Ta bort det här innehållet permanent';
+      'Ta bort videon från Divine. Andra Nostr-klienter kan fortfarande visa den.';
 
   @override
   String get videoGridDeleteConfirmTitle => 'Ta bort video';
 
   @override
   String get videoGridDeleteConfirmMessage =>
-      'Är du säker på att du vill ta bort den här videon?';
+      'Den här videon raderas permanent från Divine. Den kan fortfarande synas i andra Nostr-klienter som använder andra reläer.';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'Detta skickar en borttagningsbegäran (NIP-09) till alla reler. Vissa reler kan fortfarande behålla innehållet.';
+      'Detta skickar en borttagningsbegäran till reler. Obs: Vissa reler kan fortfarande ha cachade kopior.';
 
   @override
   String get videoGridDeleteCancel => 'Avbryt';
@@ -833,11 +833,6 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get videoGridDeleteSuccess => 'Borttagningsbegäran skickad';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'Kunde inte ta bort innehåll: $error';
-  }
 
   @override
   String get exploreTabClassics => 'Klassiker';
@@ -2959,7 +2954,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get shareMenuDeleteVideoSubtitle =>
-      'Ta bort det här innehållet permanent';
+      'Ta bort videon från Divine. Andra Nostr-klienter kan fortfarande visa den.';
 
   @override
   String get shareMenuVideoInTheseLists => 'Videon finns i de här listorna:';
@@ -2974,11 +2969,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get shareMenuDeleteConfirmation =>
-      'Är du säker på att du vill ta bort den här videon?';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'Detta skickar en borttagningsbegäran (NIP-09) till alla reler. Vissa reler kan fortfarande behålla innehållet.';
+      'Den här videon raderas permanent från Divine. Den kan fortfarande synas i andra Nostr-klienter som använder andra reläer.';
 
   @override
   String get shareMenuCancel => 'Avbryt';
@@ -2990,12 +2981,27 @@ class AppLocalizationsSv extends AppLocalizations {
   String get shareMenuDeletingContent => 'Tar bort innehåll...';
 
   @override
-  String get shareMenuDeleteRequestSent => 'Borttagningsbegäran skickad';
+  String get shareMenuDeleteRequestSent => 'Videon borttagen';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'Kunde inte ta bort innehåll: $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      'Borttagningen är inte redo än. Försök igen om en stund.';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner =>
+      'Du kan bara ta bort dina egna videor.';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated =>
+      'Logga in igen och försök ta bort.';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign =>
+      'Kunde inte signera borttagningsbegäran. Försök igen.';
+
+  @override
+  String get shareMenuDeleteFailedGeneric =>
+      'Kunde inte ta bort den här videon. Försök igen.';
 
   @override
   String get shareMenuFollowSetName => 'Namn på följsamling';
@@ -3061,12 +3067,7 @@ class AppLocalizationsSv extends AppLocalizations {
       'Detta skickar en borttagningsbegäran till reler. Obs: Vissa reler kan fortfarande ha cachade kopior.';
 
   @override
-  String get shareMenuVideoDeletionRequested => 'Videoborttagning begärd';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return 'Kunde inte ta bort videon: $error';
-  }
+  String get shareMenuVideoDeletionRequested => 'Videon borttagen';
 
   @override
   String get shareMenuContentLabels => 'Innehållsetiketter';

@@ -849,18 +849,19 @@ class AppLocalizationsRo extends AppLocalizations {
   String get videoGridDeleteVideo => 'Șterge videoclipul';
 
   @override
-  String get videoGridDeleteVideoSubtitle => 'Elimină definitiv acest conținut';
+  String get videoGridDeleteVideoSubtitle =>
+      'Elimină acest videoclip din Divine. Alți clienți Nostr îl pot afișa în continuare.';
 
   @override
   String get videoGridDeleteConfirmTitle => 'Șterge videoclipul';
 
   @override
   String get videoGridDeleteConfirmMessage =>
-      'Sigur vrei să ștergi acest videoclip?';
+      'Acest videoclip va fi șters definitiv din Divine. Poate să apară în continuare în alți clienți Nostr care folosesc alte relay-uri.';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'Asta va trimite o cerere de ștergere (NIP-09) către toate relay-urile. Unele relay-uri pot păstra totuși conținutul.';
+      'Asta va trimite o cerere de ștergere către relay-uri. Notă: Unele relay-uri pot avea încă copii în cache.';
 
   @override
   String get videoGridDeleteCancel => 'Anulează';
@@ -874,11 +875,6 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get videoGridDeleteSuccess =>
       'Cererea de ștergere a fost trimisă cu succes';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'N-am putut șterge conținutul: $error';
-  }
 
   @override
   String get exploreTabClassics => 'Clasice';
@@ -3051,7 +3047,8 @@ class AppLocalizationsRo extends AppLocalizations {
   String get shareMenuDeleteVideo => 'Șterge videoclipul';
 
   @override
-  String get shareMenuDeleteVideoSubtitle => 'Elimină definitiv acest conținut';
+  String get shareMenuDeleteVideoSubtitle =>
+      'Elimină acest videoclip din Divine. Alți clienți Nostr îl pot afișa în continuare.';
 
   @override
   String get shareMenuVideoInTheseLists => 'Videoclipul e în aceste liste:';
@@ -3073,11 +3070,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get shareMenuDeleteConfirmation =>
-      'Sigur vrei să ștergi acest videoclip?';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'Asta va trimite o cerere de ștergere (NIP-09) către toate relay-urile. Unele relay-uri pot păstra totuși conținutul.';
+      'Acest videoclip va fi șters definitiv din Divine. Poate să apară în continuare în alți clienți Nostr care folosesc alte relay-uri.';
 
   @override
   String get shareMenuCancel => 'Anulează';
@@ -3089,13 +3082,27 @@ class AppLocalizationsRo extends AppLocalizations {
   String get shareMenuDeletingContent => 'Se șterge conținutul...';
 
   @override
-  String get shareMenuDeleteRequestSent =>
-      'Cererea de ștergere a fost trimisă cu succes';
+  String get shareMenuDeleteRequestSent => 'Videoclip șters';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'N-am putut șterge conținutul: $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      'Ștergerea nu e încă gata. Încearcă din nou peste un moment.';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner =>
+      'Poți șterge doar propriile videoclipuri.';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated =>
+      'Autentifică-te din nou, apoi încearcă să ștergi.';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign =>
+      'Nu am putut semna cererea de ștergere. Încearcă din nou.';
+
+  @override
+  String get shareMenuDeleteFailedGeneric =>
+      'Nu am putut șterge acest videoclip. Încearcă din nou.';
 
   @override
   String get shareMenuFollowSetName => 'Numele setului de urmărire';
@@ -3162,13 +3169,7 @@ class AppLocalizationsRo extends AppLocalizations {
       'Asta va trimite o cerere de ștergere către relay-uri. Notă: Unele relay-uri pot avea încă copii în cache.';
 
   @override
-  String get shareMenuVideoDeletionRequested =>
-      'Cerere de ștergere a videoclipului trimisă';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return 'N-am putut șterge videoclipul: $error';
-  }
+  String get shareMenuVideoDeletionRequested => 'Videoclip șters';
 
   @override
   String get shareMenuContentLabels => 'Etichete de conținut';

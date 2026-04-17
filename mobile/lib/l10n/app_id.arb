@@ -403,22 +403,14 @@
     "videoGridEditVideo": "Ubah Video",
     "videoGridEditVideoSubtitle": "Perbarui judul, deskripsi, dan hashtag",
     "videoGridDeleteVideo": "Hapus Video",
-    "videoGridDeleteVideoSubtitle": "Hapus konten ini secara permanen",
+    "videoGridDeleteVideoSubtitle": "Hapus video ini dari Divine. Klien Nostr lain mungkin masih menampilkannya.",
     "videoGridDeleteConfirmTitle": "Hapus Video",
-    "videoGridDeleteConfirmMessage": "Yakin mau menghapus video ini?",
-    "videoGridDeleteConfirmNote": "Ini akan mengirim permintaan hapus (NIP-09) ke semua relay. Beberapa relay mungkin masih menyimpan kontennya.",
+    "videoGridDeleteConfirmMessage": "Video ini akan dihapus permanen dari Divine. Video ini mungkin masih muncul di klien Nostr lain yang memakai relay berbeda.",
+    "videoGridDeleteConfirmNote": "Ini akan mengirim permintaan hapus ke relay. Catatan: Beberapa relay mungkin masih punya salinan cache.",
     "videoGridDeleteCancel": "Batal",
     "videoGridDeleteConfirm": "Hapus",
     "videoGridDeletingContent": "Menghapus konten...",
     "videoGridDeleteSuccess": "Permintaan hapus berhasil dikirim",
-    "videoGridDeleteFailure": "Gagal menghapus konten: {error}",
-    "@videoGridDeleteFailure": {
-        "placeholders": {
-            "error": {
-                "type": "Object"
-            }
-        }
-    },
     "exploreTabClassics": "Klasik",
     "exploreTabNew": "Baru",
     "exploreTabPopular": "Populer",
@@ -1510,7 +1502,7 @@
     "shareMenuEditVideo": "Ubah Video",
     "shareMenuEditVideoSubtitle": "Perbarui judul, deskripsi, dan hashtag",
     "shareMenuDeleteVideo": "Hapus Video",
-    "shareMenuDeleteVideoSubtitle": "Hapus konten ini secara permanen",
+    "shareMenuDeleteVideoSubtitle": "Hapus video ini dari Divine. Klien Nostr lain mungkin masih menampilkannya.",
     "shareMenuVideoInTheseLists": "Video ada di daftar ini:",
     "shareMenuVideoCount": "{count} video",
     "@shareMenuVideoCount": {
@@ -1521,20 +1513,16 @@
         }
     },
     "shareMenuClose": "Tutup",
-    "shareMenuDeleteConfirmation": "Yakin mau menghapus video ini?",
-    "shareMenuDeleteWarning": "Ini akan mengirim permintaan hapus (NIP-09) ke semua relay. Beberapa relay mungkin masih menyimpan kontennya.",
+    "shareMenuDeleteConfirmation": "Video ini akan dihapus permanen dari Divine. Video ini mungkin masih muncul di klien Nostr lain yang memakai relay berbeda.",
     "shareMenuCancel": "Batal",
     "shareMenuDelete": "Hapus",
     "shareMenuDeletingContent": "Menghapus konten...",
-    "shareMenuDeleteRequestSent": "Permintaan hapus berhasil dikirim",
-    "shareMenuFailedToDeleteContent": "Gagal menghapus konten: {error}",
-    "@shareMenuFailedToDeleteContent": {
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
+    "shareMenuDeleteRequestSent": "Video dihapus",
+    "shareMenuDeleteFailedNotInitialized": "Penghapusan belum siap. Coba lagi sebentar lagi.",
+    "shareMenuDeleteFailedNotOwner": "Kamu cuma bisa menghapus video milikmu sendiri.",
+    "shareMenuDeleteFailedNotAuthenticated": "Masuk lagi, lalu coba hapus.",
+    "shareMenuDeleteFailedCouldNotSign": "Tidak bisa menandatangani permintaan hapus. Coba lagi.",
+    "shareMenuDeleteFailedGeneric": "Tidak bisa menghapus video ini. Coba lagi.",
     "shareMenuFollowSetName": "Nama Set Ikuti",
     "shareMenuFollowSetNameHint": "contoh: Kreator Konten, Musisi, dll.",
     "shareMenuDescriptionOptional": "Deskripsi (opsional)",
@@ -1568,15 +1556,7 @@
     },
     "shareMenuDeleteVideoQuestion": "Hapus Video?",
     "shareMenuDeleteRelayWarning": "Ini akan mengirim permintaan hapus ke relay. Catatan: Beberapa relay mungkin masih punya salinan cache.",
-    "shareMenuVideoDeletionRequested": "Penghapusan video diminta",
-    "shareMenuFailedToDeleteVideo": "Gagal menghapus video: {error}",
-    "@shareMenuFailedToDeleteVideo": {
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
+    "shareMenuVideoDeletionRequested": "Video dihapus",
     "shareMenuContentLabels": "Label konten",
     "shareMenuAddContentLabels": "Tambah label konten",
     "shareMenuClearAll": "Bersihkan semua",

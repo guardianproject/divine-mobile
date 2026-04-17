@@ -756,17 +756,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get videoGridDeleteVideo => '動画を削除';
 
   @override
-  String get videoGridDeleteVideoSubtitle => 'このコンテンツを完全に削除する';
+  String get videoGridDeleteVideoSubtitle =>
+      'この動画を Divine から削除します。他の Nostr クライアントでは表示されることがあります。';
 
   @override
   String get videoGridDeleteConfirmTitle => '動画を削除';
 
   @override
-  String get videoGridDeleteConfirmMessage => 'この動画を本当に削除する?';
+  String get videoGridDeleteConfirmMessage =>
+      'この動画は Divine から完全に削除されます。別のリレーを使うほかの Nostr クライアントでは表示されることがあります。';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'すべてのリレーに削除リクエスト (NIP-09) を送るよ。一部のリレーではコンテンツが残ることもあるよ。';
+      'リレーに削除リクエストを送るよ。注意: 一部のリレーにはキャッシュが残ることもあるよ。';
 
   @override
   String get videoGridDeleteCancel => 'キャンセル';
@@ -779,11 +781,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get videoGridDeleteSuccess => '削除リクエストを送ったよ';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'コンテンツの削除がうまくいかなかった: $error';
-  }
 
   @override
   String get exploreTabClassics => 'クラシック';
@@ -2807,7 +2804,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shareMenuDeleteVideo => '動画を削除';
 
   @override
-  String get shareMenuDeleteVideoSubtitle => 'このコンテンツを完全に削除';
+  String get shareMenuDeleteVideoSubtitle =>
+      'この動画を Divine から削除します。他の Nostr クライアントでは表示されることがあります。';
 
   @override
   String get shareMenuVideoInTheseLists => 'この動画が入ってるリスト:';
@@ -2821,11 +2819,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shareMenuClose => '閉じる';
 
   @override
-  String get shareMenuDeleteConfirmation => 'この動画を本当に削除する?';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'すべてのリレーに削除リクエスト (NIP-09) を送るよ。一部のリレーではキャッシュが残ることもあるよ。';
+  String get shareMenuDeleteConfirmation =>
+      'この動画は Divine から完全に削除されます。別のリレーを使うほかの Nostr クライアントでは表示されることがあります。';
 
   @override
   String get shareMenuCancel => 'キャンセル';
@@ -2837,12 +2832,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shareMenuDeletingContent => 'コンテンツを削除中...';
 
   @override
-  String get shareMenuDeleteRequestSent => '削除リクエストを送ったよ';
+  String get shareMenuDeleteRequestSent => '動画を削除したよ';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'コンテンツの削除がうまくいかなかった: $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      '削除の準備がまだだよ。少し待ってからもう一度試してね。';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner => '自分の動画だけ削除できるよ。';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated => 'もう一度ログインしてから削除してね。';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign => '削除リクエストに署名できなかったよ。もう一度試してね。';
+
+  @override
+  String get shareMenuDeleteFailedGeneric => 'この動画を削除できなかったよ。もう一度試してね。';
 
   @override
   String get shareMenuFollowSetName => 'フォローセット名';
@@ -2907,12 +2913,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'リレーに削除リクエストを送るよ。注意: 一部のリレーにはキャッシュが残ることもあるよ。';
 
   @override
-  String get shareMenuVideoDeletionRequested => '動画の削除をリクエストしたよ';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return '動画の削除がうまくいかなかった: $error';
-  }
+  String get shareMenuVideoDeletionRequested => '動画を削除したよ';
 
   @override
   String get shareMenuContentLabels => 'コンテンツラベル';

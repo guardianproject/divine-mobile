@@ -794,18 +794,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get videoGridDeleteVideo => 'حذف الفيديو';
 
   @override
-  String get videoGridDeleteVideoSubtitle => 'إزالة هذا المحتوى نهائيًا';
+  String get videoGridDeleteVideoSubtitle =>
+      'أزِل هذا الفيديو من Divine. قد يظل ظاهرًا في عملاء Nostr آخرين.';
 
   @override
   String get videoGridDeleteConfirmTitle => 'حذف الفيديو';
 
   @override
   String get videoGridDeleteConfirmMessage =>
-      'هل أنت متأكد من رغبتك في حذف هذا الفيديو؟';
+      'سيتم حذف هذا الفيديو نهائيًا من Divine. قد يظل ظاهرًا في عملاء Nostr الآخرين الذين يستخدمون محولات مختلفة.';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'سيرسل هذا طلب حذف (NIP-09) إلى جميع المحولات. قد تحتفظ بعض المحولات بالمحتوى.';
+      'سيرسل هذا طلب حذف إلى المحولات. ملاحظة: قد تحتفظ بعض المحولات بنسخ مخزّنة.';
 
   @override
   String get videoGridDeleteCancel => 'إلغاء';
@@ -818,11 +819,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get videoGridDeleteSuccess => 'تم إرسال طلب الحذف بنجاح';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'فشل حذف المحتوى: $error';
-  }
 
   @override
   String get exploreTabClassics => 'الكلاسيكيات';
@@ -2931,7 +2927,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareMenuDeleteVideo => 'حذف الفيديو';
 
   @override
-  String get shareMenuDeleteVideoSubtitle => 'إزالة هذا المحتوى نهائيًا';
+  String get shareMenuDeleteVideoSubtitle =>
+      'أزِل هذا الفيديو من Divine. قد يظل ظاهرًا في عملاء Nostr آخرين.';
 
   @override
   String get shareMenuVideoInTheseLists => 'الفيديو في هذه القوائم:';
@@ -2946,11 +2943,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shareMenuDeleteConfirmation =>
-      'هل أنت متأكد من رغبتك في حذف هذا الفيديو؟';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'سيرسل هذا طلب حذف (NIP-09) إلى جميع المحولات. قد تحتفظ بعض المحولات بالمحتوى.';
+      'سيتم حذف هذا الفيديو نهائيًا من Divine. قد يظل ظاهرًا في عملاء Nostr الآخرين الذين يستخدمون محولات مختلفة.';
 
   @override
   String get shareMenuCancel => 'إلغاء';
@@ -2962,12 +2955,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareMenuDeletingContent => 'جاري حذف المحتوى...';
 
   @override
-  String get shareMenuDeleteRequestSent => 'تم إرسال طلب الحذف بنجاح';
+  String get shareMenuDeleteRequestSent => 'تم حذف الفيديو';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'فشل حذف المحتوى: $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      'الحذف غير جاهز بعد. حاول مرة أخرى بعد لحظة.';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner =>
+      'يمكنك حذف مقاطع الفيديو الخاصة بك فقط.';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated =>
+      'سجّل الدخول مرة أخرى، ثم حاول الحذف.';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign =>
+      'لم نتمكن من توقيع طلب الحذف. حاول مرة أخرى.';
+
+  @override
+  String get shareMenuDeleteFailedGeneric =>
+      'تعذّر حذف هذا الفيديو. حاول مرة أخرى.';
 
   @override
   String get shareMenuFollowSetName => 'اسم مجموعة المتابعة';
@@ -3033,12 +3041,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'سيرسل هذا طلب حذف إلى المحولات. ملاحظة: قد تحتفظ بعض المحولات بنسخ مخزّنة.';
 
   @override
-  String get shareMenuVideoDeletionRequested => 'تم طلب حذف الفيديو';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return 'فشل حذف الفيديو: $error';
-  }
+  String get shareMenuVideoDeletionRequested => 'تم حذف الفيديو';
 
   @override
   String get shareMenuContentLabels => 'وسوم المحتوى';

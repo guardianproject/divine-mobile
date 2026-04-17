@@ -403,22 +403,14 @@
     "videoGridEditVideo": "Edytuj film",
     "videoGridEditVideoSubtitle": "Zaktualizuj tytuł, opis i hashtagi",
     "videoGridDeleteVideo": "Usuń film",
-    "videoGridDeleteVideoSubtitle": "Trwale usuń tę treść",
+    "videoGridDeleteVideoSubtitle": "Usuń ten film z Divine. Inne klienty Nostr mogą go nadal pokazywać.",
     "videoGridDeleteConfirmTitle": "Usuń film",
-    "videoGridDeleteConfirmMessage": "Na pewno chcesz usunąć ten film?",
-    "videoGridDeleteConfirmNote": "To wyślе żądanie usunięcia (NIP-09) do wszystkich przekaźników. Niektóre przekaźniki mogą nadal zachować treść.",
+    "videoGridDeleteConfirmMessage": "Ten film zostanie trwale usunięty z Divine. Może nadal być widoczny w innych klientach Nostr korzystających z innych przekaźników.",
+    "videoGridDeleteConfirmNote": "To wyślе żądanie usunięcia do przekaźników. Uwaga: Niektóre przekaźniki mogą nadal mieć zbuforowane kopie.",
     "videoGridDeleteCancel": "Anuluj",
     "videoGridDeleteConfirm": "Usuń",
     "videoGridDeletingContent": "Usuwanie treści...",
     "videoGridDeleteSuccess": "Żądanie usunięcia wysłane pomyślnie",
-    "videoGridDeleteFailure": "Nie udało się usunąć treści: {error}",
-    "@videoGridDeleteFailure": {
-        "placeholders": {
-            "error": {
-                "type": "Object"
-            }
-        }
-    },
     "exploreTabClassics": "Klasyki",
     "exploreTabNew": "Nowe",
     "exploreTabPopular": "Popularne",
@@ -1510,7 +1502,7 @@
     "shareMenuEditVideo": "Edytuj film",
     "shareMenuEditVideoSubtitle": "Zaktualizuj tytuł, opis i hashtagi",
     "shareMenuDeleteVideo": "Usuń film",
-    "shareMenuDeleteVideoSubtitle": "Trwale usuń tę treść",
+    "shareMenuDeleteVideoSubtitle": "Usuń ten film z Divine. Inne klienty Nostr mogą go nadal pokazywać.",
     "shareMenuVideoInTheseLists": "Film jest na tych listach:",
     "shareMenuVideoCount": "{count, plural, one{1 film} few{{count} filmy} many{{count} filmów} other{{count} filmu}}",
     "@shareMenuVideoCount": {
@@ -1521,20 +1513,16 @@
         }
     },
     "shareMenuClose": "Zamknij",
-    "shareMenuDeleteConfirmation": "Na pewno chcesz usunąć ten film?",
-    "shareMenuDeleteWarning": "To wyślе żądanie usunięcia (NIP-09) do wszystkich przekaźników. Niektóre przekaźniki mogą nadal zachować treść.",
+    "shareMenuDeleteConfirmation": "Ten film zostanie trwale usunięty z Divine. Może nadal być widoczny w innych klientach Nostr korzystających z innych przekaźników.",
     "shareMenuCancel": "Anuluj",
     "shareMenuDelete": "Usuń",
     "shareMenuDeletingContent": "Usuwanie treści...",
-    "shareMenuDeleteRequestSent": "Żądanie usunięcia wysłane pomyślnie",
-    "shareMenuFailedToDeleteContent": "Nie udało się usunąć treści: {error}",
-    "@shareMenuFailedToDeleteContent": {
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
+    "shareMenuDeleteRequestSent": "Film usunięty",
+    "shareMenuDeleteFailedNotInitialized": "Usuwanie nie jest jeszcze gotowe. Spróbuj ponownie za chwilę.",
+    "shareMenuDeleteFailedNotOwner": "Możesz usuwać tylko własne filmy.",
+    "shareMenuDeleteFailedNotAuthenticated": "Zaloguj się ponownie i spróbuj usunąć.",
+    "shareMenuDeleteFailedCouldNotSign": "Nie udało się podpisać żądania usunięcia. Spróbuj ponownie.",
+    "shareMenuDeleteFailedGeneric": "Nie udało się usunąć tego filmu. Spróbuj ponownie.",
     "shareMenuFollowSetName": "Nazwa zestawu obserwowanych",
     "shareMenuFollowSetNameHint": "np. Twórcy treści, Muzycy itp.",
     "shareMenuDescriptionOptional": "Opis (opcjonalnie)",
@@ -1568,15 +1556,7 @@
     },
     "shareMenuDeleteVideoQuestion": "Usunąć film?",
     "shareMenuDeleteRelayWarning": "To wyślе żądanie usunięcia do przekaźników. Uwaga: Niektóre przekaźniki mogą nadal mieć zbuforowane kopie.",
-    "shareMenuVideoDeletionRequested": "Zażądano usunięcia filmu",
-    "shareMenuFailedToDeleteVideo": "Nie udało się usunąć filmu: {error}",
-    "@shareMenuFailedToDeleteVideo": {
-        "placeholders": {
-            "error": {
-                "type": "String"
-            }
-        }
-    },
+    "shareMenuVideoDeletionRequested": "Film usunięty",
     "shareMenuContentLabels": "Etykiety treści",
     "shareMenuAddContentLabels": "Dodaj etykiety treści",
     "shareMenuClearAll": "Wyczyść wszystko",

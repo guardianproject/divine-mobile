@@ -830,18 +830,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get videoGridDeleteVideoSubtitle =>
-      'Diesen Inhalt dauerhaft entfernen';
+      'Dieses Video aus Divine entfernen. Es kann in anderen Nostr-Clients weiterhin sichtbar sein.';
 
   @override
   String get videoGridDeleteConfirmTitle => 'Video löschen';
 
   @override
   String get videoGridDeleteConfirmMessage =>
-      'Bist du sicher, dass du dieses Video löschen willst?';
+      'Dieses Video wird dauerhaft aus Divine gelöscht. Es kann in anderen Nostr-Clients, die andere Relays nutzen, weiterhin sichtbar sein.';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'Damit wird eine Löschanfrage (NIP-09) an alle Relays gesendet. Manche Relays behalten die Inhalte möglicherweise trotzdem.';
+      'Damit wird eine Löschanfrage an die Relays gesendet. Hinweis: Manche Relays haben möglicherweise noch zwischengespeicherte Kopien.';
 
   @override
   String get videoGridDeleteCancel => 'Abbrechen';
@@ -854,11 +854,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get videoGridDeleteSuccess => 'Löschanfrage erfolgreich gesendet';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'Inhalt konnte nicht gelöscht werden: $error';
-  }
 
   @override
   String get exploreTabClassics => 'Klassiker';
@@ -3002,7 +2997,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shareMenuDeleteVideoSubtitle =>
-      'Diesen Inhalt dauerhaft entfernen';
+      'Dieses Video aus Divine entfernen. Es kann in anderen Nostr-Clients weiterhin sichtbar sein.';
 
   @override
   String get shareMenuVideoInTheseLists => 'Video ist in diesen Listen:';
@@ -3017,11 +3012,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shareMenuDeleteConfirmation =>
-      'Bist du sicher, dass du dieses Video löschen willst?';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'Damit wird eine Löschanfrage (NIP-09) an alle Relays gesendet. Manche Relays behalten die Inhalte möglicherweise trotzdem.';
+      'Dieses Video wird dauerhaft aus Divine gelöscht. Es kann in anderen Nostr-Clients, die andere Relays nutzen, weiterhin sichtbar sein.';
 
   @override
   String get shareMenuCancel => 'Abbrechen';
@@ -3033,12 +3024,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shareMenuDeletingContent => 'Inhalt wird gelöscht...';
 
   @override
-  String get shareMenuDeleteRequestSent => 'Löschanfrage erfolgreich gesendet';
+  String get shareMenuDeleteRequestSent => 'Video gelöscht';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'Inhalt konnte nicht gelöscht werden: $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      'Löschen ist noch nicht bereit. Versuch es gleich noch einmal.';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner =>
+      'Du kannst nur deine eigenen Videos löschen.';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated =>
+      'Melde dich erneut an und versuch es nochmal.';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign =>
+      'Die Löschanfrage konnte nicht signiert werden. Versuch es nochmal.';
+
+  @override
+  String get shareMenuDeleteFailedGeneric =>
+      'Dieses Video konnte nicht gelöscht werden. Versuch es nochmal.';
 
   @override
   String get shareMenuFollowSetName => 'Follow-Set-Name';
@@ -3104,12 +3110,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Damit wird eine Löschanfrage an die Relays gesendet. Hinweis: Manche Relays haben möglicherweise noch zwischengespeicherte Kopien.';
 
   @override
-  String get shareMenuVideoDeletionRequested => 'Video-Löschung angefordert';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return 'Video konnte nicht gelöscht werden: $error';
-  }
+  String get shareMenuVideoDeletionRequested => 'Video gelöscht';
 
   @override
   String get shareMenuContentLabels => 'Inhalts-Labels';

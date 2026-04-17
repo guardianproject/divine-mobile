@@ -831,18 +831,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get videoGridDeleteVideo => 'Eliminar video';
 
   @override
-  String get videoGridDeleteVideoSubtitle => 'Sacá este contenido para siempre';
+  String get videoGridDeleteVideoSubtitle =>
+      'Sacá este video de Divine. Otros clientes Nostr todavía pueden mostrarlo.';
 
   @override
   String get videoGridDeleteConfirmTitle => 'Eliminar video';
 
   @override
   String get videoGridDeleteConfirmMessage =>
-      '¿Seguro que querés eliminar este video?';
+      'Este video se elimina para siempre de Divine. Todavía puede verse en otros clientes Nostr que usen otros relays.';
 
   @override
   String get videoGridDeleteConfirmNote =>
-      'Esto envía un pedido de eliminación (NIP-09) a todos los relays. Algunos relays todavía pueden mantener el contenido.';
+      'Esto envía un pedido de eliminación a los relays. Nota: algunos relays todavía pueden tener copias en caché.';
 
   @override
   String get videoGridDeleteCancel => 'Cancelar';
@@ -856,11 +857,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get videoGridDeleteSuccess =>
       'Pedido de eliminación enviado con éxito';
-
-  @override
-  String videoGridDeleteFailure(Object error) {
-    return 'No se pudo eliminar el contenido: $error';
-  }
 
   @override
   String get exploreTabClassics => 'Clásicos';
@@ -3001,7 +2997,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shareMenuDeleteVideo => 'Eliminar video';
 
   @override
-  String get shareMenuDeleteVideoSubtitle => 'Sacá este contenido para siempre';
+  String get shareMenuDeleteVideoSubtitle =>
+      'Sacá este video de Divine. Otros clientes Nostr todavía pueden mostrarlo.';
 
   @override
   String get shareMenuVideoInTheseLists => 'El video está en estas listas:';
@@ -3016,11 +3013,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get shareMenuDeleteConfirmation =>
-      '¿Seguro que querés eliminar este video?';
-
-  @override
-  String get shareMenuDeleteWarning =>
-      'Esto envía un pedido de eliminación (NIP-09) a todos los relays. Algunos relays todavía pueden mantener el contenido.';
+      'Este video se elimina para siempre de Divine. Todavía puede verse en otros clientes Nostr que usen otros relays.';
 
   @override
   String get shareMenuCancel => 'Cancelar';
@@ -3032,13 +3025,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shareMenuDeletingContent => 'Eliminando contenido...';
 
   @override
-  String get shareMenuDeleteRequestSent =>
-      'Pedido de eliminación enviado con éxito';
+  String get shareMenuDeleteRequestSent => 'Video eliminado';
 
   @override
-  String shareMenuFailedToDeleteContent(String error) {
-    return 'No se pudo eliminar el contenido: $error';
-  }
+  String get shareMenuDeleteFailedNotInitialized =>
+      'El borrado no está listo todavía. Probá de nuevo en un momento.';
+
+  @override
+  String get shareMenuDeleteFailedNotOwner =>
+      'Solo podés borrar tus propios videos.';
+
+  @override
+  String get shareMenuDeleteFailedNotAuthenticated =>
+      'Volvé a iniciar sesión y probá borrar de nuevo.';
+
+  @override
+  String get shareMenuDeleteFailedCouldNotSign =>
+      'No pudimos firmar el pedido de borrado. Probá de nuevo.';
+
+  @override
+  String get shareMenuDeleteFailedGeneric =>
+      'No pudimos borrar este video. Probá de nuevo.';
 
   @override
   String get shareMenuFollowSetName => 'Nombre del set de seguidos';
@@ -3105,13 +3112,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esto envía un pedido de eliminación a los relays. Nota: algunos relays todavía pueden tener copias en caché.';
 
   @override
-  String get shareMenuVideoDeletionRequested =>
-      'Eliminación del video solicitada';
-
-  @override
-  String shareMenuFailedToDeleteVideo(String error) {
-    return 'No se pudo eliminar el video: $error';
-  }
+  String get shareMenuVideoDeletionRequested => 'Video eliminado';
 
   @override
   String get shareMenuContentLabels => 'Etiquetas de contenido';
