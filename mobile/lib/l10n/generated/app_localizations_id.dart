@@ -1215,6 +1215,17 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String videoFeedLoopCountLine(String compactCount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'loop',
+      one: 'loop',
+    );
+    return '$compactCount $_temp0';
+  }
+
+  @override
   String get metadataBadgeNotDivine => 'Bukan Divine';
 
   @override
@@ -1248,7 +1259,15 @@ class AppLocalizationsId extends AppLocalizations {
   String get metadataRepostedByLabel => 'Di-repost oleh';
 
   @override
-  String get metadataLoopsLabel => 'Loop';
+  String metadataLoopsLabel(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Loop',
+      one: 'Loop',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get metadataLikesLabel => 'Suka';
