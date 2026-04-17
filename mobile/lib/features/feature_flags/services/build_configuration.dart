@@ -39,6 +39,8 @@ class BuildConfiguration {
         return const bool.fromEnvironment('FF_INTEGRATED_APPS');
       case FeatureFlag.accountSwitching:
         return const bool.fromEnvironment('FF_ACCOUNT_SWITCHING');
+      case FeatureFlag.feedAutoAdvance:
+        return const bool.fromEnvironment('FF_FEED_AUTO_ADVANCE');
     }
   }
 
@@ -77,6 +79,8 @@ class BuildConfiguration {
         return 'FF_INTEGRATED_APPS';
       case FeatureFlag.accountSwitching:
         return 'FF_ACCOUNT_SWITCHING';
+      case FeatureFlag.feedAutoAdvance:
+        return 'FF_FEED_AUTO_ADVANCE';
     }
   }
 }
