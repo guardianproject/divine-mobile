@@ -12,6 +12,7 @@ import 'package:openvine/extensions/aspect_ratio_extensions.dart';
 import 'package:openvine/extensions/complete_parameters_extensions.dart';
 import 'package:openvine/models/divine_video_clip.dart';
 import 'package:openvine/services/crash_reporting_service.dart';
+import 'package:openvine/services/device_auth/device_auth_provider.dart';
 import 'package:openvine/services/native_proofmode_service.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -212,6 +213,7 @@ class VideoEditorRenderService {
     bool aiTrainingOptOut = true,
     CompleteParameters? parameters,
     String? taskId,
+    DeviceAuthProvider? authProvider,
   }) async {
     if (renderVideoToClipOverride != null) {
       return renderVideoToClipOverride!(
@@ -272,6 +274,7 @@ class VideoEditorRenderService {
       aiTrainingOptOut: aiTrainingOptOut,
       clips: attestedClips,
       editorStateHistory: editorStateHistory,
+      authProvider: authProvider,
     );
     final String? proofManifestJson = proofData != null
         ? jsonEncode(proofData)
