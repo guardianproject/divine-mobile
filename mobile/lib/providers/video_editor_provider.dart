@@ -834,6 +834,7 @@ class VideoEditorNotifier extends Notifier<VideoEditorProviderState> {
     setProcessing(true);
 
     final renderParameters = _buildRenderParameters();
+    final authProvider = await ref.read(proofSignAuthProvider.future);
 
     final result = await VideoEditorRenderService.renderVideoToClip(
       clips: _clips,
@@ -843,6 +844,7 @@ class VideoEditorNotifier extends Notifier<VideoEditorProviderState> {
       parameters: renderParameters,
       originalAudioVolume: state.originalAudioVolume,
       customAudioVolume: state.customAudioVolume,
+      authProvider: authProvider,
     );
 
     if (result == null) {
@@ -942,73 +944,5 @@ class VideoEditorNotifier extends Notifier<VideoEditorProviderState> {
         startTime: soundTrack.startOffset,
       ),
     );
-
-    try {
-      // Render clips into single video file
-      final outputPath = await VideoEditorRenderService.renderVideo(
-        clips: _clips,
-        aspectRatio: _clips.first.targetAspectRatio,
-        enableAudio: !state.isMuted,
-        usePersistentStorage: true,
-        parameters: state.editorEditingParameters,
-      );
-      String? proofManifestJson;
-
-      // Generate proofmode attestation if render successful
-      if (outputPath != null) {
-        Log.info(
-          '✅ Video rendered to: $outputPath',
-          name: 'VideoEditorNotifier',
-          category: .video,
-        );
-
-        Log.debug(
-          '🔐 Generating proofmode attestation for video',
-          name: 'VideoEditorNotifier',
-          category: .video,
-        );
-        final authProvider = await ref.read(
-          proofSignAuthProvider.future,
-        );
-        final proofData = await NativeProofModeService.proofFile(
-          File(outputPath),
-          authProvider: authProvider,
-        );
-
-        if (proofData != null) {
-          proofManifestJson = jsonEncode(proofData);
-          Log.info(
-            '✅ Proofmode attestation generated',
-            name: 'VideoEditorNotifier',
-            category: .video,
-          );
-        } else {
-          Log.warning(
-            '⚠️ No proofmode data available',
-            name: 'VideoEditorNotifier',
-            category: .video,
-          );
-        }
-      } else {
-        Log.error(
-          '❌ Video rendering failed',
-          name: 'VideoEditorNotifier',
-          category: .video,
-        );
-      }
-
-      state = state.copyWith(isProcessing: false);
-      return (outputPath, proofManifestJson);
-    } catch (e, stackTrace) {
-      Log.error(
-        '❌ Video rendering error: $e',
-        name: 'VideoEditorNotifier',
-        category: .video,
-        error: e,
-        stackTrace: stackTrace,
-      );
-      state = state.copyWith(isProcessing: false);
-      return (null, null);
-    }
   }
 }

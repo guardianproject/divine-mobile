@@ -11,6 +11,7 @@ import 'package:openvine/constants/video_editor_constants.dart';
 import 'package:openvine/extensions/aspect_ratio_extensions.dart';
 import 'package:openvine/models/divine_video_clip.dart';
 import 'package:openvine/services/crash_reporting_service.dart';
+import 'package:openvine/services/device_auth/device_auth_provider.dart';
 import 'package:openvine/services/native_proofmode_service.dart';
 import 'package:openvine/utils/unified_logger.dart';
 import 'package:path/path.dart' as path;
@@ -193,6 +194,7 @@ class VideoEditorRenderService {
     double customAudioVolume = 1.0,
     bool aiTrainingOptOut = true,
     CompleteParameters? parameters,
+    DeviceAuthProvider? authProvider,
   }) async {
     if (clips.isEmpty) return null;
 
@@ -229,6 +231,7 @@ class VideoEditorRenderService {
     final proofData = await NativeProofModeService.proofFile(
       File(outputPath),
       aiTrainingOptOut: aiTrainingOptOut,
+      authProvider: authProvider,
     );
     final String? proofManifestJson = proofData != null
         ? jsonEncode(proofData)

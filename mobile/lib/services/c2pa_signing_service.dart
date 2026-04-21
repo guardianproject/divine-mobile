@@ -3,7 +3,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:c2pa_flutter/c2pa.dart';
 import 'package:flutter/foundation.dart';
@@ -411,47 +410,6 @@ class C2paSigningService {
       );
     }
     return base64Decode(signature);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
-
-  /// Builds the manifest JSON for a freshly captured video.
-  String _buildManifestJson(
-    String claimGenerator,
-    String title,
-    String digitalSourceUrl,
-  ) {
-    return '''
-{
-  "claim_generator": "$claimGenerator",
-  "title": "$title",
-  "format": "video/mp4",
-  "ingredients": [
-        {
-          "title": "$title",
-          "format": "video/mp4",
-          "relationship": "parentOf",
-          "label": "c2pa.ingredient.v2"
-        }
-      ],
-  "assertions": [
-    {
-      "label": "c2pa.actions.v2",
-      "data": {
-        "actions": [
-          {
-            "action": "c2pa.created",
-            "digitalSourceType": "$digitalSourceUrl",
-            "softwareAgent": "$claimGenerator"
-          }
-        ]
-      }
-    }
-  ]
-}
-''';
   }
 
   /// Parse a signing algorithm string into the c2pa_flutter enum.
