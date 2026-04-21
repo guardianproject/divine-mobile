@@ -4697,6 +4697,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Encontre listas de vídeos selecionados';
 
   @override
+  String get searchEnterQuery => 'Digite uma busca';
+
+  @override
+  String get searchDiscoverSomethingInteresting => 'Descubra algo interessante';
+
+  @override
   String get cameraAgeRestriction =>
       'Você precisa ter 16 anos ou mais para criar conteúdo';
 

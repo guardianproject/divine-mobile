@@ -4799,6 +4799,12 @@ class AppLocalizationsRo extends AppLocalizations {
       'Găsește liste de videoclipuri selectate';
 
   @override
+  String get searchEnterQuery => 'Introdu un termen de căutare';
+
+  @override
+  String get searchDiscoverSomethingInteresting => 'Descoperă ceva interesant';
+
+  @override
   String get cameraAgeRestriction =>
       'Trebuie să ai cel puțin 16 ani pentru a crea conținut';
 

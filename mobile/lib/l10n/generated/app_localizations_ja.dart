@@ -4464,6 +4464,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get searchFindCuratedVideoLists => 'キュレーションされた動画リストを探そう';
 
   @override
+  String get searchEnterQuery => '検索キーワードを入力';
+
+  @override
+  String get searchDiscoverSomethingInteresting => '面白いものを見つけよう';
+
+  @override
   String get cameraAgeRestriction => 'コンテンツを作るには16歳以上である必要があるよ';
 
   @override

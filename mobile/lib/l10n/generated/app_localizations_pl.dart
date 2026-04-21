@@ -4806,6 +4806,12 @@ class AppLocalizationsPl extends AppLocalizations {
       'Znajdź wyselekcjonowane listy filmów';
 
   @override
+  String get searchEnterQuery => 'Wpisz zapytanie';
+
+  @override
+  String get searchDiscoverSomethingInteresting => 'Odkryj coś ciekawego';
+
+  @override
   String get cameraAgeRestriction =>
       'Musisz mieć co najmniej 16 lat, aby tworzyć treści';
 

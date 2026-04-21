@@ -4622,6 +4622,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchFindCuratedVideoLists => 'ابحث عن قوائم فيديو مختارة';
 
   @override
+  String get searchEnterQuery => 'أدخل استعلام البحث';
+
+  @override
+  String get searchDiscoverSomethingInteresting =>
+      'اكتشف شيئًا مثيرًا للاهتمام';
+
+  @override
   String get cameraAgeRestriction =>
       'يجب أن يكون عمرك 16 عامًا أو أكثر لإنشاء محتوى';
 
