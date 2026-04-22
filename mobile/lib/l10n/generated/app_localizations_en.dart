@@ -403,32 +403,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileCloseButton => 'Close';
 
   @override
-  String get profileNoCollabsTitle => 'No Collabs Yet';
+  String get profileNoCollabsTitle => 'No collabs yet';
 
   @override
   String get profileCollabsOwnEmpty =>
-      'Videos you collaborate on will appear here';
+      'Videos you collaborate on will appear here.';
 
   @override
   String get profileCollabsOtherEmpty =>
-      'Videos they collaborate on will appear here';
+      'Videos they collaborate on will appear here.';
 
   @override
   String get profileErrorLoadingCollabs => 'Error loading collab videos';
 
   @override
-  String get profileNoCommentsOwnTitle => 'No Comments Yet';
+  String get profileNoSavedVideosTitle => 'Nothing saved yet';
 
   @override
-  String get profileNoCommentsOtherTitle => 'No Comments';
+  String get profileSavedOwnEmpty =>
+      'Bookmark videos from the share sheet and they\'ll show up here.';
+
+  @override
+  String get profileErrorLoadingSaved => 'Error loading saved videos';
+
+  @override
+  String get profileNoCommentsOwnTitle => 'No comments yet';
+
+  @override
+  String get profileNoCommentsOtherTitle => 'No comments yet';
 
   @override
   String get profileCommentsOwnEmpty =>
-      'Your comments and replies will appear here';
+      'Your comments and replies will appear here.';
 
   @override
   String get profileCommentsOtherEmpty =>
-      'Their comments and replies will appear here';
+      'Their comments and replies will appear here.';
 
   @override
   String get profileErrorLoadingComments => 'Error loading comments';
@@ -446,25 +456,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileLibraryLabel => 'Library';
 
   @override
-  String get profileNoLikedVideosTitle => 'No Liked Videos Yet';
+  String get profileNoLikedVideosTitle => 'No likes yet';
 
   @override
-  String get profileLikedOwnEmpty => 'Videos you like will appear here';
+  String get profileLikedOwnEmpty =>
+      'When something catches your eye, tap the heart. Your likes will show up here.';
 
   @override
-  String get profileLikedOtherEmpty => 'Videos they like will appear here';
+  String get profileLikedOtherEmpty =>
+      'Nothing caught their eye yet. Give it time.';
 
   @override
   String get profileErrorLoadingLiked => 'Error loading liked videos';
 
   @override
-  String get profileNoRepostsTitle => 'No Reposts Yet';
+  String get profileNoRepostsTitle => 'No reposts yet';
 
   @override
-  String get profileRepostsOwnEmpty => 'Videos you repost will appear here';
+  String get profileRepostsOwnEmpty =>
+      'See something worth sharing? Repost it and it\'ll appear here.';
 
   @override
-  String get profileRepostsOtherEmpty => 'Videos they repost will appear here';
+  String get profileRepostsOtherEmpty =>
+      'They haven\'t passed anything on yet. When they do, it\'ll show up here.';
 
   @override
   String get profileErrorLoadingReposts => 'Error loading reposted videos';
@@ -479,15 +493,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileLoadingVideos => 'Loading videos...';
 
   @override
-  String get profileNoVideosTitle => 'No Videos Yet';
+  String get profileNoVideosTitle => 'No videos yet';
 
   @override
   String get profileNoVideosOwnSubtitle =>
-      'Share your first video to see it here';
+      'Your stage is set. Start posting and your videos will live here.';
 
   @override
   String get profileNoVideosOtherSubtitle =>
-      'This user hasn\'t shared any videos yet';
+      'The world is waiting. Follow them so you don\'t miss it.';
 
   @override
   String profileVideoThumbnailLabel(int number) {
@@ -548,6 +562,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSignInButton => 'Sign in';
+
+  @override
+  String get profileMaybeLaterLabel => 'Maybe Later';
+
+  @override
+  String get profileSecurePrimaryButton => 'Add Email & Password';
+
+  @override
+  String get profileCompletePrimaryButton => 'Update Your Profile';
+
+  @override
+  String get profileLoopsLabel => 'Loops';
+
+  @override
+  String get profileLikesLabel => 'Likes';
+
+  @override
+  String get profileMyLibraryLabel => 'My Library';
+
+  @override
+  String get profileMessageLabel => 'Message';
+
+  @override
+  String get profileUserFallback => 'user';
 
   @override
   String get profileDismissTooltip => 'Dismiss';

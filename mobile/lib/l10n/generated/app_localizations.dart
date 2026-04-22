@@ -763,19 +763,19 @@ abstract class AppLocalizations {
   /// No description provided for @profileNoCollabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Collabs Yet'**
+  /// **'No collabs yet'**
   String get profileNoCollabsTitle;
 
   /// No description provided for @profileCollabsOwnEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Videos you collaborate on will appear here'**
+  /// **'Videos you collaborate on will appear here.'**
   String get profileCollabsOwnEmpty;
 
   /// No description provided for @profileCollabsOtherEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Videos they collaborate on will appear here'**
+  /// **'Videos they collaborate on will appear here.'**
   String get profileCollabsOtherEmpty;
 
   /// No description provided for @profileErrorLoadingCollabs.
@@ -784,28 +784,46 @@ abstract class AppLocalizations {
   /// **'Error loading collab videos'**
   String get profileErrorLoadingCollabs;
 
+  /// No description provided for @profileNoSavedVideosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing saved yet'**
+  String get profileNoSavedVideosTitle;
+
+  /// No description provided for @profileSavedOwnEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark videos from the share sheet and they\'ll show up here.'**
+  String get profileSavedOwnEmpty;
+
+  /// No description provided for @profileErrorLoadingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading saved videos'**
+  String get profileErrorLoadingSaved;
+
   /// No description provided for @profileNoCommentsOwnTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Comments Yet'**
+  /// **'No comments yet'**
   String get profileNoCommentsOwnTitle;
 
   /// No description provided for @profileNoCommentsOtherTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Comments'**
+  /// **'No comments yet'**
   String get profileNoCommentsOtherTitle;
 
   /// No description provided for @profileCommentsOwnEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Your comments and replies will appear here'**
+  /// **'Your comments and replies will appear here.'**
   String get profileCommentsOwnEmpty;
 
   /// No description provided for @profileCommentsOtherEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Their comments and replies will appear here'**
+  /// **'Their comments and replies will appear here.'**
   String get profileCommentsOtherEmpty;
 
   /// No description provided for @profileErrorLoadingComments.
@@ -841,19 +859,19 @@ abstract class AppLocalizations {
   /// No description provided for @profileNoLikedVideosTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Liked Videos Yet'**
+  /// **'No likes yet'**
   String get profileNoLikedVideosTitle;
 
   /// No description provided for @profileLikedOwnEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Videos you like will appear here'**
+  /// **'When something catches your eye, tap the heart. Your likes will show up here.'**
   String get profileLikedOwnEmpty;
 
   /// No description provided for @profileLikedOtherEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Videos they like will appear here'**
+  /// **'Nothing caught their eye yet. Give it time.'**
   String get profileLikedOtherEmpty;
 
   /// No description provided for @profileErrorLoadingLiked.
@@ -865,19 +883,19 @@ abstract class AppLocalizations {
   /// No description provided for @profileNoRepostsTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Reposts Yet'**
+  /// **'No reposts yet'**
   String get profileNoRepostsTitle;
 
   /// No description provided for @profileRepostsOwnEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Videos you repost will appear here'**
+  /// **'See something worth sharing? Repost it and it\'ll appear here.'**
   String get profileRepostsOwnEmpty;
 
   /// No description provided for @profileRepostsOtherEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Videos they repost will appear here'**
+  /// **'They haven\'t passed anything on yet. When they do, it\'ll show up here.'**
   String get profileRepostsOtherEmpty;
 
   /// No description provided for @profileErrorLoadingReposts.
@@ -907,19 +925,19 @@ abstract class AppLocalizations {
   /// No description provided for @profileNoVideosTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Videos Yet'**
+  /// **'No videos yet'**
   String get profileNoVideosTitle;
 
   /// No description provided for @profileNoVideosOwnSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Share your first video to see it here'**
+  /// **'Your stage is set. Start posting and your videos will live here.'**
   String get profileNoVideosOwnSubtitle;
 
   /// No description provided for @profileNoVideosOtherSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'This user hasn\'t shared any videos yet'**
+  /// **'The world is waiting. Follow them so you don\'t miss it.'**
   String get profileNoVideosOtherSubtitle;
 
   /// No description provided for @profileVideoThumbnailLabel.
@@ -1029,6 +1047,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in'**
   String get profileSignInButton;
+
+  /// No description provided for @profileMaybeLaterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get profileMaybeLaterLabel;
+
+  /// No description provided for @profileSecurePrimaryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Email & Password'**
+  String get profileSecurePrimaryButton;
+
+  /// No description provided for @profileCompletePrimaryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Your Profile'**
+  String get profileCompletePrimaryButton;
+
+  /// No description provided for @profileLoopsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loops'**
+  String get profileLoopsLabel;
+
+  /// No description provided for @profileLikesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Likes'**
+  String get profileLikesLabel;
+
+  /// No description provided for @profileMyLibraryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My Library'**
+  String get profileMyLibraryLabel;
+
+  /// No description provided for @profileMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get profileMessageLabel;
+
+  /// Generic fallback noun for a user whose display name is unknown. Used in sentences like 'Unfollow {user}?'.
+  ///
+  /// In en, this message translates to:
+  /// **'user'**
+  String get profileUserFallback;
 
   /// No description provided for @profileDismissTooltip.
   ///
