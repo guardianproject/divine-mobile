@@ -1227,6 +1227,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get videoActionAutoLabel => 'Otomatik';
 
   @override
+  String get videoActionLikeLabel => 'Like';
+
+  @override
+  String get videoActionReplyLabel => 'Reply';
+
+  @override
+  String get videoActionRepostLabel => 'Repost';
+
+  @override
+  String get videoActionShareLabel => 'Share';
+
+  @override
+  String get videoActionAboutLabel => 'About';
+
+  @override
   String get videoActionEnableAutoAdvance => 'Otomatik ilerlemeyi etkinleştir';
 
   @override
@@ -1250,6 +1265,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get videoActionShowSubtitles => 'Altyazıları göster';
+
+  @override
+  String get videoOverlayOpenMetadataFromTitle => 'Open video details';
+
+  @override
+  String get videoOverlayOpenMetadataFromDescription => 'Open video details';
 
   @override
   String videoDescriptionLoops(String count) {

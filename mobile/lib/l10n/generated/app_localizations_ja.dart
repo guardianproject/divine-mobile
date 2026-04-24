@@ -1162,6 +1162,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get videoActionAutoLabel => '自動';
 
   @override
+  String get videoActionLikeLabel => 'Like';
+
+  @override
+  String get videoActionReplyLabel => 'Reply';
+
+  @override
+  String get videoActionRepostLabel => 'Repost';
+
+  @override
+  String get videoActionShareLabel => 'Share';
+
+  @override
+  String get videoActionAboutLabel => 'About';
+
+  @override
   String get videoActionEnableAutoAdvance => '自動送りを有効にする';
 
   @override
@@ -1184,6 +1199,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get videoActionShowSubtitles => '字幕を表示';
+
+  @override
+  String get videoOverlayOpenMetadataFromTitle => 'Open video details';
+
+  @override
+  String get videoOverlayOpenMetadataFromDescription => 'Open video details';
 
   @override
   String videoDescriptionLoops(String count) {

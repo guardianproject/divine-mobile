@@ -2242,6 +2242,36 @@ abstract class AppLocalizations {
   /// **'Auto'**
   String get videoActionAutoLabel;
 
+  /// No description provided for @videoActionLikeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get videoActionLikeLabel;
+
+  /// No description provided for @videoActionReplyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get videoActionReplyLabel;
+
+  /// No description provided for @videoActionRepostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repost'**
+  String get videoActionRepostLabel;
+
+  /// No description provided for @videoActionShareLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get videoActionShareLabel;
+
+  /// No description provided for @videoActionAboutLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get videoActionAboutLabel;
+
   /// No description provided for @videoActionEnableAutoAdvance.
   ///
   /// In en, this message translates to:
@@ -2289,6 +2319,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show subtitles'**
   String get videoActionShowSubtitles;
+
+  /// Screen-reader label for the tappable title row on the video overlay. Action-oriented: describes what tapping does (opens the metadata sheet), not the title text itself — that's already read aloud by the underlying Text widget.
+  ///
+  /// In en, this message translates to:
+  /// **'Open video details'**
+  String get videoOverlayOpenMetadataFromTitle;
+
+  /// Screen-reader label for the tappable description row on the video overlay. Action-oriented: describes what tapping does (opens the metadata sheet), not the description text itself — that's already read aloud by the underlying Text widget.
+  ///
+  /// In en, this message translates to:
+  /// **'Open video details'**
+  String get videoOverlayOpenMetadataFromDescription;
 
   /// No description provided for @videoDescriptionLoops.
   ///
