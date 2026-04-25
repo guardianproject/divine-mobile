@@ -1798,9 +1798,7 @@ Nip98AuthService nip98AuthService(Ref ref) {
 @riverpod
 BlossomAuthService blossomAuthService(Ref ref) {
   final authService = ref.watch(authServiceProvider);
-  return BlossomAuthService(
-    authProvider: _BlossomAuthAdapter(authService),
-  );
+  return BlossomAuthService(authProvider: _BlossomAuthAdapter(authService));
 }
 
 /// Shared viewer auth service for media GET requests.
