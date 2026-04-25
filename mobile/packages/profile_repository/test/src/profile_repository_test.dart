@@ -628,6 +628,7 @@ void main() {
               engagement: ProfileEngagementData.fromJson(const {
                 'total_reactions': 42,
                 'total_loops': 12.6,
+                'total_views': 99,
               }),
             ),
           );
@@ -654,6 +655,38 @@ void main() {
               followingCount: 7,
               videoCount: 3,
               totalLikes: 42,
+              totalViews: 99,
+            ),
+          ).called(1);
+        });
+
+        test('uses rounded loops when unified views are unavailable', () async {
+          when(() => mockFunnelcakeClient.isAvailable).thenReturn(true);
+          when(
+            () => mockFunnelcakeClient.getUserProfile(testPubkey),
+          ).thenAnswer(
+            (_) async => UserProfileNotPublished(
+              pubkey: testPubkey,
+              engagement: ProfileEngagementData.fromJson(const {
+                'total_loops': 12.6,
+                'total_views': 0,
+              }),
+            ),
+          );
+
+          final result = await repoWithFunnelcake.fetchFreshProfile(
+            pubkey: testPubkey,
+          );
+
+          expect(result, isNull);
+          expect(repoWithFunnelcake.isConfirmedMissing(testPubkey), isTrue);
+          verify(
+            () => mockProfileStatsDao.upsertStats(
+              pubkey: testPubkey,
+              followerCount: any(named: 'followerCount'),
+              followingCount: any(named: 'followingCount'),
+              videoCount: any(named: 'videoCount'),
+              totalLikes: any(named: 'totalLikes'),
               totalViews: 13,
             ),
           ).called(1);
