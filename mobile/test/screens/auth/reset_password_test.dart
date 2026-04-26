@@ -25,16 +25,19 @@ void main() {
       mockOAuth = _MockKeycastOAuth();
     });
 
-    Widget buildTestWidget() {
+    Widget buildTestWidget({String? email}) {
       return ProviderScope(
         overrides: [
           ...getStandardTestOverrides(),
           oauthClientProvider.overrideWithValue(mockOAuth),
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: ResetPasswordScreen(token: 'test-token-abc123'),
+          home: ResetPasswordScreen(
+            token: 'test-token-abc123',
+            email: email,
+          ),
         ),
       );
     }
@@ -66,36 +69,98 @@ void main() {
         expect(find.byType(AutofillGroup), findsOneWidget);
       });
 
-      testWidgets('calls TextInput.finishAutofillContext on successful reset', (
-        tester,
-      ) async {
-        final recorder = AutofillContextRecorder.install();
+      testWidgets(
+        'renders read-only email field with AutofillHints.username when '
+        'email param present',
+        (tester) async {
+          const email = 'user@example.com';
 
-        when(
-          () => mockOAuth.resetPassword(
-            token: any(named: 'token'),
-            newPassword: any(named: 'newPassword'),
-          ),
-        ).thenAnswer((_) async => ResetPasswordResult(success: true));
+          await tester.pumpWidget(buildTestWidget(email: email));
+          await tester.pumpAndSettle();
 
-        await tester.pumpWidget(buildTestWidget());
-        await tester.pumpAndSettle();
+          final usernameField = find.byWidgetPredicate(
+            (widget) =>
+                widget is TextField &&
+                (widget.autofillHints?.contains(AutofillHints.username) ??
+                    false),
+          );
 
-        // Enter a valid password (>= 8 characters).
-        await tester.enterText(
-          find.descendant(
-            of: find.widgetWithText(DivineAuthTextField, 'New Password'),
-            matching: find.byType(TextField),
-          ),
-          'NewSecure123!',
-        );
+          expect(usernameField, findsOneWidget);
+          final textField = tester.widget<TextField>(usernameField);
+          expect(textField.readOnly, isTrue);
+          expect(textField.controller?.text, equals(email));
+        },
+      );
 
-        await tester.tap(find.widgetWithText(DivineButton, 'Update password'));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
+      testWidgets(
+        'omits email field when email param is null',
+        (tester) async {
+          await tester.pumpWidget(buildTestWidget());
+          await tester.pumpAndSettle();
 
-        expect(recorder.didFinishAutofillContext, isTrue);
-      });
+          final usernameField = find.byWidgetPredicate(
+            (widget) =>
+                widget is TextField &&
+                (widget.autofillHints?.contains(AutofillHints.username) ??
+                    false),
+          );
+
+          expect(usernameField, findsNothing);
+        },
+      );
+
+      testWidgets(
+        'omits email field when email param is empty string',
+        (tester) async {
+          await tester.pumpWidget(buildTestWidget(email: ''));
+          await tester.pumpAndSettle();
+
+          final usernameField = find.byWidgetPredicate(
+            (widget) =>
+                widget is TextField &&
+                (widget.autofillHints?.contains(AutofillHints.username) ??
+                    false),
+          );
+
+          expect(usernameField, findsNothing);
+        },
+      );
+
+      testWidgets(
+        'calls TextInput.finishAutofillContext on successful reset',
+        (tester) async {
+          final recorder = AutofillContextRecorder.install();
+
+          when(
+            () => mockOAuth.resetPassword(
+              token: any(named: 'token'),
+              newPassword: any(named: 'newPassword'),
+            ),
+          ).thenAnswer(
+            (_) async => ResetPasswordResult(success: true),
+          );
+
+          await tester.pumpWidget(buildTestWidget());
+          await tester.pumpAndSettle();
+
+          // Enter a valid password (>= 8 characters).
+          await tester.enterText(
+            find.descendant(
+              of: find.widgetWithText(DivineAuthTextField, 'New Password'),
+              matching: find.byType(TextField),
+            ),
+            'NewSecure123!',
+          );
+
+          await tester.tap(
+            find.widgetWithText(DivineButton, 'Update password'),
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
+
+          expect(recorder.didFinishAutofillContext, isTrue);
+        },
+      );
     });
   });
 }
