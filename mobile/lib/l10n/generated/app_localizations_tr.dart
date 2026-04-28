@@ -611,6 +611,13 @@ class AppLocalizationsTr extends AppLocalizations {
       'Profil yayınlanamadı. Lütfen tekrar dene.';
 
   @override
+  String get profileSetupNoRelaysConnected =>
+      'Ağa ulaşılamadı. Bağlantını kontrol et ve tekrar dene.';
+
+  @override
+  String get profileSetupRetryLabel => 'Tekrar dene';
+
+  @override
   String get profileSetupDisplayNameLabel => 'Görünen Ad';
 
   @override
