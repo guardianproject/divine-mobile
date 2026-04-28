@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:divine_ui/divine_ui.dart';
@@ -292,13 +293,17 @@ class _TimelineOutsideAreaPainter extends CustomPainter {
     canvas.clipRect(Offset.zero & size);
     canvas.transform(_stripeTransformStorage);
 
-    final drawHeight = (size.height * 3).ceilToDouble();
-    final drawWidth = (size.width * 3).ceilToDouble();
-    final startX = -drawWidth - ((-drawWidth) % _stripeGap);
-    for (var x = startX; x <= drawWidth; x += _stripeGap) {
+    // Diagonal covers the rotated bounding box for any aspect ratio.
+    final extent = math
+        .sqrt(
+          size.width * size.width + size.height * size.height,
+        )
+        .ceilToDouble();
+    final startX = -extent - ((-extent) % _stripeGap);
+    for (var x = startX; x <= extent; x += _stripeGap) {
       canvas.drawLine(
-        Offset(x, -drawHeight),
-        Offset(x, drawHeight),
+        Offset(x, -extent),
+        Offset(x, extent),
         stripePaint,
       );
     }
