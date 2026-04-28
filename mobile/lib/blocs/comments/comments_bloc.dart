@@ -69,11 +69,10 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
     on<CommentSubmitted>(_onSubmitted);
     on<CommentErrorCleared>(_onErrorCleared);
     on<CommentDeleteRequested>(_onDeleteRequested);
-    // droppable() prevents concurrent processing of the SAME event type,
-    // but the manual voteInProgressCommentId guard prevents
-    // rapid toggles on DIFFERENT comment IDs from racing each other.
-    on<CommentUpvoteToggled>(_onUpvoteToggled, transformer: droppable());
-    on<CommentDownvoteToggled>(_onDownvoteToggled, transformer: droppable());
+    // Single handler with droppable(): splitting by direction would let an
+    // up-tap and a down-tap run concurrently and interleave kind-7 / kind-5
+    // publishes on the relay.
+    on<CommentVoteToggled>(_onVoteToggled, transformer: droppable());
     on<CommentVoteCountsFetchRequested>(_onVoteCountsFetchRequested);
     on<CommentsSortModeChanged>(_onSortModeChanged);
     on<CommentReportRequested>(_onReportRequested, transformer: droppable());
@@ -485,39 +484,18 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
     }
   }
 
-  Future<void> _onUpvoteToggled(
-    CommentUpvoteToggled event,
+  Future<void> _onVoteToggled(
+    CommentVoteToggled event,
     Emitter<CommentsState> emit,
-  ) async => _onVoteToggled(
-    commentId: event.commentId,
-    authorPubkey: event.authorPubkey,
-    isUpvote: true,
-    emit: emit,
-  );
-
-  Future<void> _onDownvoteToggled(
-    CommentDownvoteToggled event,
-    Emitter<CommentsState> emit,
-  ) async => _onVoteToggled(
-    commentId: event.commentId,
-    authorPubkey: event.authorPubkey,
-    isUpvote: false,
-    emit: emit,
-  );
-
-  Future<void> _onVoteToggled({
-    required String commentId,
-    required String authorPubkey,
-    required bool isUpvote,
-    required Emitter<CommentsState> emit,
-  }) async {
+  ) async {
     if (!_authService.isAuthenticated) {
       emit(state.copyWith(error: CommentsError.notAuthenticated));
       return;
     }
 
-    // Prevent double-tap on the same comment
-    if (state.voteInProgressCommentId == commentId) return;
+    final commentId = event.commentId;
+    final authorPubkey = event.authorPubkey;
+    final isUpvote = event.vote == Vote.up;
 
     final wasUpvoted = state.upvotedCommentIds.contains(commentId);
     final wasDownvoted = state.downvotedCommentIds.contains(commentId);
@@ -560,27 +538,23 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
         downvotedCommentIds: downIds,
         commentUpvoteCounts: upCounts,
         commentDownvoteCounts: downCounts,
-        voteInProgressCommentId: commentId,
       ),
     );
 
     try {
-      if (hadSameVote) {
-        // Remove existing vote
-        if (isUpvote) {
-          await _likesRepository.toggleLike(
-            eventId: commentId,
-            authorPubkey: authorPubkey,
-            targetKind: EventKind.comment,
-          );
+      // Remove the user's existing vote (same or opposite) first. The repo
+      // tracks upvotes in _likeRecords and downvotes in _downvoteRecords;
+      // pick the right teardown call based on which side actually had it.
+      if (hadSameVote || hadOppositeVote) {
+        if (wasUpvoted) {
+          await _likesRepository.unlikeEvent(commentId);
         } else {
-          await _likesRepository.unlikeEvent(commentId);
+          await _likesRepository.removeDownvote(commentId);
         }
-      } else {
-        // Remove opposite vote if present, then add new vote
-        if (hadOppositeVote) {
-          await _likesRepository.unlikeEvent(commentId);
-        }
+      }
+
+      // Place the new vote (only when this tap isn't a same-side removal).
+      if (!hadSameVote) {
         if (isUpvote) {
           await _likesRepository.likeEvent(
             eventId: commentId,
@@ -595,9 +569,41 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
           );
         }
       }
-
-      // Clear in-progress guard
-      emit(state.copyWith());
+    } on AlreadyLikedException {
+      // Repo already had the upvote — sync state to reality without error.
+      // Pre-tap baseline was wrong; trust the repo.
+      emit(
+        state.copyWith(
+          upvotedCommentIds: Set<String>.from(state.upvotedCommentIds)
+            ..add(commentId),
+          downvotedCommentIds: Set<String>.from(state.downvotedCommentIds)
+            ..remove(commentId),
+        ),
+      );
+    } on NotLikedException {
+      // Repo had no upvote to remove — sync state and continue.
+      emit(
+        state.copyWith(
+          upvotedCommentIds: Set<String>.from(state.upvotedCommentIds)
+            ..remove(commentId),
+        ),
+      );
+    } on AlreadyDownvotedException {
+      emit(
+        state.copyWith(
+          downvotedCommentIds: Set<String>.from(state.downvotedCommentIds)
+            ..add(commentId),
+          upvotedCommentIds: Set<String>.from(state.upvotedCommentIds)
+            ..remove(commentId),
+        ),
+      );
+    } on NotDownvotedException {
+      emit(
+        state.copyWith(
+          downvotedCommentIds: Set<String>.from(state.downvotedCommentIds)
+            ..remove(commentId),
+        ),
+      );
     } catch (e) {
       Log.error(
         'Error toggling comment ${isUpvote ? 'upvote' : 'downvote'}: $e',
@@ -605,7 +611,7 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
         category: LogCategory.ui,
       );
 
-      // Revert optimistic update
+      // Revert optimistic update to the pre-tap baseline.
       emit(
         state.copyWith(
           upvotedCommentIds: Set<String>.from(state.upvotedCommentIds)
