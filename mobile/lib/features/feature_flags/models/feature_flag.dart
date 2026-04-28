@@ -60,6 +60,13 @@ enum FeatureFlag {
     'Show Nostr relay configuration and diagnostics in Settings. '
         'Changing relays can break publishing and discovery — only turn '
         'this on if you know what you are doing.',
+  ),
+  proofSignDeviceAuth(
+    'ProofSign Device Auth (experimental)',
+    'Use device attestation (App Attest on iOS, Play Integrity / Key '
+        'Attestation on Android) when signing C2PA video manifests with '
+        'ProofSign. When off, signing falls back to the dev bearer token. '
+        'Turn this on only if your device is enrolled with ProofSign.',
   )
   ;
 

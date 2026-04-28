@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:openvine/config/proofsign_config.dart';
+import 'package:openvine/features/feature_flags/models/feature_flag.dart';
+import 'package:openvine/features/feature_flags/providers/feature_flag_providers.dart';
 import 'package:openvine/services/device_auth/app_attest_provider.dart';
 import 'package:openvine/services/device_auth/device_auth_provider.dart';
 import 'package:openvine/services/device_auth/key_attestation_provider.dart';
@@ -32,6 +34,18 @@ const _tag = 'ProofSignProvider';
 /// or registration fails.
 @Riverpod(keepAlive: true)
 Future<DeviceAuthProvider?> proofSignAuth(Ref ref) async {
+  final flagEnabled = ref.watch(
+    isFeatureEnabledProvider(FeatureFlag.proofSignDeviceAuth),
+  );
+  if (!flagEnabled) {
+    Log.info(
+      'ProofSign device auth disabled by feature flag — '
+      'signing will use bearer token',
+      name: _tag,
+    );
+    return null;
+  }
+
   const config = ProofSignConfig.fromEnvironment;
   if (!config.isConfigured) {
     Log.info(

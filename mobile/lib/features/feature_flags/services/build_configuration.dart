@@ -47,6 +47,8 @@ class BuildConfiguration {
         return const bool.fromEnvironment('FF_CONTENT_POLICY_V2');
       case FeatureFlag.advancedRelaySettings:
         return const bool.fromEnvironment('FF_ADVANCED_RELAY_SETTINGS');
+      case FeatureFlag.proofSignDeviceAuth:
+        return const bool.fromEnvironment('FF_PROOFSIGN_DEVICE_AUTH');
     }
   }
 
@@ -93,6 +95,8 @@ class BuildConfiguration {
         return 'FF_CONTENT_POLICY_V2';
       case FeatureFlag.advancedRelaySettings:
         return 'FF_ADVANCED_RELAY_SETTINGS';
+      case FeatureFlag.proofSignDeviceAuth:
+        return 'FF_PROOFSIGN_DEVICE_AUTH';
     }
   }
 }
