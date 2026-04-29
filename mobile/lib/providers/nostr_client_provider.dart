@@ -72,40 +72,15 @@ class NostrService extends _$NostrService {
       dbClient: dbClient,
     );
 
-    // Register callback so when NIP-65 discovery completes later, we add those
-    // relays to this client (fixes race where discovery finishes after client build)
-    authService.registerUserRelaysDiscoveredCallback((relayUrls) {
-      if (relayUrls.isEmpty) return;
-      Future.microtask(() async {
-        try {
-          final added = await client.addRelays(relayUrls);
-          if (added > 0) {
-            Log.info(
-              '[NostrService] Added $added discovered relay(s) after NIP-65 discovery',
-              name: 'NostrService',
-              category: LogCategory.system,
-            );
-          }
-        } catch (e) {
-          Log.warning(
-            '[NostrService] Failed to add discovered relays: $e',
-            name: 'NostrService',
-            category: LogCategory.system,
-          );
-        }
-      });
-    });
+    // NIP-65 discovered-relays callback — see _userRelaysDiscoveredCallbackFor.
+    authService.registerUserRelaysDiscoveredCallback(
+      _userRelaysDiscoveredCallbackFor(client),
+    );
 
-    // Register bootstrap kind:10002 callback — AuthService calls this when
-    // indexer discovery returns empty, so we self-publish a minimal relay
-    // list on the user's behalf. See divine-mobile#3174 / keycast#94.
-    authService.registerBootstrapRelayListCallback((event, targetRelays) async {
-      final published = await client.publishEvent(
-        event,
-        targetRelays: targetRelays,
-      );
-      return published != null;
-    });
+    // Bootstrap kind:10002 publisher — see _bootstrapCallbackFor.
+    authService.registerBootstrapRelayListCallback(
+      _bootstrapCallbackFor(client),
+    );
 
     // Schedule initialization after build completes
     // Add user relays BEFORE initialize() to avoid race condition
@@ -192,41 +167,15 @@ class NostrService extends _$NostrService {
         dbClient: dbClient,
       );
 
-      // Register callback for new client so later discovery adds relays to it
-      authService.registerUserRelaysDiscoveredCallback((relayUrls) {
-        if (relayUrls.isEmpty) return;
-        Future.microtask(() async {
-          try {
-            final added = await newClient.addRelays(relayUrls);
-            if (added > 0) {
-              Log.info(
-                '[NostrService] Added $added discovered relay(s) after NIP-65 discovery',
-                name: 'NostrService',
-                category: LogCategory.system,
-              );
-            }
-          } catch (e) {
-            Log.warning(
-              '[NostrService] Failed to add discovered relays: $e',
-              name: 'NostrService',
-              category: LogCategory.system,
-            );
-          }
-        });
-      });
+      // NIP-65 discovered-relays callback — see _userRelaysDiscoveredCallbackFor.
+      authService.registerUserRelaysDiscoveredCallback(
+        _userRelaysDiscoveredCallbackFor(newClient),
+      );
 
-      // Register bootstrap kind:10002 callback for the new client. See
-      // divine-mobile#3174 / keycast#94.
-      authService.registerBootstrapRelayListCallback((
-        event,
-        targetRelays,
-      ) async {
-        final published = await newClient.publishEvent(
-          event,
-          targetRelays: targetRelays,
-        );
-        return published != null;
-      });
+      // Bootstrap kind:10002 publisher — see _bootstrapCallbackFor.
+      authService.registerBootstrapRelayListCallback(
+        _bootstrapCallbackFor(newClient),
+      );
 
       _lastPubkey = newPubkey;
 
@@ -238,5 +187,54 @@ class NostrService extends _$NostrService {
       await newClient.initialize();
       state = newClient;
     }
+  }
+
+  /// Builds the NIP-65 discovered-relays callback bound to [client].
+  ///
+  /// Registered with AuthService so when NIP-65 discovery completes later,
+  /// the discovered relays are added to [client] — this fixes the race
+  /// where discovery finishes after the client has been built. Used at
+  /// both initial-build and account-switch sites so the
+  /// add-relays-on-discovery flow stays in one place.
+  static UserRelaysDiscoveredCallback _userRelaysDiscoveredCallbackFor(
+    NostrClient client,
+  ) {
+    return (relayUrls) {
+      if (relayUrls.isEmpty) return;
+      Future.microtask(() async {
+        try {
+          final added = await client.addRelays(relayUrls);
+          if (added > 0) {
+            Log.info(
+              '[NostrService] Added $added discovered relay(s) after NIP-65 discovery',
+              name: 'NostrService',
+              category: LogCategory.system,
+            );
+          }
+        } catch (e) {
+          Log.warning(
+            '[NostrService] Failed to add discovered relays: $e',
+            name: 'NostrService',
+            category: LogCategory.system,
+          );
+        }
+      });
+    };
+  }
+
+  /// Builds the bootstrap kind:10002 publisher closure bound to [client].
+  ///
+  /// AuthService invokes this when indexer NIP-65 discovery returns empty,
+  /// so we self-publish a minimal relay list on the user's behalf. Used at
+  /// both initial-build and account-switch sites so the publish path stays
+  /// in one place. See divine-mobile#3174 / keycast#94.
+  static BootstrapRelayListCallback _bootstrapCallbackFor(NostrClient client) {
+    return (event, targetRelays) async {
+      final published = await client.publishEvent(
+        event,
+        targetRelays: targetRelays,
+      );
+      return published != null;
+    };
   }
 }
