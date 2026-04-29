@@ -4538,6 +4538,32 @@ class AppLocalizationsTr extends AppLocalizations {
   String get inboxConversationUnmuted => 'Sohbet sessizden çıkarıldı';
 
   @override
+  String get inboxCollabInviteCardTitle => 'İşbirliği daveti';
+
+  @override
+  String inboxCollabInviteCardRoleLabel(String role) {
+    return 'Bu gönderide $role';
+  }
+
+  @override
+  String get inboxCollabInviteAcceptButton => 'Kabul et';
+
+  @override
+  String get inboxCollabInviteIgnoreButton => 'Yoksay';
+
+  @override
+  String get inboxCollabInviteAcceptedStatus => 'Kabul edildi';
+
+  @override
+  String get inboxCollabInviteIgnoredStatus => 'Yoksayıldı';
+
+  @override
+  String get inboxCollabInviteAcceptError => 'Kabul edilemedi. Tekrar dene.';
+
+  @override
+  String get inboxCollabInviteSentStatus => 'Davet gönderildi';
+
+  @override
   String get reportDialogCancel => 'İptal';
 
   @override

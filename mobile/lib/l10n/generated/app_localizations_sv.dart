@@ -4548,6 +4548,33 @@ class AppLocalizationsSv extends AppLocalizations {
   String get inboxConversationUnmuted => 'Konversation inte tystad';
 
   @override
+  String get inboxCollabInviteCardTitle => 'Inbjudan att samarbeta';
+
+  @override
+  String inboxCollabInviteCardRoleLabel(String role) {
+    return '$role i det här inlägget';
+  }
+
+  @override
+  String get inboxCollabInviteAcceptButton => 'Acceptera';
+
+  @override
+  String get inboxCollabInviteIgnoreButton => 'Ignorera';
+
+  @override
+  String get inboxCollabInviteAcceptedStatus => 'Accepterad';
+
+  @override
+  String get inboxCollabInviteIgnoredStatus => 'Ignorerad';
+
+  @override
+  String get inboxCollabInviteAcceptError =>
+      'Det gick inte att acceptera. Försök igen.';
+
+  @override
+  String get inboxCollabInviteSentStatus => 'Inbjudan skickad';
+
+  @override
   String get reportDialogCancel => 'Avbryt';
 
   @override

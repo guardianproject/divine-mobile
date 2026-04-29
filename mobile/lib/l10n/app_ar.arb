@@ -2255,6 +2255,24 @@
             }
         }
     },
+    "inboxCollabInviteAcceptButton": "قبول",
+    "inboxCollabInviteAcceptError": "تعذر القبول. حاول مرة أخرى.",
+    "inboxCollabInviteAcceptedStatus": "تم القبول",
+    "inboxCollabInviteCardRoleLabel": "{role} على هذا المنشور",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "دعوة للتعاون",
+    "inboxCollabInviteIgnoreButton": "تجاهل",
+    "inboxCollabInviteIgnoredStatus": "تم التجاهل",
+    "inboxCollabInviteSentStatus": "تم إرسال الدعوة",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
+    },
     "inboxConversationMuted": "تم كتم المحادثة",
     "inboxConversationUnmuted": "تم إلغاء كتم المحادثة",
     "inboxEmptySubtitle": "زر + لن يعضّك.",

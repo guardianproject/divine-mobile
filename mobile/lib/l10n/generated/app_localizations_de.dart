@@ -4607,6 +4607,33 @@ class AppLocalizationsDe extends AppLocalizations {
       'Unterhaltung nicht mehr stummgeschaltet';
 
   @override
+  String get inboxCollabInviteCardTitle => 'Einladung zur Zusammenarbeit';
+
+  @override
+  String inboxCollabInviteCardRoleLabel(String role) {
+    return '$role bei diesem Beitrag';
+  }
+
+  @override
+  String get inboxCollabInviteAcceptButton => 'Annehmen';
+
+  @override
+  String get inboxCollabInviteIgnoreButton => 'Ignorieren';
+
+  @override
+  String get inboxCollabInviteAcceptedStatus => 'Angenommen';
+
+  @override
+  String get inboxCollabInviteIgnoredStatus => 'Ignoriert';
+
+  @override
+  String get inboxCollabInviteAcceptError =>
+      'Annahme fehlgeschlagen. Erneut versuchen.';
+
+  @override
+  String get inboxCollabInviteSentStatus => 'Einladung gesendet';
+
+  @override
   String get reportDialogCancel => 'Abbrechen';
 
   @override

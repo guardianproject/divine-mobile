@@ -4684,6 +4684,33 @@ class AppLocalizationsRo extends AppLocalizations {
   String get inboxConversationUnmuted => 'Conversație reactivată';
 
   @override
+  String get inboxCollabInviteCardTitle => 'Invitație de colaborare';
+
+  @override
+  String inboxCollabInviteCardRoleLabel(String role) {
+    return '$role la această postare';
+  }
+
+  @override
+  String get inboxCollabInviteAcceptButton => 'Acceptă';
+
+  @override
+  String get inboxCollabInviteIgnoreButton => 'Ignoră';
+
+  @override
+  String get inboxCollabInviteAcceptedStatus => 'Acceptată';
+
+  @override
+  String get inboxCollabInviteIgnoredStatus => 'Ignorată';
+
+  @override
+  String get inboxCollabInviteAcceptError =>
+      'Nu s-a putut accepta. Încearcă din nou.';
+
+  @override
+  String get inboxCollabInviteSentStatus => 'Invitație trimisă';
+
+  @override
   String get reportDialogCancel => 'Anulează';
 
   @override
