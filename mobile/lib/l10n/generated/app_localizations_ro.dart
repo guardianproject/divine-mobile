@@ -306,6 +306,13 @@ class AppLocalizationsRo extends AppLocalizations {
   String get profileMoreSemanticLabel => 'Mai multe opțiuni';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => 'Închide avatarul';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel =>
+      'Închide previzualizarea avatarului';
+
+  @override
   String get profileFollowingLabel => 'Urmărit';
 
   @override
@@ -3518,6 +3525,17 @@ class AppLocalizationsRo extends AppLocalizations {
       'Când oamenii interacționează cu conținutul tău, vei vedea asta aici';
 
   @override
+  String get notificationsUnreadPrefix => 'Notificare necitită';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return 'Vezi profilul $displayName';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => 'Vezi profilurile';
+
+  @override
   String notificationsLoadingType(String type) {
     return 'Se încarcă notificările de tip $type...';
   }
@@ -5151,6 +5169,23 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String notificationRepostedYourVideo(String actorName) {
     return '$actorName a redistribuit videoclipul tău';
+  }
+
+  @override
+  String get notificationRepliedToYourComment => 'a răspuns la comentariul tău';
+
+  @override
+  String get notificationAndConnector => 'și';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'încă $count persoane',
+      one: 'încă 1 persoană',
+    );
+    return '$_temp0';
   }
 
   @override

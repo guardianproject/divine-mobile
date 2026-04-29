@@ -259,6 +259,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get profileMoreSemanticLabel => 'その他のオプション';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => 'アバターを閉じる';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel => 'アバタープレビューを閉じる';
+
+  @override
   String get profileFollowingLabel => 'フォロー中';
 
   @override
@@ -3248,6 +3254,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationsEmptyDescription => '誰かがあなたのコンテンツに反応したらここに出るよ';
 
   @override
+  String get notificationsUnreadPrefix => '未読の通知';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return '$displayNameさんのプロフィールを開く';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => 'プロフィールを開く';
+
+  @override
   String notificationsLoadingType(String type) {
     return '$typeの通知を読み込み中...';
   }
@@ -4811,6 +4828,22 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String notificationRepostedYourVideo(String actorName) {
     return '$actorNameさんがあなたの動画をリポストしました';
+  }
+
+  @override
+  String get notificationRepliedToYourComment => 'があなたのコメントに返信しました';
+
+  @override
+  String get notificationAndConnector => 'と';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '他$count人',
+    );
+    return '$_temp0';
   }
 
   @override

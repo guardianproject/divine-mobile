@@ -166,6 +166,14 @@
   "profileRefreshSemanticLabel": "Refresh profile",
   "profileMoreTooltip": "More",
   "profileMoreSemanticLabel": "More options",
+  "profileAvatarLightboxBarrierLabel": "Close avatar",
+  "@profileAvatarLightboxBarrierLabel": {
+    "description": "Screen-reader label for the dismissable scrim behind the maximized profile-avatar dialog. Read aloud when focus lands on the barrier."
+  },
+  "profileAvatarLightboxCloseSemanticLabel": "Close avatar preview",
+  "@profileAvatarLightboxCloseSemanticLabel": {
+    "description": "Screen-reader label for the maximized profile-avatar dialog's tap-to-close gesture detector."
+  },
   "profileFollowingLabel": "Following",
   "profileFollowLabel": "Follow",
   "profileBlockedLabel": "Blocked",
@@ -1760,6 +1768,23 @@
     }
   },
   "notificationsEmptyDescription": "When people interact with your content, you'll see it here",
+  "notificationsUnreadPrefix": "Unread notification",
+  "@notificationsUnreadPrefix": {
+    "description": "Screen-reader prefix announced before an unread notification row's content, so the user hears that the row is unread before the message itself."
+  },
+  "notificationsViewProfileSemanticLabel": "View {displayName} profile",
+  "@notificationsViewProfileSemanticLabel": {
+    "description": "Screen-reader label for the avatar tap target on a notification row, which opens the user's profile.",
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsViewProfilesSemanticLabel": "View profiles",
+  "@notificationsViewProfilesSemanticLabel": {
+    "description": "Screen-reader label for a grouped notification's avatar stack, which opens the list of involved profiles."
+  },
   "notificationsLoadingType": "Loading {type} notifications...",
   "@notificationsLoadingType": {
     "placeholders": {
@@ -2671,6 +2696,21 @@
   "@notificationRepostedYourVideo": {
     "placeholders": {
       "actorName": { "type": "String" }
+    }
+  },
+  "notificationRepliedToYourComment": "replied to your comment",
+  "@notificationRepliedToYourComment": {
+    "description": "Verb phrase shown after the actor name in a reply notification."
+  },
+  "notificationAndConnector": "and",
+  "@notificationAndConnector": {
+    "description": "Connector word between the first actor and the 'N others' count in a grouped notification (e.g. 'Alice and 3 others liked your video')."
+  },
+  "notificationOthersCount": "{count, plural, =1{1 other} other{{count} others}}",
+  "@notificationOthersCount": {
+    "description": "Number of additional actors beyond the first in a grouped notification.",
+    "placeholders": {
+      "count": { "type": "int" }
     }
   },
 

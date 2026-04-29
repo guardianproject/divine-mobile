@@ -279,6 +279,13 @@ class AppLocalizationsSv extends AppLocalizations {
   String get profileMoreSemanticLabel => 'Fler alternativ';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => 'Stäng avatar';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel =>
+      'Stäng avatarförhandsvisning';
+
+  @override
   String get profileFollowingLabel => 'Följer';
 
   @override
@@ -3413,6 +3420,17 @@ class AppLocalizationsSv extends AppLocalizations {
       'När folk interagerar med ditt innehåll ser du det här';
 
   @override
+  String get notificationsUnreadPrefix => 'Oläst avisering';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return 'Visa ${displayName}s profil';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => 'Visa profiler';
+
+  @override
   String notificationsLoadingType(String type) {
     return 'Läser in $type-aviseringar...';
   }
@@ -5010,6 +5028,23 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String notificationRepostedYourVideo(String actorName) {
     return '$actorName delade din video';
+  }
+
+  @override
+  String get notificationRepliedToYourComment => 'svarade på din kommentar';
+
+  @override
+  String get notificationAndConnector => 'och';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count till',
+      one: '1 till',
+    );
+    return '$_temp0';
   }
 
   @override

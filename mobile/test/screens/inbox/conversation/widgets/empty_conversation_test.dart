@@ -13,7 +13,11 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
-              body: EmptyConversation(displayName: 'Bob', onViewProfile: () {}),
+              body: EmptyConversation(
+                displayName: 'Bob',
+                pubkey: 'pk1',
+                onViewProfile: () {},
+              ),
             ),
           ),
         );
@@ -27,7 +31,11 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
-              body: EmptyConversation(displayName: 'Bob', onViewProfile: () {}),
+              body: EmptyConversation(
+                displayName: 'Bob',
+                pubkey: 'pk1',
+                onViewProfile: () {},
+              ),
             ),
           ),
         );
@@ -43,6 +51,7 @@ void main() {
             home: Scaffold(
               body: EmptyConversation(
                 displayName: 'Bob',
+                pubkey: 'pk1',
                 nip05: 'bob@example.com',
                 onViewProfile: () {},
               ),
@@ -59,7 +68,11 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
-              body: EmptyConversation(displayName: 'Bob', onViewProfile: () {}),
+              body: EmptyConversation(
+                displayName: 'Bob',
+                pubkey: 'pk1',
+                onViewProfile: () {},
+              ),
             ),
           ),
         );
@@ -74,7 +87,11 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
-              body: EmptyConversation(displayName: 'Bob', onViewProfile: () {}),
+              body: EmptyConversation(
+                displayName: 'Bob',
+                pubkey: 'pk1',
+                onViewProfile: () {},
+              ),
             ),
           ),
         );
@@ -96,6 +113,7 @@ void main() {
             home: Scaffold(
               body: EmptyConversation(
                 displayName: 'Bob',
+                pubkey: 'pk1',
                 onViewProfile: () => wasCalled = true,
               ),
             ),

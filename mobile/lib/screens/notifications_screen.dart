@@ -1,4 +1,3 @@
-// TODO(notifications-refactor): Remove after migration is verified
 // ABOUTME: Notifications screen displaying user's social interactions and system updates
 // ABOUTME: Shows likes, comments, follows, mentions, reposts with filtering and read state
 
@@ -119,66 +118,101 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
       );
     }
 
-    // AppShell provides the Scaffold and AppBar, so this is just the body content
-    return Column(
-      children: [
-        // Tab bar for filtering notifications
-        Material(
-          color: VineTheme.navGreen,
-          child: TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            padding: const EdgeInsetsDirectional.only(start: 16),
-            indicatorColor: VineTheme.tabIndicatorGreen,
-            indicatorWeight: 4,
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: VineTheme.transparent,
-            labelColor: VineTheme.whiteText,
-            unselectedLabelColor: VineTheme.tabIconInactive,
-            labelStyle: VineTheme.tabTextStyle(),
-            unselectedLabelStyle: VineTheme.tabTextStyle(
-              color: VineTheme.tabIconInactive,
+    // Inner top-radius ClipRRect keeps the tabs strip visually correct when
+    // this screen is rendered without a rounded outer wrapper.
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(VineTheme.shellInnerCornerRadius),
+      ),
+      child: ColoredBox(
+        color: VineTheme.surfaceContainerHigh,
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            // Transparent Material so surfaceContainerHigh shows through.
+            Material(
+              type: .transparency,
+              child: Stack(
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    padding: const EdgeInsetsDirectional.only(start: 16),
+                    indicatorColor: VineTheme.tabIndicatorGreen,
+                    indicatorWeight: 4,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: VineTheme.transparent,
+                    labelColor: VineTheme.whiteText,
+                    unselectedLabelColor: VineTheme.onSurfaceMuted55,
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 14),
+                    labelStyle: VineTheme.titleMediumFont(),
+                    unselectedLabelStyle: VineTheme.titleMediumFont(
+                      color: VineTheme.onSurfaceMuted55,
+                    ),
+                    tabs: [
+                      Tab(text: context.l10n.notificationsTabAll),
+                      Tab(text: context.l10n.notificationsTabLikes),
+                      Tab(text: context.l10n.notificationsTabComments),
+                      Tab(text: context.l10n.notificationsTabFollows),
+                      Tab(text: context.l10n.notificationsTabReposts),
+                    ],
+                  ),
+                  // Right-edge fade gradient shim to hint scrollability.
+                  const Positioned(
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    width: 24,
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.centerRight,
+                            end: Alignment.centerLeft,
+                            colors: [
+                              VineTheme.surfaceContainerHigh,
+                              VineTheme.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            labelPadding: const EdgeInsets.symmetric(horizontal: 14),
-            tabs: [
-              Tab(text: context.l10n.notificationsTabAll),
-              Tab(text: context.l10n.notificationsTabLikes),
-              Tab(text: context.l10n.notificationsTabComments),
-              Tab(text: context.l10n.notificationsTabFollows),
-              Tab(text: context.l10n.notificationsTabReposts),
-            ],
-          ),
+            // Notification lists with swipe support
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _NotificationTabContent(
+                    filter: null,
+                    isActive: _activeTabIndex == 0,
+                  ),
+                  _NotificationTabContent(
+                    filter: NotificationType.like,
+                    isActive: _activeTabIndex == 1,
+                  ),
+                  _NotificationTabContent(
+                    filter: NotificationType.comment,
+                    isActive: _activeTabIndex == 2,
+                  ),
+                  _NotificationTabContent(
+                    filter: NotificationType.follow,
+                    isActive: _activeTabIndex == 3,
+                  ),
+                  _NotificationTabContent(
+                    filter: NotificationType.repost,
+                    isActive: _activeTabIndex == 4,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        // Notification lists with swipe support
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _NotificationTabContent(
-                filter: null,
-                isActive: _activeTabIndex == 0,
-              ),
-              _NotificationTabContent(
-                filter: NotificationType.like,
-                isActive: _activeTabIndex == 1,
-              ),
-              _NotificationTabContent(
-                filter: NotificationType.comment,
-                isActive: _activeTabIndex == 2,
-              ),
-              _NotificationTabContent(
-                filter: NotificationType.follow,
-                isActive: _activeTabIndex == 3,
-              ),
-              _NotificationTabContent(
-                filter: NotificationType.repost,
-                isActive: _activeTabIndex == 4,
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -237,13 +271,13 @@ class _NotificationTabContentState
 
     return asyncState.when(
       loading: () => const ColoredBox(
-        color: VineTheme.backgroundColor,
+        color: VineTheme.surfaceContainerHigh,
         child: Center(
           child: CircularProgressIndicator(color: VineTheme.vineGreen),
         ),
       ),
       error: (error, _) => ColoredBox(
-        color: VineTheme.backgroundColor,
+        color: VineTheme.surfaceContainerHigh,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -292,7 +326,7 @@ class _NotificationTabContentState
 
         if (notifications.isEmpty) {
           return ColoredBox(
-            color: VineTheme.backgroundColor,
+            color: VineTheme.surfaceContainerHigh,
             child: RefreshIndicator(
               semanticsLabel: context.l10n.notificationsCheckingNew,
               color: VineTheme.onPrimary,
@@ -376,7 +410,7 @@ class _NotificationTabContentState
         }
 
         return ColoredBox(
-          color: VineTheme.backgroundColor,
+          color: VineTheme.surfaceContainerHigh,
           child: RefreshIndicator(
             semanticsLabel: 'checking for new notifications',
             color: VineTheme.onPrimary,
@@ -446,10 +480,8 @@ class _NotificationTabContentState
                                   context,
                                 ).toLanguageTag(),
                               ),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: VineTheme.secondaryText,
+                              style: VineTheme.labelLargeFont(
+                                color: VineTheme.onSurfaceMuted,
                               ),
                             ),
                           ),
@@ -473,13 +505,6 @@ class _NotificationTabContentState
                             );
                           },
                         ),
-                        if (adjustedIndex < notifications.length - 1)
-                          const Divider(
-                            height: 1,
-                            thickness: 0.5,
-                            color: VineTheme.onSurfaceMuted,
-                            indent: 72,
-                          ),
                       ],
                     );
                   },

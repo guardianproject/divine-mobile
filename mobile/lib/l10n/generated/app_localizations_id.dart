@@ -272,6 +272,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get profileMoreSemanticLabel => 'Opsi lainnya';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => 'Tutup avatar';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel =>
+      'Tutup pratinjau avatar';
+
+  @override
   String get profileFollowingLabel => 'Mengikuti';
 
   @override
@@ -3390,6 +3397,17 @@ class AppLocalizationsId extends AppLocalizations {
       'Saat orang berinteraksi dengan kontenmu, kamu akan melihatnya di sini';
 
   @override
+  String get notificationsUnreadPrefix => 'Notifikasi belum dibaca';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return 'Lihat profil $displayName';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => 'Lihat profil';
+
+  @override
   String notificationsLoadingType(String type) {
     return 'Memuat notifikasi $type...';
   }
@@ -4992,6 +5010,22 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String notificationRepostedYourVideo(String actorName) {
     return '$actorName membagikan ulang videomu';
+  }
+
+  @override
+  String get notificationRepliedToYourComment => 'membalas komentar Anda';
+
+  @override
+  String get notificationAndConnector => 'dan';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lainnya',
+    );
+    return '$_temp0';
   }
 
   @override

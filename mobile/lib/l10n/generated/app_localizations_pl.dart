@@ -291,6 +291,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get profileMoreSemanticLabel => 'Więcej opcji';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => 'Zamknij awatar';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel =>
+      'Zamknij podgląd awatara';
+
+  @override
   String get profileFollowingLabel => 'Obserwujesz';
 
   @override
@@ -3513,6 +3520,17 @@ class AppLocalizationsPl extends AppLocalizations {
       'Gdy ludzie zaczną wchodzić w interakcję z twoimi treściami, zobaczysz to tutaj';
 
   @override
+  String get notificationsUnreadPrefix => 'Nieprzeczytane powiadomienie';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return 'Zobacz profil użytkownika $displayName';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => 'Zobacz profile';
+
+  @override
   String notificationsLoadingType(String type) {
     return 'Wczytywanie powiadomień typu $type...';
   }
@@ -5154,6 +5172,24 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String notificationRepostedYourVideo(String actorName) {
     return '$actorName udostępnił(a) Twoje wideo';
+  }
+
+  @override
+  String get notificationRepliedToYourComment =>
+      'odpowiedział(a) na Twój komentarz';
+
+  @override
+  String get notificationAndConnector => 'i';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count innych osób',
+      one: '1 inna osoba',
+    );
+    return '$_temp0';
   }
 
   @override

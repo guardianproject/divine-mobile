@@ -385,9 +385,13 @@ class _PeopleAvatarItem extends ConsumerWidget {
           padding: const EdgeInsetsDirectional.only(end: 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            spacing: 4,
             children: [
-              UserAvatar(imageUrl: profile?.picture, size: 56),
-              const SizedBox(height: 4),
+              UserAvatar(
+                imageUrl: profile?.picture,
+                placeholderSeed: pubkey,
+                size: 56,
+              ),
               SizedBox(
                 width: 70,
                 child: Text(

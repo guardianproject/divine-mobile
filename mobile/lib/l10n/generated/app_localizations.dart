@@ -580,6 +580,18 @@ abstract class AppLocalizations {
   /// **'More options'**
   String get profileMoreSemanticLabel;
 
+  /// Screen-reader label for the dismissable scrim behind the maximized profile-avatar dialog. Read aloud when focus lands on the barrier.
+  ///
+  /// In en, this message translates to:
+  /// **'Close avatar'**
+  String get profileAvatarLightboxBarrierLabel;
+
+  /// Screen-reader label for the maximized profile-avatar dialog's tap-to-close gesture detector.
+  ///
+  /// In en, this message translates to:
+  /// **'Close avatar preview'**
+  String get profileAvatarLightboxCloseSemanticLabel;
+
   /// No description provided for @profileFollowingLabel.
   ///
   /// In en, this message translates to:
@@ -6014,6 +6026,24 @@ abstract class AppLocalizations {
   /// **'When people interact with your content, you\'ll see it here'**
   String get notificationsEmptyDescription;
 
+  /// Screen-reader prefix announced before an unread notification row's content, so the user hears that the row is unread before the message itself.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread notification'**
+  String get notificationsUnreadPrefix;
+
+  /// Screen-reader label for the avatar tap target on a notification row, which opens the user's profile.
+  ///
+  /// In en, this message translates to:
+  /// **'View {displayName} profile'**
+  String notificationsViewProfileSemanticLabel(String displayName);
+
+  /// Screen-reader label for a grouped notification's avatar stack, which opens the list of involved profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'View profiles'**
+  String get notificationsViewProfilesSemanticLabel;
+
   /// No description provided for @notificationsLoadingType.
   ///
   /// In en, this message translates to:
@@ -8869,6 +8899,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{actorName} reposted your video'**
   String notificationRepostedYourVideo(String actorName);
+
+  /// Verb phrase shown after the actor name in a reply notification.
+  ///
+  /// In en, this message translates to:
+  /// **'replied to your comment'**
+  String get notificationRepliedToYourComment;
+
+  /// Connector word between the first actor and the 'N others' count in a grouped notification (e.g. 'Alice and 3 others liked your video').
+  ///
+  /// In en, this message translates to:
+  /// **'and'**
+  String get notificationAndConnector;
+
+  /// Number of additional actors beyond the first in a grouped notification.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 other} other{{count} others}}'**
+  String notificationOthersCount(int count);
 
   /// No description provided for @draftUntitled.
   ///
