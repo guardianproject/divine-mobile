@@ -4402,6 +4402,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get inboxCollabInviteSentStatus => '초대를 보냈어요';
 
   @override
+  String get inboxConversationCollabInvitePreview => '콜라보 초대';
+
+  @override
   String get reportDialogCancel => '취소';
 
   @override
