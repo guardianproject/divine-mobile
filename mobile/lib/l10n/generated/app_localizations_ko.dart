@@ -2521,6 +2521,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shareSheetSaveVideo => '영상 저장';
 
   @override
+  String get shareSheetAddToClips => '클립에 추가';
+
+  @override
+  String get shareSheetAddedToClips => '클립에 추가했어요';
+
+  @override
+  String get shareSheetAddToClipsFailed => '클립에 추가할 수 없어요';
+
+  @override
   String get shareSheetAddToList => '리스트에 추가';
 
   @override

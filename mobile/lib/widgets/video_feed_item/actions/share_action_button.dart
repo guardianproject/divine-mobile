@@ -3,6 +3,7 @@
 // ABOUTME: input, and more actions (save, copy, share via, report, etc.).
 
 import 'package:divine_ui/divine_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:openvine/features/feature_flags/models/feature_flag.dart';
 import 'package:openvine/features/feature_flags/providers/feature_flag_providers.dart';
 import 'package:openvine/l10n/l10n.dart';
 import 'package:openvine/providers/app_providers.dart';
+import 'package:openvine/providers/classic_vine_clip_import_provider.dart';
 import 'package:openvine/providers/environment_provider.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
 import 'package:openvine/services/video_sharing_service.dart';
@@ -123,6 +125,9 @@ class _UnifiedShareSheetState extends ConsumerState<_UnifiedShareSheet> {
       followRepository: ref.read(followRepositoryProvider),
       bookmarkServiceFuture: ref.read(bookmarkServiceProvider.future),
       cacheManager: openVineImageCache,
+      classicVineClipImportService: ref.read(
+        classicVineClipImportServiceProvider,
+      ),
     )..add(const ShareSheetContactsLoadRequested());
   }
 
@@ -150,6 +155,7 @@ class _UnifiedShareSheetState extends ConsumerState<_UnifiedShareSheet> {
   @override
   Widget build(BuildContext context) {
     final isOwnContent = _isUserOwnContent();
+    final canAddClassicVineToClips = widget.video.isOriginalVine && !kIsWeb;
 
     return BlocProvider.value(
       value: _shareSheetBloc,
@@ -166,6 +172,11 @@ class _UnifiedShareSheetState extends ConsumerState<_UnifiedShareSheet> {
           onReport: _handleReport,
           onSaveOriginal: isOwnContent ? _handleSaveOriginal : null,
           onSaveWithWatermark: _handleSaveWithWatermark,
+          onAddClassicVineToClips: canAddClassicVineToClips
+              ? () => _shareSheetBloc.add(
+                  const ShareSheetAddClassicVineToClipsRequested(),
+                )
+              : null,
         ),
       ),
     );
@@ -199,6 +210,16 @@ class _UnifiedShareSheetState extends ConsumerState<_UnifiedShareSheet> {
             succeeded
                 ? context.l10n.shareAddedToBookmarks
                 : context.l10n.shareFailedToAddBookmark,
+            error: !succeeded,
+          ),
+        );
+      case ShareSheetClassicVineClipImportResult(:final succeeded):
+        _safePop(context);
+        messenger.showSnackBar(
+          DivineSnackbarContainer.snackBar(
+            succeeded
+                ? context.l10n.shareSheetAddedToClips
+                : context.l10n.shareSheetAddToClipsFailed,
             error: !succeeded,
           ),
         );
@@ -332,6 +353,7 @@ class _UnifiedShareSheetView extends StatelessWidget {
     required this.onAddToList,
     required this.onReport,
     required this.onSaveWithWatermark,
+    this.onAddClassicVineToClips,
     this.onSaveOriginal,
   });
 
@@ -343,6 +365,7 @@ class _UnifiedShareSheetView extends StatelessWidget {
   final VoidCallback onReport;
   final Future<void> Function()? onSaveOriginal;
   final Future<void> Function() onSaveWithWatermark;
+  final VoidCallback? onAddClassicVineToClips;
 
   @override
   Widget build(BuildContext context) {
@@ -395,6 +418,7 @@ class _UnifiedShareSheetView extends StatelessWidget {
                         onSave: () => bloc.add(const ShareSheetSaveRequested()),
                         onSaveOriginal: onSaveOriginal,
                         onSaveWithWatermark: onSaveWithWatermark,
+                        onAddClassicVineToClips: onAddClassicVineToClips,
                         onAddToList: onAddToList,
                         onCopyLink: () =>
                             bloc.add(const ShareSheetCopyLinkRequested()),

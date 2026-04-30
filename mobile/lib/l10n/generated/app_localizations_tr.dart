@@ -2632,6 +2632,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get shareSheetSaveVideo => 'Videoyu Kaydet';
 
   @override
+  String get shareSheetAddToClips => 'Kliplere ekle';
+
+  @override
+  String get shareSheetAddedToClips => 'Kliplere eklendi';
+
+  @override
+  String get shareSheetAddToClipsFailed => 'Kliplere eklenemedi';
+
+  @override
   String get shareSheetAddToList => 'Listeye Ekle';
 
   @override

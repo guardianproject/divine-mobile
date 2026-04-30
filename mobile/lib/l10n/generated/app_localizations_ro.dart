@@ -2729,6 +2729,15 @@ class AppLocalizationsRo extends AppLocalizations {
   String get shareSheetSaveVideo => 'Salvează videoclipul';
 
   @override
+  String get shareSheetAddToClips => 'Adaugă la clipuri';
+
+  @override
+  String get shareSheetAddedToClips => 'Adăugat la clipuri';
+
+  @override
+  String get shareSheetAddToClipsFailed => 'Nu s-a putut adăuga la clipuri';
+
+  @override
   String get shareSheetAddToList => 'Adaugă la listă';
 
   @override

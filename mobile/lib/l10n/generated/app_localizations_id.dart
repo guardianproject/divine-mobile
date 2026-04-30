@@ -2625,6 +2625,15 @@ class AppLocalizationsId extends AppLocalizations {
   String get shareSheetSaveVideo => 'Simpan Video';
 
   @override
+  String get shareSheetAddToClips => 'Tambahkan ke klip';
+
+  @override
+  String get shareSheetAddedToClips => 'Ditambahkan ke klip';
+
+  @override
+  String get shareSheetAddToClipsFailed => 'Tidak dapat menambahkan ke klip';
+
+  @override
   String get shareSheetAddToList => 'Tambah ke Daftar';
 
   @override

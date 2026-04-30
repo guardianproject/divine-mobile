@@ -2644,6 +2644,15 @@ class AppLocalizationsSv extends AppLocalizations {
   String get shareSheetSaveVideo => 'Spara video';
 
   @override
+  String get shareSheetAddToClips => 'Lägg till i klipp';
+
+  @override
+  String get shareSheetAddedToClips => 'Tillagt i klipp';
+
+  @override
+  String get shareSheetAddToClipsFailed => 'Kunde inte lägga till i klipp';
+
+  @override
   String get shareSheetAddToList => 'Lägg till i lista';
 
   @override
