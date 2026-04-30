@@ -5248,6 +5248,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get videoEditorOpenFilterSemanticLabel => 'فتح محرر الفلاتر';
 
   @override
+  String get videoEditorOpenStickerSemanticLabel => 'فتح محرر الملصقات';
+
+  @override
   String get videoEditorSaveDraftTitle => 'حفظ المسودة؟';
 
   @override
@@ -5456,6 +5459,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get videoEditorFeedPreviewContent =>
       'تجنب وضع المحتوى خلف هذه المناطق.';
+
+  @override
+  String get videoEditorStickersDivineOriginals => 'Divine الأصلية';
 
   @override
   String get videoEditorStickerSearchHint => 'البحث في الملصقات...';

@@ -5353,6 +5353,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get videoEditorOpenFilterSemanticLabel => 'Abrir editor de filtros';
 
   @override
+  String get videoEditorOpenStickerSemanticLabel => 'Abrir editor de stickers';
+
+  @override
   String get videoEditorSaveDraftTitle => '¿Guardar tu borrador?';
 
   @override
@@ -5569,6 +5572,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get videoEditorFeedPreviewContent =>
       'Evita colocar contenido detrás de estas áreas.';
+
+  @override
+  String get videoEditorStickersDivineOriginals => 'Divine Originales';
 
   @override
   String get videoEditorStickerSearchHint => 'Buscar stickers...';

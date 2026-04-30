@@ -5290,6 +5290,10 @@ class AppLocalizationsSv extends AppLocalizations {
   String get videoEditorOpenFilterSemanticLabel => 'Öppna filtereditor';
 
   @override
+  String get videoEditorOpenStickerSemanticLabel =>
+      'Öppna klistermärkesredigerare';
+
+  @override
   String get videoEditorSaveDraftTitle => 'Spara ditt utkast?';
 
   @override
@@ -5502,6 +5506,9 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get videoEditorFeedPreviewContent =>
       'Undvik att placera innehåll bakom dessa områden.';
+
+  @override
+  String get videoEditorStickersDivineOriginals => 'Divine Original';
 
   @override
   String get videoEditorStickerSearchHint => 'Sök stickers...';
