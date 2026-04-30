@@ -51,7 +51,7 @@ final class ClassicVinesFeedProvider
   ClassicVinesFeed create() => ClassicVinesFeed();
 }
 
-String _$classicVinesFeedHash() => r'dae0e59fd5c1d737a96b612fbae7e0fe532027aa';
+String _$classicVinesFeedHash() => r'31af899ba468acb15c63498bf119caf3426fa295';
 
 /// ClassicVines feed provider - shows pre-2017 Vine archive sorted by loops
 ///
@@ -219,7 +219,7 @@ final class ClassicVinesAvailableProvider
 }
 
 String _$classicVinesAvailableHash() =>
-    r'39ee4ffc7ab9d5494577f0ef017908bc6103f394';
+    r'617a64b91dcb7896bcc986e4a7af0f0db6544825';
 
 /// Provider for top classic Viners derived from classic videos
 ///
