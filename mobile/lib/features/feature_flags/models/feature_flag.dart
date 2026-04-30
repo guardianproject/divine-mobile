@@ -62,11 +62,10 @@ enum FeatureFlag {
         'this on if you know what you are doing.',
   ),
   proofSignDeviceAuth(
-    'ProofSign Device Auth (experimental)',
+    'ProofSign Device Auth',
     'Use device attestation (App Attest on iOS, Play Integrity / Key '
         'Attestation on Android) when signing C2PA video manifests with '
-        'ProofSign. When off, signing falls back to the dev bearer token. '
-        'Turn this on only if your device is enrolled with ProofSign.',
+        'ProofSign. When off, signing falls back to token auth. '
   )
   ;
 
