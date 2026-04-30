@@ -12,6 +12,7 @@ import 'package:openvine/models/video_editor/video_editor_provider_state.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/clip_manager_provider.dart';
 import 'package:openvine/providers/video_editor_provider.dart';
+import 'package:openvine/services/device_auth/proofsign_provider.dart';
 import 'package:openvine/services/draft_storage_service.dart';
 import 'package:openvine/services/video_editor/video_editor_render_service.dart';
 import 'package:pro_video_editor/pro_video_editor.dart';
@@ -23,7 +24,9 @@ void main() {
     late ProviderContainer container;
 
     setUp(() {
-      container = ProviderContainer();
+      container = ProviderContainer(
+        overrides: [proofSignAuthProvider.overrideWith((ref) async => null)],
+      );
     });
 
     tearDown(() {
@@ -510,6 +513,11 @@ void main() {
         // Start second (fast) render — increments _renderGeneration
         final render2 = notifier.startRenderVideo();
 
+        // Both calls await `proofSignAuthProvider.future` before invoking
+        // the render override. Drain the microtask queue so both renders
+        // advance past that await and call into the override.
+        await Future<void>.delayed(Duration.zero);
+
         expect(callCount, equals(2));
 
         // Fast render completes first
@@ -795,7 +803,9 @@ void main() {
     late ProviderContainer container;
 
     setUp(() {
-      container = ProviderContainer();
+      container = ProviderContainer(
+        overrides: [proofSignAuthProvider.overrideWith((ref) async => null)],
+      );
     });
 
     tearDown(() {
@@ -911,7 +921,9 @@ void main() {
     late ProviderContainer container;
 
     setUp(() {
-      container = ProviderContainer();
+      container = ProviderContainer(
+        overrides: [proofSignAuthProvider.overrideWith((ref) async => null)],
+      );
     });
 
     tearDown(() {

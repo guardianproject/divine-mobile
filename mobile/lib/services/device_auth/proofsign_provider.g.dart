@@ -67,4 +67,4 @@ final class ProofSignAuthProvider
   }
 }
 
-String _$proofSignAuthHash() => r'3c6cca59ddd6360fd9e309049ec9b842868c39c0';
+String _$proofSignAuthHash() => r'378654665efdacb76a942f8a575d46438f6edbf9';
