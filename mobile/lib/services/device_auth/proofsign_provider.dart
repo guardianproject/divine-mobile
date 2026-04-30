@@ -135,12 +135,19 @@ Future<DeviceAuthProvider?> _createAndroidProvider(
       packageName: packageInfo.packageName,
     );
     if (savedType == 'play_integrity' && savedId != null) {
-      provider.restoreDeviceId(savedId);
+      final savedCounter = prefs.getInt(_keyDeviceAuthCounter) ?? 0;
+      provider.restoreDeviceId(savedId, counter: savedCounter);
       Log.debug(
-        'Restored Play Integrity registration from storage',
+        'Restored Play Integrity registration from storage '
+        '(counter: $savedCounter)',
         name: _tag,
       );
     }
+    // Persist counter after each signing request
+    provider.onCounterChanged = (counter) async {
+      final p = await SharedPreferences.getInstance();
+      await p.setInt(_keyDeviceAuthCounter, counter);
+    };
     return provider;
   }
 

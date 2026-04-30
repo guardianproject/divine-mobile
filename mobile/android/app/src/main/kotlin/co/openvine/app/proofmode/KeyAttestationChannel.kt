@@ -23,7 +23,7 @@ class KeyAttestationChannel {
         private const val CHANNEL_NAME = "com.openvine/key_attestation"
         private const val TAG = "KeyAttestationChannel"
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
-        private const val KEY_ALIAS = "proofsign_device_key"
+        private const val KEY_ALIAS = "proofsign_key_attestation_key"
     }
 
     fun register(flutterEngine: FlutterEngine) {

@@ -29,7 +29,10 @@ class KeyAttestationProvider implements DeviceAuthProvider {
 
   /// Called after each signing request with the new counter value.
   /// Used by the provider to persist the counter to SharedPreferences.
-  void Function(int counter)? onCounterChanged;
+  ///
+  /// The signer awaits this future before transmitting the signed request,
+  /// so the persisted counter is durable even if the app is killed mid-flight.
+  Future<void> Function(int counter)? onCounterChanged;
 
   /// The device ID, or null if not registered.
   String? get deviceId => _deviceId;
@@ -111,7 +114,10 @@ class KeyAttestationProvider implements DeviceAuthProvider {
     }
 
     _counter++;
-    onCounterChanged?.call(_counter);
+    // Persist the new counter BEFORE we use it to sign the outgoing request,
+    // so a crash between increment and signing can't leave the server with a
+    // counter higher than what we'll present on next launch.
+    await onCounterChanged?.call(_counter);
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final signPayload = '$_deviceId|$_counter|$timestamp|$claim';
 
