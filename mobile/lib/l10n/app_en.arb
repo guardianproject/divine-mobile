@@ -249,6 +249,14 @@
       }
     }
   },
+  "profileAddToListDisplayName": "Add {displayName} to a list",
+  "@profileAddToListDisplayName": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
   "profileUserBlockedTitle": "User Blocked",
   "profileUserBlockedContent": "You won't see content from this user in your feeds.",
   "profileUserBlockedUnblockHint": "You can unblock them anytime from their profile or in Settings > Safety.",
@@ -1544,7 +1552,7 @@
   "shareMenuAddToBookmarksSubtitle": "Save for later viewing",
   "shareMenuAddToBookmarkSet": "Add to Bookmark Set",
   "shareMenuAddToBookmarkSetSubtitle": "Organize in collections",
-  "shareMenuFollowSets": "Follow Sets",
+  "shareMenuFollowSets": "People Lists",
   "shareMenuCreateFollowSet": "Create Follow Set",
   "shareMenuCreateFollowSetSubtitle": "Start new collection with this creator",
   "shareMenuAddToFollowSet": "Add to Follow Set",
@@ -1553,6 +1561,99 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "peopleListsAddToList": "Add to list",
+  "peopleListsAddToListSubtitle": "Put this creator in one of your lists",
+  "peopleListsSheetTitle": "Add to list",
+  "peopleListsEmptyTitle": "No lists yet",
+  "peopleListsEmptySubtitle": "Create a list to start grouping people.",
+  "peopleListsCreateList": "Create list",
+  "peopleListsNewListTitle": "New list",
+  "peopleListsRouteTitle": "People list",
+  "@peopleListsRouteTitle": {
+    "description": "AppBar title for the people-list members route when it is reached with a missing or empty list id (e.g., via a malformed deep link)."
+  },
+  "peopleListsListNameLabel": "List name",
+  "peopleListsListNameHint": "Close friends",
+  "peopleListsCreateButton": "Create",
+  "peopleListsAddPeopleTitle": "Add people",
+  "peopleListsAddPeopleTooltip": "Add people",
+  "peopleListsAddPeopleSemanticLabel": "Add people to list",
+  "peopleListsListNotFoundTitle": "List not found",
+  "peopleListsListNotFoundSubtitle": "List not found. It may have been deleted.",
+  "peopleListsListDeletedSubtitle": "This list may have been deleted.",
+  "peopleListsNoPeopleTitle": "No people in this list",
+  "peopleListsNoPeopleSubtitle": "Add some people to get started",
+  "peopleListsNoVideosTitle": "No videos yet",
+  "peopleListsNoVideosSubtitle": "Videos from list members will appear here",
+  "peopleListsNoVideosAvailable": "No videos available",
+  "peopleListsFailedToLoadVideos": "Failed to load videos",
+  "peopleListsVideoNotAvailable": "Video not available",
+  "peopleListsBackToGridTooltip": "Back to grid",
+  "peopleListsErrorLoadingVideos": "Error loading videos",
+  "peopleListsNoPeopleToAdd": "No people available to add.",
+  "peopleListsAddToListName": "Add to {name}",
+  "@peopleListsAddToListName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsAddPeopleSearchHint": "Search people",
+  "peopleListsAddPeopleError": "Couldn't load people. Please try again.",
+  "peopleListsAddPeopleRetry": "Try again",
+  "peopleListsAddButton": "Add",
+  "peopleListsAddButtonWithCount": "Add {count}",
+  "@peopleListsAddButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "peopleListsInNLists": "{count, plural, =1{In 1 list} other{In {count} lists}}",
+  "@peopleListsInNLists": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "peopleListsRemoveConfirmTitle": "Remove {name}?",
+  "@peopleListsRemoveConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsRemoveConfirmBody": "They will be removed from this list.",
+  "peopleListsRemove": "Remove",
+  "peopleListsRemovedFromList": "Removed {name} from list",
+  "@peopleListsRemovedFromList": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsUndo": "Undo",
+  "peopleListsProfileLongPressHint": "Profile for {name}. Long press to remove.",
+  "@peopleListsProfileLongPressHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsViewProfileHint": "View profile for {name}",
+  "@peopleListsViewProfileHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },
@@ -2044,6 +2145,10 @@
     }
   },
   "listCreateNewList": "Create New List",
+  "listNewPeopleList": "New people list",
+  "listCollaboratorsNone": "None",
+  "listAddCollaboratorTitle": "Add a collaborator",
+  "listCollaboratorSearchHint": "Search diVine...",
   "listNameLabel": "List Name",
   "listDescriptionLabel": "Description (optional)",
   "listPublicList": "Public List",

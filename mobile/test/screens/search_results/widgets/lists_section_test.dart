@@ -14,6 +14,10 @@ import 'package:openvine/screens/search_results/widgets/section_header.dart';
 class _MockListSearchBloc extends MockBloc<ListSearchEvent, ListSearchState>
     implements ListSearchBloc {}
 
+// Full-length 64-char Nostr pubkey — never truncate.
+const String _authorOne =
+    '1111111111111111111111111111111111111111111111111111111111111111';
+
 void main() {
   group(ListsSection, () {
     late _MockListSearchBloc mockBloc;
@@ -22,7 +26,7 @@ void main() {
     final testList = CuratedList(
       id: 'cl1',
       name: 'Top Videos',
-      pubkey: 'author1',
+      pubkey: _authorOne,
       videoEventIds: const ['vid1'],
       createdAt: now,
       updatedAt: now,
@@ -41,9 +45,15 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: BlocProvider<ListSearchBloc>.value(
-            value: mockBloc,
-            child: CustomScrollView(slivers: [ListsSection(showAll: showAll)]),
+          body: SizedBox(
+            width: 800,
+            height: 1000,
+            child: BlocProvider<ListSearchBloc>.value(
+              value: mockBloc,
+              child: CustomScrollView(
+                slivers: [ListsSection(showAll: showAll)],
+              ),
+            ),
           ),
         ),
       );
@@ -116,20 +126,32 @@ void main() {
         },
       );
 
-      testWidgets('renders $SearchSectionErrorState on failure', (
-        tester,
-      ) async {
-        when(() => mockBloc.state).thenReturn(
-          const ListSearchState(
-            status: ListSearchStatus.failure,
-            query: 'test',
-          ),
-        );
+      testWidgets(
+        'renders $SearchSectionErrorState on failure',
+        (tester) async {
+          when(() => mockBloc.state).thenReturn(
+            const ListSearchState(
+              status: ListSearchStatus.failure,
+              query: 'test',
+            ),
+          );
 
-        await tester.pumpWidget(buildSubject(showAll: true));
+          await tester.pumpWidget(buildSubject(showAll: true));
 
-        expect(find.byType(SearchSectionErrorState), findsOneWidget);
-      });
+          expect(find.byType(SearchSectionErrorState), findsOneWidget);
+        },
+      );
+
+      // Note: rendering PeopleListSearchCard in a test viewport triggers a
+      // pre-existing layout bug in `UserAvatar(size: double.infinity)` inside
+      // its AspectRatio collage. That is owned by the card widget, not this
+      // section. We cover the behavior at two layers instead:
+      //   - BLoC: `list_search_bloc_test.dart` verifies peopleResults are
+      //     populated correctly from the repository.
+      //   - Integration: `_PeopleListCard.onTap` is a compile-time no-op in
+      //     `lists_section.dart` (see the comment "Intentionally disabled
+      //     until public people-list routes include owner pubkey"), so the
+      //     non-navigation guarantee is enforced structurally, not at runtime.
     });
 
     testWidgets('retry dispatches $ListSearchQueryChanged with current query', (

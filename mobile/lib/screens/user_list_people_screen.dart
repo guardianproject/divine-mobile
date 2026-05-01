@@ -1,11 +1,14 @@
 // ABOUTME: Screen for displaying people from a NIP-51 kind 30000 user list with their videos
-// ABOUTME: Shows horizontal carousel of people at top, video grid below
+// ABOUTME: Selects the UserList by id from PeopleListsBloc so it reacts to repository updates.
 
 import 'package:divine_ui/divine_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart' hide LogCategory;
+import 'package:openvine/features/people_lists/people_lists.dart';
+import 'package:openvine/l10n/l10n.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/list_providers.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
@@ -17,51 +20,157 @@ import 'package:openvine/widgets/scroll_to_hide_mixin.dart';
 import 'package:openvine/widgets/user_avatar.dart';
 import 'package:unified_logger/unified_logger.dart';
 
-class UserListPeopleScreen extends ConsumerStatefulWidget {
-  const UserListPeopleScreen({required this.userList, super.key});
+/// Screen that renders a single NIP-51 kind 30000 people list.
+///
+/// The screen is addressed by [listId] and selects the matching [UserList]
+/// from [PeopleListsBloc] with a [BlocSelector], so edits made elsewhere
+/// (add/remove member, rename) are reflected without rebuilding the route.
+class UserListPeopleScreen extends StatelessWidget {
+  const UserListPeopleScreen({required this.listId, super.key});
 
-  final UserList userList;
+  /// GoRouter name for this route.
+  static const routeName = 'people-list-members';
+
+  /// GoRouter path template for this route.
+  static const path = '/people-lists/:listId';
+
+  /// Full list id (NIP-51 addressable identifier). Never truncated.
+  final String listId;
 
   @override
-  ConsumerState<UserListPeopleScreen> createState() =>
-      _UserListPeopleScreenState();
+  Widget build(BuildContext context) {
+    return BlocSelector<PeopleListsBloc, PeopleListsState, UserList?>(
+      selector: (state) {
+        for (final list in state.lists) {
+          if (list.id == listId) return list;
+        }
+        return null;
+      },
+      builder: (context, userList) {
+        if (userList == null) {
+          return const _ListNotFoundView();
+        }
+        return _UserListPeopleView(userList: userList);
+      },
+    );
+  }
 }
 
-class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
-    with ScrollToHideMixin {
-  int? _activeVideoIndex;
+/// Shown when the selected [UserList] is not present in bloc state.
+class _ListNotFoundView extends StatelessWidget {
+  const _ListNotFoundView();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: VineTheme.backgroundColor,
+      appBar: DiVineAppBar(
+        title: context.l10n.peopleListsRouteTitle,
+        showBackButton: true,
+        onBackPressed: context.pop,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.group_off,
+              size: 64,
+              color: VineTheme.secondaryText,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.peopleListsListNotFoundTitle,
+              style: const TextStyle(
+                color: VineTheme.primaryText,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.peopleListsListDeletedSubtitle,
+              style: const TextStyle(
+                color: VineTheme.secondaryText,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Body view for a resolved [UserList].
+class _UserListPeopleView extends ConsumerStatefulWidget {
+  const _UserListPeopleView({required this.userList});
+
+  final UserList userList;
+
+  @override
+  ConsumerState<_UserListPeopleView> createState() =>
+      _UserListPeopleViewState();
+}
+
+class _UserListPeopleViewState extends ConsumerState<_UserListPeopleView>
+    with ScrollToHideMixin {
+  int? _activeVideoIndex;
+
+  void _navigateToAddPeople(String listId) {
+    context.push(
+      '/people-lists/${Uri.encodeComponent(listId)}/add-people',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userList = widget.userList;
+    final l10n = context.l10n;
+    return Scaffold(
+      backgroundColor: VineTheme.backgroundColor,
       appBar: _activeVideoIndex == null
           ? DiVineAppBar(
-              title: widget.userList.name,
-              subtitle: widget.userList.description,
+              title: userList.name,
+              subtitle: userList.description,
               showBackButton: true,
               onBackPressed: context.pop,
+              actions: [
+                if (userList.isEditable)
+                  DiVineAppBarAction(
+                    icon: const MaterialIconSource(Icons.person_add_alt_1),
+                    tooltip: context.l10n.peopleListsAddPeopleTooltip,
+                    semanticLabel:
+                        context.l10n.peopleListsAddPeopleSemanticLabel,
+                    onPressed: () => _navigateToAddPeople(userList.id),
+                  ),
+              ],
             )
           : null,
-      body: widget.userList.pubkeys.isEmpty
-          ? const Center(
+      body: userList.pubkeys.isEmpty
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.group, size: 64, color: VineTheme.secondaryText),
-                  SizedBox(height: 16),
+                  const Icon(
+                    Icons.group,
+                    size: 64,
+                    color: VineTheme.secondaryText,
+                  ),
+                  const SizedBox(height: 16),
                   Text(
-                    'No people in this list',
-                    style: TextStyle(
+                    l10n.peopleListsNoPeopleTitle,
+                    style: const TextStyle(
                       color: VineTheme.primaryText,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Add some people to get started',
-                    style: TextStyle(
+                    l10n.peopleListsNoPeopleSubtitle,
+                    style: const TextStyle(
                       color: VineTheme.secondaryText,
                       fontSize: 14,
                     ),
@@ -70,43 +179,44 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
               ),
             )
           : _activeVideoIndex != null
-          ? _buildVideoPlayer()
-          : _buildListContent(),
+          ? _buildVideoPlayer(userList)
+          : _buildListContent(userList),
     );
   }
 
-  Widget _buildListContent() {
+  Widget _buildListContent(UserList userList) {
     final videosAsync = ref.watch(
-      userListMemberVideosProvider(widget.userList.pubkeys),
+      userListMemberVideosProvider(userList.pubkeys),
     );
+    final l10n = context.l10n;
 
     measureHeaderHeight();
 
     return videosAsync.when(
       data: (videos) {
         if (videos.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.video_library,
                   size: 64,
                   color: VineTheme.secondaryText,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
-                  'No videos yet',
-                  style: TextStyle(
+                  l10n.peopleListsNoVideosTitle,
+                  style: const TextStyle(
                     color: VineTheme.primaryText,
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Videos from list members will appear here',
-                  style: TextStyle(
+                  l10n.peopleListsNoVideosSubtitle,
+                  style: const TextStyle(
                     color: VineTheme.secondaryText,
                     fontSize: 14,
                   ),
@@ -141,13 +251,13 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
                   },
                   onRefresh: () async {
                     ref.invalidate(
-                      userListMemberVideosProvider(widget.userList.pubkeys),
+                      userListMemberVideosProvider(userList.pubkeys),
                     );
                   },
-                  emptyBuilder: () => const Center(
+                  emptyBuilder: () => Center(
                     child: Text(
-                      'No videos available',
-                      style: TextStyle(color: VineTheme.secondaryText),
+                      l10n.peopleListsNoVideosAvailable,
+                      style: const TextStyle(color: VineTheme.secondaryText),
                     ),
                   ),
                 ),
@@ -161,9 +271,11 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
               top: headerOffset,
               left: 0,
               right: 0,
-              child: _PeopleCarousel(
+              child: PeopleCarousel(
                 key: headerKey,
-                pubkeys: widget.userList.pubkeys,
+                pubkeys: userList.pubkeys,
+                listId: userList.id,
+                canRemove: userList.isEditable,
               ),
             ),
           ],
@@ -178,9 +290,9 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
           children: [
             const Icon(Icons.error, size: 64, color: VineTheme.likeRed),
             const SizedBox(height: 16),
-            const Text(
-              'Failed to load videos',
-              style: TextStyle(color: VineTheme.likeRed, fontSize: 18),
+            Text(
+              l10n.peopleListsFailedToLoadVideos,
+              style: const TextStyle(color: VineTheme.likeRed, fontSize: 18),
             ),
             const SizedBox(height: 8),
             Text(
@@ -197,18 +309,19 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
     );
   }
 
-  Widget _buildVideoPlayer() {
+  Widget _buildVideoPlayer(UserList userList) {
     final videosAsync = ref.watch(
-      userListMemberVideosProvider(widget.userList.pubkeys),
+      userListMemberVideosProvider(userList.pubkeys),
     );
+    final l10n = context.l10n;
 
     return videosAsync.when(
       data: (videos) {
         if (videos.isEmpty || _activeVideoIndex! >= videos.length) {
-          return const Center(
+          return Center(
             child: Text(
-              'Video not available',
-              style: TextStyle(color: VineTheme.secondaryText),
+              l10n.peopleListsVideoNotAvailable,
+              style: const TextStyle(color: VineTheme.secondaryText),
             ),
           );
         }
@@ -221,7 +334,7 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
               removedIdsStream: ref
                   .read(videoEventServiceProvider)
                   .removedVideoIds,
-              contextTitle: widget.userList.name,
+              contextTitle: userList.name,
             ),
             // Header bar showing list name and back button
             Positioned(
@@ -262,7 +375,7 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
                             _activeVideoIndex = null;
                           });
                         },
-                        tooltip: 'Back to grid',
+                        tooltip: l10n.peopleListsBackToGridTooltip,
                       ),
                       const SizedBox(width: 8),
                       // List name
@@ -272,7 +385,7 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              widget.userList.name,
+                              userList.name,
                               style: const TextStyle(
                                 color: VineTheme.whiteText,
                                 fontSize: 16,
@@ -281,9 +394,9 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (widget.userList.description != null)
+                            if (userList.description != null)
                               Text(
-                                widget.userList.description!,
+                                userList.description!,
                                 style: const TextStyle(
                                   color: VineTheme.secondaryText,
                                   fontSize: 12,
@@ -324,10 +437,10 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
       loading: () => const Center(
         child: CircularProgressIndicator(color: VineTheme.vineGreen),
       ),
-      error: (error, stack) => const Center(
+      error: (error, stack) => Center(
         child: Text(
-          'Error loading videos',
-          style: TextStyle(color: VineTheme.likeRed),
+          l10n.peopleListsErrorLoadingVideos,
+          style: const TextStyle(color: VineTheme.likeRed),
         ),
       ),
     );
@@ -335,10 +448,18 @@ class _UserListPeopleScreenState extends ConsumerState<UserListPeopleScreen>
 }
 
 /// Horizontal carousel of people avatars for a user list.
-class _PeopleCarousel extends StatelessWidget {
-  const _PeopleCarousel({required this.pubkeys, super.key});
+@visibleForTesting
+class PeopleCarousel extends StatelessWidget {
+  const PeopleCarousel({
+    required this.pubkeys,
+    required this.listId,
+    required this.canRemove,
+    super.key,
+  });
 
   final List<String> pubkeys;
+  final String listId;
+  final bool canRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -354,8 +475,11 @@ class _PeopleCarousel extends StatelessWidget {
             top: 12,
           ),
           itemCount: pubkeys.length,
-          itemBuilder: (context, index) =>
-              _PeopleAvatarItem(pubkey: pubkeys[index]),
+          itemBuilder: (context, index) => _PeopleAvatarItem(
+            pubkey: pubkeys[index],
+            listId: listId,
+            canRemove: canRemove,
+          ),
         ),
       ),
     );
@@ -363,9 +487,71 @@ class _PeopleCarousel extends StatelessWidget {
 }
 
 class _PeopleAvatarItem extends ConsumerWidget {
-  const _PeopleAvatarItem({required this.pubkey});
+  const _PeopleAvatarItem({
+    required this.pubkey,
+    required this.listId,
+    required this.canRemove,
+  });
 
   final String pubkey;
+  final String listId;
+  final bool canRemove;
+
+  Future<void> _confirmRemove(BuildContext context, String displayName) async {
+    final l10n = context.l10n;
+    final shouldRemove = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: VineTheme.surfaceContainer,
+        title: Text(
+          l10n.peopleListsRemoveConfirmTitle(displayName),
+          style: VineTheme.titleMediumFont(),
+        ),
+        content: Text(
+          l10n.peopleListsRemoveConfirmBody,
+          style: VineTheme.bodyMediumFont(color: VineTheme.secondaryText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              l10n.commonCancel,
+              style: VineTheme.labelMediumFont(color: VineTheme.secondaryText),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              l10n.peopleListsRemove,
+              style: VineTheme.labelMediumFont(color: VineTheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldRemove != true || !context.mounted) return;
+
+    final bloc = context.read<PeopleListsBloc>()
+      ..add(
+        PeopleListsPubkeyRemoveRequested(listId: listId, pubkey: pubkey),
+      );
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.peopleListsRemovedFromList(displayName)),
+        action: SnackBarAction(
+          label: l10n.peopleListsUndo,
+          onPressed: () {
+            bloc.add(
+              PeopleListsPubkeyAddRequested(listId: listId, pubkey: pubkey),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -374,13 +560,18 @@ class _PeopleAvatarItem extends ConsumerWidget {
         profile?.bestDisplayName ?? UserProfile.defaultDisplayNameFor(pubkey);
 
     return Semantics(
-      label: 'View profile for $displayName',
+      label: canRemove
+          ? context.l10n.peopleListsProfileLongPressHint(displayName)
+          : context.l10n.peopleListsViewProfileHint(displayName),
       button: true,
       child: GestureDetector(
         onTap: () {
           final npub = NostrKeyUtils.encodePubKey(pubkey);
           context.push(OtherProfileScreen.pathForNpub(npub));
         },
+        onLongPress: canRemove
+            ? () => _confirmRemove(context, displayName)
+            : null,
         child: Padding(
           padding: const EdgeInsetsDirectional.only(end: 12),
           child: Column(

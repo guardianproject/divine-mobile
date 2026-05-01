@@ -748,6 +748,12 @@ abstract class AppLocalizations {
   /// **'Unblock {displayName}'**
   String profileUnblockDisplayName(String displayName);
 
+  /// No description provided for @profileAddToListDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {displayName} to a list'**
+  String profileAddToListDisplayName(String displayName);
+
   /// No description provided for @profileUserBlockedTitle.
   ///
   /// In en, this message translates to:
@@ -5297,7 +5303,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareMenuFollowSets.
   ///
   /// In en, this message translates to:
-  /// **'Follow Sets'**
+  /// **'People Lists'**
   String get shareMenuFollowSets;
 
   /// No description provided for @shareMenuCreateFollowSet.
@@ -5323,6 +5329,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} follow sets available'**
   String shareMenuFollowSetsAvailable(int count);
+
+  /// No description provided for @peopleListsAddToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to list'**
+  String get peopleListsAddToList;
+
+  /// No description provided for @peopleListsAddToListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put this creator in one of your lists'**
+  String get peopleListsAddToListSubtitle;
+
+  /// No description provided for @peopleListsSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to list'**
+  String get peopleListsSheetTitle;
+
+  /// No description provided for @peopleListsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No lists yet'**
+  String get peopleListsEmptyTitle;
+
+  /// No description provided for @peopleListsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a list to start grouping people.'**
+  String get peopleListsEmptySubtitle;
+
+  /// No description provided for @peopleListsCreateList.
+  ///
+  /// In en, this message translates to:
+  /// **'Create list'**
+  String get peopleListsCreateList;
+
+  /// No description provided for @peopleListsNewListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New list'**
+  String get peopleListsNewListTitle;
+
+  /// AppBar title for the people-list members route when it is reached with a missing or empty list id (e.g., via a malformed deep link).
+  ///
+  /// In en, this message translates to:
+  /// **'People list'**
+  String get peopleListsRouteTitle;
+
+  /// No description provided for @peopleListsListNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'List name'**
+  String get peopleListsListNameLabel;
+
+  /// No description provided for @peopleListsListNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Close friends'**
+  String get peopleListsListNameHint;
+
+  /// No description provided for @peopleListsCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get peopleListsCreateButton;
+
+  /// No description provided for @peopleListsAddPeopleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add people'**
+  String get peopleListsAddPeopleTitle;
+
+  /// No description provided for @peopleListsAddPeopleTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add people'**
+  String get peopleListsAddPeopleTooltip;
+
+  /// No description provided for @peopleListsAddPeopleSemanticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add people to list'**
+  String get peopleListsAddPeopleSemanticLabel;
+
+  /// No description provided for @peopleListsListNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List not found'**
+  String get peopleListsListNotFoundTitle;
+
+  /// No description provided for @peopleListsListNotFoundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List not found. It may have been deleted.'**
+  String get peopleListsListNotFoundSubtitle;
+
+  /// No description provided for @peopleListsListDeletedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This list may have been deleted.'**
+  String get peopleListsListDeletedSubtitle;
+
+  /// No description provided for @peopleListsNoPeopleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No people in this list'**
+  String get peopleListsNoPeopleTitle;
+
+  /// No description provided for @peopleListsNoPeopleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add some people to get started'**
+  String get peopleListsNoPeopleSubtitle;
+
+  /// No description provided for @peopleListsNoVideosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos yet'**
+  String get peopleListsNoVideosTitle;
+
+  /// No description provided for @peopleListsNoVideosSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos from list members will appear here'**
+  String get peopleListsNoVideosSubtitle;
+
+  /// No description provided for @peopleListsNoVideosAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos available'**
+  String get peopleListsNoVideosAvailable;
+
+  /// No description provided for @peopleListsFailedToLoadVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load videos'**
+  String get peopleListsFailedToLoadVideos;
+
+  /// No description provided for @peopleListsVideoNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Video not available'**
+  String get peopleListsVideoNotAvailable;
+
+  /// No description provided for @peopleListsBackToGridTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to grid'**
+  String get peopleListsBackToGridTooltip;
+
+  /// No description provided for @peopleListsErrorLoadingVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading videos'**
+  String get peopleListsErrorLoadingVideos;
+
+  /// No description provided for @peopleListsNoPeopleToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'No people available to add.'**
+  String get peopleListsNoPeopleToAdd;
+
+  /// No description provided for @peopleListsAddToListName.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to {name}'**
+  String peopleListsAddToListName(String name);
+
+  /// No description provided for @peopleListsAddPeopleSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search people'**
+  String get peopleListsAddPeopleSearchHint;
+
+  /// No description provided for @peopleListsAddPeopleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load people. Please try again.'**
+  String get peopleListsAddPeopleError;
+
+  /// No description provided for @peopleListsAddPeopleRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get peopleListsAddPeopleRetry;
+
+  /// No description provided for @peopleListsAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get peopleListsAddButton;
+
+  /// No description provided for @peopleListsAddButtonWithCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count}'**
+  String peopleListsAddButtonWithCount(int count);
+
+  /// No description provided for @peopleListsInNLists.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{In 1 list} other{In {count} lists}}'**
+  String peopleListsInNLists(int count);
+
+  /// No description provided for @peopleListsRemoveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String peopleListsRemoveConfirmTitle(String name);
+
+  /// No description provided for @peopleListsRemoveConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They will be removed from this list.'**
+  String get peopleListsRemoveConfirmBody;
+
+  /// No description provided for @peopleListsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get peopleListsRemove;
+
+  /// No description provided for @peopleListsRemovedFromList.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {name} from list'**
+  String peopleListsRemovedFromList(String name);
+
+  /// No description provided for @peopleListsUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get peopleListsUndo;
+
+  /// No description provided for @peopleListsProfileLongPressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile for {name}. Long press to remove.'**
+  String peopleListsProfileLongPressHint(String name);
+
+  /// No description provided for @peopleListsViewProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View profile for {name}'**
+  String peopleListsViewProfileHint(String name);
 
   /// No description provided for @shareMenuAddedToBookmarks.
   ///
@@ -6973,6 +7225,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create New List'**
   String get listCreateNewList;
+
+  /// No description provided for @listNewPeopleList.
+  ///
+  /// In en, this message translates to:
+  /// **'New people list'**
+  String get listNewPeopleList;
+
+  /// No description provided for @listCollaboratorsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get listCollaboratorsNone;
+
+  /// No description provided for @listAddCollaboratorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a collaborator'**
+  String get listAddCollaboratorTitle;
+
+  /// No description provided for @listCollaboratorSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search diVine...'**
+  String get listCollaboratorSearchHint;
 
   /// No description provided for @listNameLabel.
   ///

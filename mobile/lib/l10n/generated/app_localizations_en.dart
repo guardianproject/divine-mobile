@@ -395,6 +395,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String profileAddToListDisplayName(String displayName) {
+    return 'Add $displayName to a list';
+  }
+
+  @override
   String get profileUserBlockedTitle => 'User Blocked';
 
   @override
@@ -3004,7 +3009,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareMenuAddToBookmarkSetSubtitle => 'Organize in collections';
 
   @override
-  String get shareMenuFollowSets => 'Follow Sets';
+  String get shareMenuFollowSets => 'People Lists';
 
   @override
   String get shareMenuCreateFollowSet => 'Create Follow Set';
@@ -3019,6 +3024,156 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String shareMenuFollowSetsAvailable(int count) {
     return '$count follow sets available';
+  }
+
+  @override
+  String get peopleListsAddToList => 'Add to list';
+
+  @override
+  String get peopleListsAddToListSubtitle =>
+      'Put this creator in one of your lists';
+
+  @override
+  String get peopleListsSheetTitle => 'Add to list';
+
+  @override
+  String get peopleListsEmptyTitle => 'No lists yet';
+
+  @override
+  String get peopleListsEmptySubtitle =>
+      'Create a list to start grouping people.';
+
+  @override
+  String get peopleListsCreateList => 'Create list';
+
+  @override
+  String get peopleListsNewListTitle => 'New list';
+
+  @override
+  String get peopleListsRouteTitle => 'People list';
+
+  @override
+  String get peopleListsListNameLabel => 'List name';
+
+  @override
+  String get peopleListsListNameHint => 'Close friends';
+
+  @override
+  String get peopleListsCreateButton => 'Create';
+
+  @override
+  String get peopleListsAddPeopleTitle => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleTooltip => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleSemanticLabel => 'Add people to list';
+
+  @override
+  String get peopleListsListNotFoundTitle => 'List not found';
+
+  @override
+  String get peopleListsListNotFoundSubtitle =>
+      'List not found. It may have been deleted.';
+
+  @override
+  String get peopleListsListDeletedSubtitle =>
+      'This list may have been deleted.';
+
+  @override
+  String get peopleListsNoPeopleTitle => 'No people in this list';
+
+  @override
+  String get peopleListsNoPeopleSubtitle => 'Add some people to get started';
+
+  @override
+  String get peopleListsNoVideosTitle => 'No videos yet';
+
+  @override
+  String get peopleListsNoVideosSubtitle =>
+      'Videos from list members will appear here';
+
+  @override
+  String get peopleListsNoVideosAvailable => 'No videos available';
+
+  @override
+  String get peopleListsFailedToLoadVideos => 'Failed to load videos';
+
+  @override
+  String get peopleListsVideoNotAvailable => 'Video not available';
+
+  @override
+  String get peopleListsBackToGridTooltip => 'Back to grid';
+
+  @override
+  String get peopleListsErrorLoadingVideos => 'Error loading videos';
+
+  @override
+  String get peopleListsNoPeopleToAdd => 'No people available to add.';
+
+  @override
+  String peopleListsAddToListName(String name) {
+    return 'Add to $name';
+  }
+
+  @override
+  String get peopleListsAddPeopleSearchHint => 'Search people';
+
+  @override
+  String get peopleListsAddPeopleError =>
+      'Couldn\'t load people. Please try again.';
+
+  @override
+  String get peopleListsAddPeopleRetry => 'Try again';
+
+  @override
+  String get peopleListsAddButton => 'Add';
+
+  @override
+  String peopleListsAddButtonWithCount(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String peopleListsInNLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count lists',
+      one: 'In 1 list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String peopleListsRemoveConfirmTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get peopleListsRemoveConfirmBody =>
+      'They will be removed from this list.';
+
+  @override
+  String get peopleListsRemove => 'Remove';
+
+  @override
+  String peopleListsRemovedFromList(String name) {
+    return 'Removed $name from list';
+  }
+
+  @override
+  String get peopleListsUndo => 'Undo';
+
+  @override
+  String peopleListsProfileLongPressHint(String name) {
+    return 'Profile for $name. Long press to remove.';
+  }
+
+  @override
+  String peopleListsViewProfileHint(String name) {
+    return 'View profile for $name';
   }
 
   @override
@@ -3949,6 +4104,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listCreateNewList => 'Create New List';
+
+  @override
+  String get listNewPeopleList => 'New people list';
+
+  @override
+  String get listCollaboratorsNone => 'None';
+
+  @override
+  String get listAddCollaboratorTitle => 'Add a collaborator';
+
+  @override
+  String get listCollaboratorSearchHint => 'Search diVine...';
 
   @override
   String get listNameLabel => 'List Name';

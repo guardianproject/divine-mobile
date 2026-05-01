@@ -55,6 +55,7 @@ workspace:
   - packages/nostr_client
   - packages/nostr_key_manager
   - packages/nostr_apps
+  - packages/people_lists_repository
   - packages/permissions_service
   - packages/pooled_video_player
   - packages/profile_repository
@@ -204,6 +205,9 @@ dependencies:
   # NIP-98 signing for age-restricted media. Gated behind
   # FeatureFlag.hlsAuthWebPlayer.
   hls_auth_web_player:
+
+  # People Lists Repository - NIP-51 kind 30000 follow sets
+  people_lists_repository:
 
   # Videos Repository - Video feed data layer
   videos_repository:

@@ -16,6 +16,7 @@ class MoreSheetMenu extends StatelessWidget {
     required this.onCopy,
     required this.onUnfollow,
     required this.onBlockTap,
+    this.onAddToList,
     super.key,
   });
 
@@ -37,12 +38,46 @@ class MoreSheetMenu extends StatelessWidget {
   /// Called when block/unblock is tapped.
   final VoidCallback onBlockTap;
 
+  /// Optional callback for the "Add to list" action.
+  ///
+  /// When null, the action is hidden (used for feature-flag gating).
+  final VoidCallback? onAddToList;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       key: const ValueKey('menu'),
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Add to list action (curated lists feature flag gated by the caller)
+        if (onAddToList != null)
+          InkWell(
+            onTap: onAddToList,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 16,
+              ),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    DivineIconName.listPlus.assetPath,
+                    width: 24,
+                    height: 24,
+                    colorFilter: const ColorFilter.mode(
+                      VineTheme.whiteText,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    context.l10n.profileAddToListDisplayName(displayName),
+                    style: VineTheme.titleMediumFont(),
+                  ),
+                ],
+              ),
+            ),
+          ),
         // Copy public key action
         InkWell(
           onTap: onCopy,
