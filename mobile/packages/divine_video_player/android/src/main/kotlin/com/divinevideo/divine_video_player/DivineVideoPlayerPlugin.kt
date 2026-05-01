@@ -76,7 +76,9 @@ class DivineVideoPlayerPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, 
     }
 
     override fun onDetachedFromActivity() {
-        // Lifecycle observer is auto-removed when the lifecycle is destroyed.
+        // Stop every live player before the Activity unwinds; full release
+        // happens later on engine detach. See #3416.
+        PlayerRegistry.forAll { it.stopForActivityDetach() }
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
