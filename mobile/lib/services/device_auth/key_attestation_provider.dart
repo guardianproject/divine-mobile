@@ -113,13 +113,16 @@ class KeyAttestationProvider implements DeviceAuthProvider {
       );
     }
 
-    _counter++;
+    // Snapshot the counter into a local BEFORE awaiting persistence, so two
+    // concurrent buildSigningRequest calls don't both end up signing with
+    // whichever counter happens to be last after the await yields.
+    final requestCounter = ++_counter;
     // Persist the new counter BEFORE we use it to sign the outgoing request,
     // so a crash between increment and signing can't leave the server with a
     // counter higher than what we'll present on next launch.
-    await onCounterChanged?.call(_counter);
+    await onCounterChanged?.call(requestCounter);
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final signPayload = '$_deviceId|$_counter|$timestamp|$claim';
+    final signPayload = '$_deviceId|$requestCounter|$timestamp|$claim';
 
     // Sign the payload with the hardware-backed key
     final signature = await _channel.invokeMethod<String>(
@@ -136,7 +139,7 @@ class KeyAttestationProvider implements DeviceAuthProvider {
       'claim': claim,
       'platform': 'android',
       'device_id': _deviceId,
-      'counter': _counter,
+      'counter': requestCounter,
       'timestamp': timestamp,
       'request_signature': signature,
     };
