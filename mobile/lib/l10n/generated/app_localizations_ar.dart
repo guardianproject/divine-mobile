@@ -1212,7 +1212,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareAddedToBookmarks => 'تمت الإضافة إلى الإشارات المرجعية';
 
   @override
+  String get shareRemovedFromBookmarks => 'تمت الإزالة من الإشارات المرجعية';
+
+  @override
   String get shareFailedToAddBookmark => 'فشل إضافة الإشارة المرجعية';
+
+  @override
+  String get shareFailedToRemoveBookmark => 'فشل إزالة الإشارة المرجعية';
 
   @override
   String get shareActionFailed => 'فشل الإجراء';

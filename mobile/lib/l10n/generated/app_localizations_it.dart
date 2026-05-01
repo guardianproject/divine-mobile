@@ -1248,7 +1248,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get shareAddedToBookmarks => 'Aggiunto ai segnalibri';
 
   @override
+  String get shareRemovedFromBookmarks => 'Rimosso dai segnalibri';
+
+  @override
   String get shareFailedToAddBookmark => 'Impossibile aggiungere ai segnalibri';
+
+  @override
+  String get shareFailedToRemoveBookmark =>
+      'Impossibile rimuovere dai segnalibri';
 
   @override
   String get shareActionFailed => 'Azione fallita';

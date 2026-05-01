@@ -1246,7 +1246,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get shareAddedToBookmarks => 'Adicionado aos favoritos';
 
   @override
+  String get shareRemovedFromBookmarks => 'Removido dos favoritos';
+
+  @override
   String get shareFailedToAddBookmark => 'Falha ao adicionar aos favoritos';
+
+  @override
+  String get shareFailedToRemoveBookmark => 'Falha ao remover dos favoritos';
 
   @override
   String get shareActionFailed => 'A ação falhou';

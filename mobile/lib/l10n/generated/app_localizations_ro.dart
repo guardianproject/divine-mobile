@@ -1262,7 +1262,14 @@ class AppLocalizationsRo extends AppLocalizations {
   String get shareAddedToBookmarks => 'Adăugat la semne de carte';
 
   @override
+  String get shareRemovedFromBookmarks => 'Eliminat din semne de carte';
+
+  @override
   String get shareFailedToAddBookmark => 'N-am putut adăuga semnul de carte';
+
+  @override
+  String get shareFailedToRemoveBookmark =>
+      'N-am putut elimina semnul de carte';
 
   @override
   String get shareActionFailed => 'Acțiunea a eșuat';

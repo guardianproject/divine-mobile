@@ -1248,7 +1248,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shareAddedToBookmarks => 'Dodano do zakładek';
 
   @override
+  String get shareRemovedFromBookmarks => 'Usunięto z zakładek';
+
+  @override
   String get shareFailedToAddBookmark => 'Nie udało się dodać zakładki';
+
+  @override
+  String get shareFailedToRemoveBookmark => 'Nie udało się usunąć zakładki';
 
   @override
   String get shareActionFailed => 'Akcja nieudana';

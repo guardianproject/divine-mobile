@@ -113,7 +113,10 @@ void main() {
       (_) async => ClassicVineClipImportSuccess(_FakeDivineVideoClip()),
     );
     when(
-      () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
+      () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+    ).thenReturn(false);
+    when(
+      () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
     ).thenAnswer((_) async => true);
     when(
       () => mockBookmarkService.getVideoBookmarkSummary(any()),
@@ -263,7 +266,10 @@ void main() {
 
     testWidgets('tapping Save shows success snackbar', (tester) async {
       when(
-        () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
+        () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+      ).thenReturn(false);
+      when(
+        () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
       ).thenAnswer((_) async => true);
 
       await tester.pumpWidget(buildSubject());
@@ -275,13 +281,19 @@ void main() {
 
       expect(find.text('Added to bookmarks'), findsOneWidget);
       verify(
-        () => mockBookmarkService.addVideoToGlobalBookmarks(testVideo.id),
+        () => mockBookmarkService.isVideoBookmarkedGlobally(testVideo.id),
+      ).called(1);
+      verify(
+        () => mockBookmarkService.toggleVideoInGlobalBookmarks(testVideo.id),
       ).called(1);
     });
 
     testWidgets('tapping Save shows failure snackbar on error', (tester) async {
       when(
-        () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
+        () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+      ).thenReturn(false);
+      when(
+        () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
       ).thenAnswer((_) async => false);
 
       await tester.pumpWidget(buildSubject());
@@ -298,7 +310,10 @@ void main() {
       tester,
     ) async {
       when(
-        () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
+        () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+      ).thenReturn(false);
+      when(
+        () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
       ).thenThrow(Exception('Network error'));
 
       await tester.pumpWidget(buildSubject());

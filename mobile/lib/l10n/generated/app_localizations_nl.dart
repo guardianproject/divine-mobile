@@ -1235,7 +1235,14 @@ class AppLocalizationsNl extends AppLocalizations {
   String get shareAddedToBookmarks => 'Toegevoegd aan bladwijzers';
 
   @override
+  String get shareRemovedFromBookmarks => 'Verwijderd uit bladwijzers';
+
+  @override
   String get shareFailedToAddBookmark => 'Bladwijzer toevoegen mislukt';
+
+  @override
+  String get shareFailedToRemoveBookmark =>
+      'Verwijderen uit bladwijzers mislukt';
 
   @override
   String get shareActionFailed => 'Actie mislukt';

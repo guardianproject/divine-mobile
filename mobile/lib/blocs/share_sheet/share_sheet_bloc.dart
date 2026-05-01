@@ -306,28 +306,43 @@ class ShareSheetBloc extends Bloc<ShareSheetEvent, ShareSheetState> {
         category: LogCategory.ui,
       );
       emit(
-        state.copyWith(actionResult: ShareSheetSaveResult(succeeded: false)),
+        state.copyWith(
+          actionResult: ShareSheetSaveResult(succeeded: false),
+        ),
       );
       return;
     }
 
+    var wasBookmarked = false;
     try {
-      final succeeded = await bookmarkService.addVideoToGlobalBookmarks(
+      wasBookmarked = bookmarkService.isVideoBookmarkedGlobally(
+        _video.id,
+      );
+      final succeeded = await bookmarkService.toggleVideoInGlobalBookmarks(
         _video.id,
       );
       emit(
         state.copyWith(
-          actionResult: ShareSheetSaveResult(succeeded: succeeded),
+          actionResult: ShareSheetSaveResult(
+            succeeded: succeeded,
+            removed: succeeded && wasBookmarked,
+            wasBookmarkedBeforeToggle: wasBookmarked,
+          ),
         ),
       );
     } catch (e) {
       Log.error(
-        'Failed to add bookmark: $e',
+        'Failed to toggle bookmark: $e',
         name: 'ShareSheetBloc',
         category: LogCategory.ui,
       );
       emit(
-        state.copyWith(actionResult: ShareSheetSaveResult(succeeded: false)),
+        state.copyWith(
+          actionResult: ShareSheetSaveResult(
+            succeeded: false,
+            wasBookmarkedBeforeToggle: wasBookmarked,
+          ),
+        ),
       );
     }
   }

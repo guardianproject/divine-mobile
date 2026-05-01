@@ -1204,7 +1204,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get shareAddedToBookmarks => 'Ditambahkan ke bookmark';
 
   @override
+  String get shareRemovedFromBookmarks => 'Dihapus dari bookmark';
+
+  @override
   String get shareFailedToAddBookmark => 'Gagal menambahkan bookmark';
+
+  @override
+  String get shareFailedToRemoveBookmark => 'Gagal menghapus bookmark';
 
   @override
   String get shareActionFailed => 'Aksi gagal';
