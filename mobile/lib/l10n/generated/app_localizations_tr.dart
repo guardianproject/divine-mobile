@@ -5254,6 +5254,9 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get commentReplyToPrefix => 'Yan:';
+
+  @override
   String get draftUntitled => 'Başlıksız';
 
   @override

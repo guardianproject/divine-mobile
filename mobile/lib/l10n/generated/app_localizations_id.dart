@@ -5245,6 +5245,9 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get commentReplyToPrefix => 'Bls:';
+
+  @override
   String get draftUntitled => 'Tanpa judul';
 
   @override
