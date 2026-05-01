@@ -601,6 +601,7 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
   String? _emailError;
   String? _generalError;
   bool _isSubmitting = false;
+  bool _newsletterOptIn = true;
 
   @override
   void dispose() {
@@ -630,6 +631,7 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
       await widget.inviteApiClient.joinWaitlist(
         contact: email,
         sourceSlug: widget.sourceSlug,
+        newsletterOptIn: _newsletterOptIn,
       );
       if (!mounted) return;
       Navigator.of(context).pop(email);
@@ -715,6 +717,45 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
                   color: VineTheme.lightText,
                 ),
                 textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _isSubmitting
+                    ? null
+                    : () => setState(() {
+                          _newsletterOptIn = !_newsletterOptIn;
+                        }),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Send me Divine Inspiration',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        color: VineTheme.lightText,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: _newsletterOptIn,
+                        onChanged: _isSubmitting
+                            ? null
+                            : (value) => setState(() {
+                                  _newsletterOptIn = value ?? false;
+                                }),
+                        activeColor: VineTheme.vineGreen,
+                        checkColor: VineTheme.whiteText,
+                        side: BorderSide(
+                          color: VineTheme.whiteText.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               DivineAuthTextField(
