@@ -291,6 +291,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get profileMoreSemanticLabel => 'Więcej opcji';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => 'Zamknij awatar';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel =>
+      'Zamknij podgląd awatara';
+
+  @override
   String get profileFollowingLabel => 'Obserwujesz';
 
   @override
@@ -395,6 +402,11 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String profileUnblockDisplayName(String displayName) {
     return 'Odblokuj $displayName';
+  }
+
+  @override
+  String profileAddToListDisplayName(String displayName) {
+    return 'Dodaj $displayName do listy';
   }
 
   @override
@@ -636,6 +648,13 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get profileSetupPublishFailed =>
       'Nie udało się opublikować profilu. Spróbuj ponownie.';
+
+  @override
+  String get profileSetupNoRelaysConnected =>
+      'Nie można połączyć się z siecią. Sprawdź połączenie i spróbuj ponownie.';
+
+  @override
+  String get profileSetupRetryLabel => 'Spróbuj ponownie';
 
   @override
   String get profileSetupDisplayNameLabel => 'Nazwa wyświetlana';
@@ -1229,7 +1248,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shareAddedToBookmarks => 'Dodano do zakładek';
 
   @override
+  String get shareRemovedFromBookmarks => 'Usunięto z zakładek';
+
+  @override
   String get shareFailedToAddBookmark => 'Nie udało się dodać zakładki';
+
+  @override
+  String get shareFailedToRemoveBookmark => 'Nie udało się usunąć zakładki';
 
   @override
   String get shareActionFailed => 'Akcja nieudana';
@@ -1380,6 +1405,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get metadataRepostsLabel => 'Reposty';
+
+  @override
+  String metadataPostedDateSemantics(String date) {
+    return 'Opublikowano $date';
+  }
 
   @override
   String get devOptionsTitle => 'Opcje dewelopera';
@@ -2707,6 +2737,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shareSheetSaveVideo => 'Zapisz film';
 
   @override
+  String get shareSheetAddToClips => 'Dodaj do klipów';
+
+  @override
+  String get shareSheetAddedToClips => 'Dodano do klipów';
+
+  @override
+  String get shareSheetAddToClipsFailed => 'Nie można dodać do klipów';
+
+  @override
   String get shareSheetAddToList => 'Dodaj do listy';
 
   @override
@@ -3080,6 +3119,156 @@ class AppLocalizationsPl extends AppLocalizations {
       one: '1 zestaw obserwowanych dostępny',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get peopleListsAddToList => 'Add to list';
+
+  @override
+  String get peopleListsAddToListSubtitle =>
+      'Put this creator in one of your lists';
+
+  @override
+  String get peopleListsSheetTitle => 'Add to list';
+
+  @override
+  String get peopleListsEmptyTitle => 'No lists yet';
+
+  @override
+  String get peopleListsEmptySubtitle =>
+      'Create a list to start grouping people.';
+
+  @override
+  String get peopleListsCreateList => 'Create list';
+
+  @override
+  String get peopleListsNewListTitle => 'New list';
+
+  @override
+  String get peopleListsRouteTitle => 'People list';
+
+  @override
+  String get peopleListsListNameLabel => 'List name';
+
+  @override
+  String get peopleListsListNameHint => 'Close friends';
+
+  @override
+  String get peopleListsCreateButton => 'Create';
+
+  @override
+  String get peopleListsAddPeopleTitle => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleTooltip => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleSemanticLabel => 'Add people to list';
+
+  @override
+  String get peopleListsListNotFoundTitle => 'List not found';
+
+  @override
+  String get peopleListsListNotFoundSubtitle =>
+      'List not found. It may have been deleted.';
+
+  @override
+  String get peopleListsListDeletedSubtitle =>
+      'This list may have been deleted.';
+
+  @override
+  String get peopleListsNoPeopleTitle => 'No people in this list';
+
+  @override
+  String get peopleListsNoPeopleSubtitle => 'Add some people to get started';
+
+  @override
+  String get peopleListsNoVideosTitle => 'No videos yet';
+
+  @override
+  String get peopleListsNoVideosSubtitle =>
+      'Videos from list members will appear here';
+
+  @override
+  String get peopleListsNoVideosAvailable => 'No videos available';
+
+  @override
+  String get peopleListsFailedToLoadVideos => 'Failed to load videos';
+
+  @override
+  String get peopleListsVideoNotAvailable => 'Video not available';
+
+  @override
+  String get peopleListsBackToGridTooltip => 'Back to grid';
+
+  @override
+  String get peopleListsErrorLoadingVideos => 'Error loading videos';
+
+  @override
+  String get peopleListsNoPeopleToAdd => 'No people available to add.';
+
+  @override
+  String peopleListsAddToListName(String name) {
+    return 'Add to $name';
+  }
+
+  @override
+  String get peopleListsAddPeopleSearchHint => 'Search people';
+
+  @override
+  String get peopleListsAddPeopleError =>
+      'Couldn\'t load people. Please try again.';
+
+  @override
+  String get peopleListsAddPeopleRetry => 'Try again';
+
+  @override
+  String get peopleListsAddButton => 'Add';
+
+  @override
+  String peopleListsAddButtonWithCount(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String peopleListsInNLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count lists',
+      one: 'In 1 list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String peopleListsRemoveConfirmTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get peopleListsRemoveConfirmBody =>
+      'They will be removed from this list.';
+
+  @override
+  String get peopleListsRemove => 'Remove';
+
+  @override
+  String peopleListsRemovedFromList(String name) {
+    return 'Removed $name from list';
+  }
+
+  @override
+  String get peopleListsUndo => 'Undo';
+
+  @override
+  String peopleListsProfileLongPressHint(String name) {
+    return 'Profile for $name. Long press to remove.';
+  }
+
+  @override
+  String peopleListsViewProfileHint(String name) {
+    return 'View profile for $name';
   }
 
   @override
@@ -3504,6 +3693,17 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get notificationsEmptyDescription =>
       'Gdy ludzie zaczną wchodzić w interakcję z twoimi treściami, zobaczysz to tutaj';
+
+  @override
+  String get notificationsUnreadPrefix => 'Nieprzeczytane powiadomienie';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return 'Zobacz profil użytkownika $displayName';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => 'Zobacz profile';
 
   @override
   String notificationsLoadingType(String type) {
@@ -4021,6 +4221,18 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get listCreateNewList => 'Utwórz nową listę';
+
+  @override
+  String get listNewPeopleList => 'Nowa lista osób';
+
+  @override
+  String get listCollaboratorsNone => 'Brak';
+
+  @override
+  String get listAddCollaboratorTitle => 'Dodaj współpracownika';
+
+  @override
+  String get listCollaboratorSearchHint => 'Szukaj w diVine...';
 
   @override
   String get listNameLabel => 'Nazwa listy';
@@ -4653,6 +4865,37 @@ class AppLocalizationsPl extends AppLocalizations {
   String get inboxConversationUnmuted => 'Wyłączono wyciszenie rozmowy';
 
   @override
+  String get inboxCollabInviteCardTitle => 'Zaproszenie do współpracy';
+
+  @override
+  String inboxCollabInviteCardRoleLabel(String role) {
+    return '$role przy tym poście';
+  }
+
+  @override
+  String get inboxCollabInviteAcceptButton => 'Akceptuj';
+
+  @override
+  String get inboxCollabInviteIgnoreButton => 'Ignoruj';
+
+  @override
+  String get inboxCollabInviteAcceptedStatus => 'Zaakceptowano';
+
+  @override
+  String get inboxCollabInviteIgnoredStatus => 'Zignorowano';
+
+  @override
+  String get inboxCollabInviteAcceptError =>
+      'Nie udało się zaakceptować. Spróbuj ponownie.';
+
+  @override
+  String get inboxCollabInviteSentStatus => 'Zaproszenie wysłane';
+
+  @override
+  String get inboxConversationCollabInvitePreview =>
+      'Zaproszenie do współpracy';
+
+  @override
   String get reportDialogCancel => 'Anuluj';
 
   @override
@@ -5150,6 +5393,24 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get notificationRepliedToYourComment =>
+      'odpowiedział(a) na Twój komentarz';
+
+  @override
+  String get notificationAndConnector => 'i';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count innych osób',
+      one: '1 inna osoba',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get draftUntitled => 'Bez tytułu';
 
   @override
@@ -5351,6 +5612,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get videoEditorOpenFilterSemanticLabel => 'Otwórz edytor filtrów';
+
+  @override
+  String get videoEditorOpenStickerSemanticLabel => 'Otwórz edytor naklejek';
 
   @override
   String get videoEditorSaveDraftTitle => 'Zapisać wersję roboczą?';
@@ -5567,6 +5831,9 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get videoEditorFeedPreviewContent =>
       'Unikaj umieszczania treści za tymi obszarami.';
+
+  @override
+  String get videoEditorStickersDivineOriginals => 'Divine Oryginały';
 
   @override
   String get videoEditorStickerSearchHint => 'Szukaj naklejek...';

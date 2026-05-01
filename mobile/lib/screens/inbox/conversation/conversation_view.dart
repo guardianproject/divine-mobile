@@ -15,6 +15,7 @@ import 'package:openvine/providers/user_profile_providers.dart';
 import 'package:openvine/screens/inbox/conversation/widgets/widgets.dart';
 import 'package:openvine/screens/other_profile_screen.dart';
 import 'package:openvine/services/collaborator_invite_parser.dart';
+import 'package:openvine/services/collaborator_invite_service.dart';
 import 'package:openvine/utils/clipboard_utils.dart';
 import 'package:openvine/utils/nostr_key_utils.dart';
 import 'package:openvine/widgets/profile/more_sheet/more_sheet_content.dart';
@@ -76,6 +77,10 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
         if (mounted) context.pop();
       case MoreSheetResult.unblockConfirmed:
         await blocklistRepository.unblockUser(otherPubkey);
+      case MoreSheetResult.addToList:
+        // addToList is not surfaced from this caller (showAddToList defaults
+        // to false on MoreSheetContent here), so this branch is unreachable.
+        break;
     }
   }
 
@@ -90,9 +95,9 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
         : '';
     final profileAsync = ref.watch(fetchUserProfileProvider(otherPubkey));
     final profile = profileAsync.asData?.value;
-    final displayName = profile?.displayName?.isNotEmpty == true
-        ? profile!.displayName!
-        : profile?.name ?? NostrKeyUtils.truncateNpub(otherPubkey);
+    final displayName =
+        profile?.bestDisplayName ??
+        UserProfile.defaultDisplayNameFor(otherPubkey);
     final handle = profile?.handle ?? '';
 
     return Scaffold(
@@ -113,6 +118,7 @@ class _ConversationViewState extends ConsumerState<ConversationView> {
           Expanded(
             child: _ConversationContent(
               currentPubkey: currentPubkey,
+              otherPubkey: otherPubkey,
               displayName: displayName,
               imageUrl: profile?.picture,
               nip05: profile?.displayNip05,
@@ -161,6 +167,7 @@ class _SendBar extends StatelessWidget {
 class _ConversationContent extends StatelessWidget {
   const _ConversationContent({
     required this.currentPubkey,
+    required this.otherPubkey,
     required this.displayName,
     this.imageUrl,
     this.nip05,
@@ -168,6 +175,7 @@ class _ConversationContent extends StatelessWidget {
   });
 
   final String currentPubkey;
+  final String otherPubkey;
   final String displayName;
   final String? imageUrl;
   final String? nip05;
@@ -197,6 +205,7 @@ class _ConversationContent extends StatelessWidget {
             selected.messages.isEmpty
                 ? EmptyConversation(
                     displayName: displayName,
+                    pubkey: otherPubkey,
                     imageUrl: imageUrl,
                     nip05: nip05,
                     onViewProfile: onViewProfile,
@@ -260,6 +269,18 @@ class _MessageList extends StatelessWidget {
         final invite = CollaboratorInviteParser.parse(message);
         if (invite != null) {
           return CollaboratorInviteCard(invite: invite, isSent: isSent);
+        }
+
+        // Suppress legacy NIP-04 invite plaintext duplicates (#3559).
+        // Phase 1 stopped new sends from emitting this fallback, but
+        // older app builds and cross-client senders can still produce
+        // bubbles that read "Open diVine to review and accept" — useless
+        // copy inside diVine, and the structured fields needed to render
+        // an actionable card are not recoverable from plaintext alone.
+        if (message.content.endsWith(
+          CollaboratorInviteService.invitePlaintextSuffix,
+        )) {
+          return const SizedBox.shrink();
         }
 
         // Grouping: in a reversed list, index 0 is newest (bottom of screen).

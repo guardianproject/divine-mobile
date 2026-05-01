@@ -48,7 +48,8 @@ class RequestPreviewView extends ConsumerWidget {
     final profile = profileAsync.asData?.value;
 
     final displayName =
-        profile?.bestDisplayName ?? NostrKeyUtils.truncateNpub(otherPubkey);
+        profile?.bestDisplayName ??
+        UserProfile.defaultDisplayNameFor(otherPubkey);
 
     return Scaffold(
       backgroundColor: VineTheme.surfaceBackground,
@@ -113,7 +114,12 @@ class _ProfileContent extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              UserAvatar(imageUrl: imageUrl, name: displayName, size: 96),
+              UserAvatar(
+                imageUrl: imageUrl,
+                name: displayName,
+                placeholderSeed: otherPubkey,
+                size: 96,
+              ),
               const SizedBox(height: 32),
               Text(
                 displayName,

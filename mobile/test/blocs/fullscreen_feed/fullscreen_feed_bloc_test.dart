@@ -216,12 +216,46 @@ void main() {
         expect(state.props, [
           FullscreenFeedStatus.ready,
           [video],
+          [
+            '${video.id}|${video.stableId}|${video.videoUrl ?? ''}|${video.thumbnailUrl ?? ''}|${video.originalLoops ?? ''}|${video.rawTags['views'] ?? ''}',
+          ],
           2,
           true,
           false,
           <String>{},
           null,
         ]);
+      });
+
+      test('videoUpdateSignature changes when loop metadata changes', () {
+        final now = DateTime.now();
+        final baseVideo = VideoEvent(
+          id: 'video1',
+          pubkey: '0' * 64,
+          createdAt: now.millisecondsSinceEpoch ~/ 1000,
+          content: '',
+          timestamp: now,
+          videoUrl: 'https://example.com/video1.mp4',
+          rawTags: const {'views': '0'},
+        );
+        final updatedVideo = baseVideo.copyWith(
+          rawTags: const {'views': '42'},
+        );
+
+        final baseState = FullscreenFeedState(
+          status: FullscreenFeedStatus.ready,
+          videos: [baseVideo],
+        );
+        final updatedState = FullscreenFeedState(
+          status: FullscreenFeedStatus.ready,
+          videos: [updatedVideo],
+        );
+
+        expect(
+          baseState.videoUpdateSignature,
+          isNot(updatedState.videoUpdateSignature),
+        );
+        expect(baseState, isNot(updatedState));
       });
     });
 
@@ -739,6 +773,7 @@ void main() {
           when(
             () => mockBlossomAuth.createGetAuthHeader(
               sha256Hash: any(named: 'sha256Hash'),
+              serverUrl: any(named: 'serverUrl'),
             ),
           ).thenAnswer((_) async => 'Nostr test-token');
           when(
@@ -758,6 +793,14 @@ void main() {
             bloc.add(const FullscreenFeedVideoCacheStarted(index: 0)),
         wait: const Duration(milliseconds: 100),
         verify: (_) {
+          // Server origin extracted from videoUrl and forwarded so the
+          // BUD-01 kind 24242 event includes the `server` tag.
+          verify(
+            () => mockBlossomAuth.createGetAuthHeader(
+              sha256Hash: 'abc123',
+              serverUrl: 'https://example.com',
+            ),
+          ).called(1);
           verify(
             () => mockMediaCache.downloadFile(
               'https://example.com/video_video1.mp4',

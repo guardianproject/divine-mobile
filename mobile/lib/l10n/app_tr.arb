@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "{displayName} kişisini listeye ekle",
     "profileUserBlockedTitle": "Kullanıcı Engellendi",
     "profileUserBlockedContent": "Bu kullanıcının içeriğini artık akışında görmeyeceksin.",
     "profileUserBlockedUnblockHint": "Profilinden veya Ayarlar > Güvenlik'ten istediğin zaman engelini kaldırabilirsin.",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "Kullanıcı adı az önce alındı. Lütfen başka birini seç.",
     "profileSetupClaimFailed": "Kullanıcı adı alınamadı. Lütfen tekrar dene.",
     "profileSetupPublishFailed": "Profil yayınlanamadı. Lütfen tekrar dene.",
+    "profileSetupNoRelaysConnected": "Ağa ulaşılamadı. Bağlantını kontrol et ve tekrar dene.",
+    "profileSetupRetryLabel": "Tekrar dene",
     "profileSetupDisplayNameLabel": "Görünen Ad",
     "profileSetupDisplayNameHint": "Seni nasıl tanısınlar?",
     "profileSetupDisplayNameHelper": "İstediğin herhangi bir ad veya etiket. Benzersiz olması gerekmez.",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "Video gönderilemedi",
     "shareAddedToBookmarks": "Yer imlerine eklendi",
+    "shareRemovedFromBookmarks": "Yer imlerinden kaldırıldı",
     "shareFailedToAddBookmark": "Yer imi eklenemedi",
+    "shareFailedToRemoveBookmark": "Yer imi kaldırılamadı",
     "shareActionFailed": "İşlem başarısız",
     "shareWithTitle": "Şununla paylaş",
     "shareFindPeople": "Kişi bul",
@@ -625,6 +630,7 @@
     "metadataLikesLabel": "Beğeniler",
     "metadataCommentsLabel": "Yorumlar",
     "metadataRepostsLabel": "Yeniden Paylaşımlar",
+    "metadataPostedDateSemantics": "{date} tarihinde paylaşıldı",
     "devOptionsTitle": "Geliştirici Seçenekleri",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1291,6 +1297,9 @@
     "shareSheetSaveToGallery": "Galeriye Kaydet",
     "shareSheetSaveWithWatermark": "Filigranlı Kaydet",
     "shareSheetSaveVideo": "Videoyu Kaydet",
+    "shareSheetAddToClips": "Kliplere ekle",
+    "shareSheetAddedToClips": "Kliplere eklendi",
+    "shareSheetAddToClipsFailed": "Kliplere eklenemedi",
     "shareSheetAddToList": "Listeye Ekle",
     "shareSheetCopy": "Kopyala",
     "shareSheetShareVia": "Şununla paylaş",
@@ -1942,6 +1951,10 @@
         }
     },
     "listCreateNewList": "Yeni Liste Oluştur",
+    "listNewPeopleList": "Yeni kişi listesi",
+    "listCollaboratorsNone": "Yok",
+    "listAddCollaboratorTitle": "Ortak ekle",
+    "listCollaboratorSearchHint": "diVine'da ara...",
     "listNameLabel": "Liste Adı",
     "listDescriptionLabel": "Açıklama (opsiyonel)",
     "listPublicList": "Herkese Açık Liste",
@@ -2252,6 +2265,28 @@
                 "type": "String"
             }
         }
+    },
+    "inboxCollabInviteAcceptButton": "Kabul et",
+    "inboxCollabInviteAcceptError": "Kabul edilemedi. Tekrar dene.",
+    "inboxCollabInviteAcceptedStatus": "Kabul edildi",
+    "inboxCollabInviteCardRoleLabel": "Bu gönderide {role}",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "İşbirliği daveti",
+    "inboxCollabInviteIgnoreButton": "Yoksay",
+    "inboxCollabInviteIgnoredStatus": "Yoksayıldı",
+    "inboxConversationCollabInvitePreview": "İşbirliği daveti",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "Davet gönderildi",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
     },
     "inboxConversationMuted": "Sohbet sessize alındı",
     "inboxConversationUnmuted": "Sohbet sessizden çıkarıldı",
@@ -2688,6 +2723,7 @@
     "videoEditorOpenLibrarySemanticLabel": "Kütüphaneyi aç",
     "videoEditorOpenDrawSemanticLabel": "Çizim düzenleyiciyi aç",
     "videoEditorOpenFilterSemanticLabel": "Filtre düzenleyiciyi aç",
+    "videoEditorOpenStickerSemanticLabel": "Stiker düzenleyiciyi aç",
     "videoEditorOpenTextSemanticLabel": "Metin düzenleyiciyi aç",
     "videoEditorPauseSemanticLabel": "Duraklat",
     "videoEditorPickColorTitle": "Renk seç",
@@ -2727,6 +2763,7 @@
         }
     },
     "videoEditorSplitSelectedClipSemanticLabel": "Seçili klibi böl",
+    "videoEditorStickersDivineOriginals": "Divine Orijinaller",
     "videoEditorStickerSearchHint": "Çıkartma ara...",
     "videoEditorTextAlignmentSemanticLabel": "Metin hizalama",
     "videoEditorTextBackgroundSemanticLabel": "Metin arka planı",
@@ -2929,5 +2966,27 @@
   "fullscreenFeedRemovedMessage": "Video kaldırıldı",
   "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
   "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+  "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "Avatarı kapat",
+    "profileAvatarLightboxCloseSemanticLabel": "Avatar önizlemesini kapat",
+    "notificationsUnreadPrefix": "Okunmamış bildirim",
+    "notificationsViewProfileSemanticLabel": "{displayName} profilini görüntüle",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "Profilleri görüntüle",
+    "notificationRepliedToYourComment": "yorumuna yanıt verdi",
+    "notificationAndConnector": "ve",
+    "notificationOthersCount": "{count, plural, =1{1 kişi daha} other{{count} kişi daha}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

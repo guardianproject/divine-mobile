@@ -990,7 +990,7 @@ final class AudioSharingPreferenceServiceProvider
 }
 
 String _$audioSharingPreferenceServiceHash() =>
-    r'6d09af615c19937bc2842079c368161b513dd323';
+    r'e63c48c60864949925db6eeed76f7e8a67e5444a';
 
 /// AI training opt-out preference service. Controls whether the
 /// CAWG training-mining assertion is embedded in C2PA manifests.
@@ -2926,7 +2926,7 @@ final class SocialServiceProvider
   }
 }
 
-String _$socialServiceHash() => r'5b4d5751d3f2ef22c9ee2610cda1c4e70b2302a7';
+String _$socialServiceHash() => r'025a0d7f80743f11d040e4867c012397282404b3';
 
 /// Cached following list loaded directly from SharedPreferences.
 ///
@@ -4052,49 +4052,73 @@ final class SubscribedListVideoCacheProvider
 String _$subscribedListVideoCacheHash() =>
     r'e7d9c2f15e09ab7d3848597e7d288749e3050f08';
 
-/// User list service for NIP-51 kind 30000 people lists
+/// Repository for NIP-51 kind 30000 people lists.
+///
+/// Wires the shared [NostrClient] (via [nostrServiceProvider]) into a
+/// [PeopleListsRepositoryImpl] backed by a [LocalPeopleListsCache] that opens
+/// a lazily-created `hive_ce` box named [_peopleListsBoxName]. The repository
+/// itself has no Flutter dependencies; this provider owns all UI glue.
 
-@ProviderFor(userListService)
-const userListServiceProvider = UserListServiceProvider._();
+@ProviderFor(peopleListsRepository)
+const peopleListsRepositoryProvider = PeopleListsRepositoryProvider._();
 
-/// User list service for NIP-51 kind 30000 people lists
+/// Repository for NIP-51 kind 30000 people lists.
+///
+/// Wires the shared [NostrClient] (via [nostrServiceProvider]) into a
+/// [PeopleListsRepositoryImpl] backed by a [LocalPeopleListsCache] that opens
+/// a lazily-created `hive_ce` box named [_peopleListsBoxName]. The repository
+/// itself has no Flutter dependencies; this provider owns all UI glue.
 
-final class UserListServiceProvider
+final class PeopleListsRepositoryProvider
     extends
         $FunctionalProvider<
-          AsyncValue<UserListService>,
-          UserListService,
-          FutureOr<UserListService>
+          PeopleListsRepository,
+          PeopleListsRepository,
+          PeopleListsRepository
         >
-    with $FutureModifier<UserListService>, $FutureProvider<UserListService> {
-  /// User list service for NIP-51 kind 30000 people lists
-  const UserListServiceProvider._()
+    with $Provider<PeopleListsRepository> {
+  /// Repository for NIP-51 kind 30000 people lists.
+  ///
+  /// Wires the shared [NostrClient] (via [nostrServiceProvider]) into a
+  /// [PeopleListsRepositoryImpl] backed by a [LocalPeopleListsCache] that opens
+  /// a lazily-created `hive_ce` box named [_peopleListsBoxName]. The repository
+  /// itself has no Flutter dependencies; this provider owns all UI glue.
+  const PeopleListsRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'userListServiceProvider',
-        isAutoDispose: true,
+        name: r'peopleListsRepositoryProvider',
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$userListServiceHash();
+  String debugGetCreateSourceHash() => _$peopleListsRepositoryHash();
 
   @$internal
   @override
-  $FutureProviderElement<UserListService> $createElement(
+  $ProviderElement<PeopleListsRepository> $createElement(
     $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
+  ) => $ProviderElement(pointer);
 
   @override
-  FutureOr<UserListService> create(Ref ref) {
-    return userListService(ref);
+  PeopleListsRepository create(Ref ref) {
+    return peopleListsRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PeopleListsRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PeopleListsRepository>(value),
+    );
   }
 }
 
-String _$userListServiceHash() => r'fd9e01e02e1be679106308e3166c3581a80b4b51';
+String _$peopleListsRepositoryHash() =>
+    r'1b80c4d4b9229393068846048b6596a0c1688e45';
 
 /// Bookmark service for NIP-51 bookmarks
 

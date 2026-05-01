@@ -14,6 +14,10 @@ import 'package:models/models.dart';
 import 'package:nostr_client/nostr_client.dart';
 import 'package:openvine/blocs/my_profile/my_profile_bloc.dart';
 import 'package:openvine/blocs/others_followers/others_followers_bloc.dart';
+import 'package:openvine/features/feature_flags/models/feature_flag.dart';
+import 'package:openvine/features/feature_flags/providers/feature_flag_providers.dart';
+import 'package:openvine/features/people_lists/bloc/people_lists_bloc.dart';
+import 'package:openvine/features/people_lists/view/people_list_membership_indicator.dart';
 import 'package:openvine/l10n/generated/app_localizations.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
@@ -21,6 +25,7 @@ import 'package:openvine/services/auth_service.dart' hide UserProfile;
 import 'package:openvine/widgets/profile/profile_header_widget.dart';
 import 'package:openvine/widgets/user_avatar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../helpers/test_provider_overrides.dart';
 
@@ -30,6 +35,9 @@ class _MockMyProfileBloc extends MockBloc<MyProfileEvent, MyProfileState>
 class _MockOthersFollowersBloc
     extends MockBloc<OthersFollowersEvent, OthersFollowersState>
     implements OthersFollowersBloc {}
+
+class _MockPeopleListsBloc extends MockBloc<PeopleListsEvent, PeopleListsState>
+    implements PeopleListsBloc {}
 
 // Mock classes
 class MockFollowRepository extends Mock implements FollowRepository {
@@ -168,6 +176,8 @@ void main() {
       String? displayNameHint,
       String? avatarUrlHint,
       MyProfileState? myProfileState,
+      bool curatedListsEnabled = false,
+      PeopleListsState? peopleListsState,
     }) {
       final authService = MockAuthService(
         isAnonymousValue: isAnonymous,
@@ -201,8 +211,21 @@ void main() {
         when(
           () => mockOthersFollowersBloc.state,
         ).thenReturn(const OthersFollowersState());
-        header = BlocProvider<OthersFollowersBloc>.value(
-          value: mockOthersFollowersBloc,
+        final mockPeopleListsBloc = _MockPeopleListsBloc();
+        whenListen(
+          mockPeopleListsBloc,
+          const Stream<PeopleListsState>.empty(),
+          initialState: peopleListsState ?? const PeopleListsState(),
+        );
+        header = MultiBlocProvider(
+          providers: [
+            BlocProvider<OthersFollowersBloc>.value(
+              value: mockOthersFollowersBloc,
+            ),
+            BlocProvider<PeopleListsBloc>.value(
+              value: mockPeopleListsBloc,
+            ),
+          ],
           child: header,
         );
       }
@@ -229,6 +252,9 @@ void main() {
           currentAuthStateProvider.overrideWith(
             (ref) => AuthState.authenticated,
           ),
+          isFeatureEnabledProvider(
+            FeatureFlag.curatedLists,
+          ).overrideWith((ref) => curatedListsEnabled),
         ],
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -259,6 +285,38 @@ void main() {
 
       expect(find.byType(UserAvatar), findsOneWidget);
     });
+
+    testWidgets(
+      'avatar lightbox seeds placeholder with the pubkey so the '
+      'fallback colour matches the rest of the app when the image fails',
+      (tester) async {
+        final testProfile = createTestProfile(
+          displayName: 'Test User',
+          picture: 'https://example.com/broken.jpg',
+        );
+
+        await tester.pumpWidget(
+          buildTestWidget(
+            userIdHex: testUserHex,
+            isOwnProfile: true,
+            profile: testProfile,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Only the header avatar is in the tree before the lightbox opens.
+        expect(find.byType(UserAvatar), findsOneWidget);
+
+        await tester.tap(find.byType(UserAvatar));
+        await tester.pumpAndSettle();
+
+        // After opening, the lightbox adds a second UserAvatar at size 288.
+        final lightboxAvatar = tester
+            .widgetList<UserAvatar>(find.byType(UserAvatar))
+            .firstWhere((avatar) => avatar.size == 288);
+        expect(lightboxAvatar.placeholderSeed, equals(testUserHex));
+      },
+    );
 
     testWidgets(
       'uses parent-supplied profile for other users while fallback provider is unresolved',
@@ -331,24 +389,98 @@ void main() {
       expect(find.text('Loops'), findsOneWidget);
     });
 
-    testWidgets('hides all stat columns when profileStats is null', (
-      tester,
-    ) async {
-      final testProfile = createTestProfile(displayName: 'Test User');
+    testWidgets(
+      'keeps all stat columns visible with em-dash placeholders once the '
+      'skeleton timeout expires and profileStats is still null',
+      (tester) async {
+        final testProfile = createTestProfile(displayName: 'Test User');
 
-      await tester.pumpWidget(
-        buildTestWidget(
-          userIdHex: testUserHex,
-          isOwnProfile: true,
-          profile: testProfile,
-        ),
+        await tester.pumpWidget(
+          buildTestWidget(
+            userIdHex: testUserHex,
+            isOwnProfile: true,
+            profile: testProfile,
+          ),
+        );
+        // Advance past the 7-second skeleton timeout, then settle any
+        // remaining switch animations.
+        await tester.pump(const Duration(seconds: 8));
+        await tester.pumpAndSettle();
+
+        // All four labels stay in the tree; counts fall back to '—'.
+        expect(find.text('Followers'), findsOneWidget);
+        expect(find.text('Following'), findsOneWidget);
+        expect(find.text('Likes'), findsOneWidget);
+        expect(find.text('Loops'), findsOneWidget);
+        expect(find.text('—'), findsNWidgets(4));
+
+        // Skeleton must be disabled after timeout — data is shown as-is.
+        // bySubtype is required because Skeletonizer is abstract; the
+        // concrete widget in the tree is the private _Skeletonizer subclass.
+        final s = tester.widget<Skeletonizer>(
+          find.bySubtype<Skeletonizer>(),
+        );
+        expect(s.enabled, isFalse);
+      },
+    );
+
+    group('Stats row skeleton timeout', () {
+      testWidgets(
+        'shows placeholder columns as skeleton while profileStats is null before timeout',
+        (tester) async {
+          final testProfile = createTestProfile(displayName: 'Test User');
+
+          await tester.pumpWidget(
+            buildTestWidget(
+              userIdHex: testUserHex,
+              isOwnProfile: true,
+              profile: testProfile,
+              // profileStats deliberately omitted (null)
+            ),
+          );
+          // One frame only — the 7-second skeleton timer has not fired yet.
+          await tester.pump();
+
+          // All four column labels are in the tree, rendered as skeletons.
+          expect(find.text('Followers'), findsOneWidget);
+          expect(find.text('Following'), findsOneWidget);
+          expect(find.text('Likes'), findsOneWidget);
+          expect(find.text('Loops'), findsOneWidget);
+
+          // Skeleton must be active — not just present in the tree.
+          // bySubtype is required because Skeletonizer is abstract; the
+          // concrete widget in the tree is the private _Skeletonizer subclass.
+          final s = tester.widget<Skeletonizer>(
+            find.bySubtype<Skeletonizer>(),
+          );
+          expect(s.enabled, isTrue);
+        },
       );
-      await tester.pumpAndSettle();
 
-      expect(find.text('Followers'), findsNothing);
-      expect(find.text('Following'), findsNothing);
-      expect(find.text('Likes'), findsNothing);
-      expect(find.text('Loops'), findsNothing);
+      testWidgets(
+        'stat columns remain visible once profileStats arrives before timeout',
+        (tester) async {
+          const stats = ProfileStats(
+            pubkey: testUserHex,
+            totalLikes: 10,
+            totalViews: 20,
+          );
+
+          await tester.pumpWidget(
+            buildTestWidget(
+              userIdHex: testUserHex,
+              isOwnProfile: true,
+              profile: createTestProfile(displayName: 'Test User'),
+              profileStats: stats,
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          // Actual data shown — no timeout was needed.
+          expect(find.text('Loops'), findsOneWidget);
+          expect(find.text('Likes'), findsOneWidget);
+        },
+      );
     });
 
     testWidgets('displays user bio when present', (tester) async {
@@ -455,6 +587,44 @@ void main() {
 
       expect(find.text('Complete your profile'), findsNothing);
     });
+
+    testWidgets(
+      'renders PeopleListMembershipIndicator for other users',
+      (tester) async {
+        final testProfile = createTestProfile(displayName: 'Other User');
+
+        await tester.pumpWidget(
+          buildTestWidget(
+            userIdHex: testUserHex,
+            isOwnProfile: false,
+            suppliedProfile: testProfile,
+            curatedListsEnabled: true,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(PeopleListMembershipIndicator), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'does not render PeopleListMembershipIndicator for own profile',
+      (tester) async {
+        final testProfile = createTestProfile(displayName: 'Self');
+
+        await tester.pumpWidget(
+          buildTestWidget(
+            userIdHex: testUserHex,
+            isOwnProfile: true,
+            profile: testProfile,
+            curatedListsEnabled: true,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(PeopleListMembershipIndicator), findsNothing);
+      },
+    );
 
     testWidgets(
       'renders fallback content for others profile with null profile',

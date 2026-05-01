@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "{displayName}をリストに追加",
     "profileUserBlockedTitle": "ブロックしたよ",
     "profileUserBlockedContent": "このユーザーのコンテンツはフィードに出なくなるよ。",
     "profileUserBlockedUnblockHint": "いつでもプロフィールか [設定] > [安全] からブロック解除できるよ。",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "そのユーザー名はたった今取られちゃった。別の名前にしてみて。",
     "profileSetupClaimFailed": "ユーザー名の取得がうまくいかなかった。もう一回試してみて。",
     "profileSetupPublishFailed": "プロフィールの公開がうまくいかなかった。もう一回試してみて。",
+    "profileSetupNoRelaysConnected": "ネットワークに接続できなかった。接続を確認してもう一回試してみて。",
+    "profileSetupRetryLabel": "再試行",
     "profileSetupDisplayNameLabel": "表示名",
     "profileSetupDisplayNameHint": "みんなに何て呼ばれたい?",
     "profileSetupDisplayNameHelper": "好きな名前やラベルを使ってOK。一意じゃなくて大丈夫。",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "動画の送信がうまくいかなかった",
     "shareAddedToBookmarks": "ブックマークに追加したよ",
+    "shareRemovedFromBookmarks": "ブックマークから外したよ",
     "shareFailedToAddBookmark": "ブックマークの追加がうまくいかなかった",
+    "shareFailedToRemoveBookmark": "ブックマークを外せなかった",
     "shareActionFailed": "操作がうまくいかなかった",
     "shareWithTitle": "共有先",
     "shareFindPeople": "ユーザーを検索",
@@ -625,6 +630,7 @@
     "metadataLikesLabel": "いいね",
     "metadataCommentsLabel": "コメント",
     "metadataRepostsLabel": "リポスト",
+    "metadataPostedDateSemantics": "{date}に投稿",
     "devOptionsTitle": "開発者オプション",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1291,6 +1297,9 @@
     "shareSheetSaveToGallery": "ギャラリーに保存",
     "shareSheetSaveWithWatermark": "ウォーターマーク付きで保存",
     "shareSheetSaveVideo": "動画を保存",
+    "shareSheetAddToClips": "クリップに追加",
+    "shareSheetAddedToClips": "クリップに追加しました",
+    "shareSheetAddToClipsFailed": "クリップに追加できませんでした",
     "shareSheetAddToList": "リストに追加",
     "shareSheetCopy": "コピー",
     "shareSheetShareVia": "他のアプリで共有",
@@ -1942,6 +1951,10 @@
         }
     },
     "listCreateNewList": "新しいリストを作る",
+    "listNewPeopleList": "新しい人リスト",
+    "listCollaboratorsNone": "なし",
+    "listAddCollaboratorTitle": "コラボレーターを追加",
+    "listCollaboratorSearchHint": "diVineを検索...",
     "listNameLabel": "リスト名",
     "listDescriptionLabel": "説明 (任意)",
     "listPublicList": "公開リスト",
@@ -2252,6 +2265,28 @@
                 "type": "String"
             }
         }
+    },
+    "inboxCollabInviteAcceptButton": "承認",
+    "inboxCollabInviteAcceptError": "承認できなかったよ。もう一度試してね。",
+    "inboxCollabInviteAcceptedStatus": "承認済み",
+    "inboxCollabInviteCardRoleLabel": "この投稿で{role}",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "コラボ招待",
+    "inboxCollabInviteIgnoreButton": "無視",
+    "inboxCollabInviteIgnoredStatus": "無視済み",
+    "inboxConversationCollabInvitePreview": "コラボ招待",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "招待を送ったよ",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
     },
     "inboxConversationMuted": "会話をミュートしたよ",
     "inboxConversationUnmuted": "会話のミュートを解除したよ",
@@ -2688,6 +2723,7 @@
     "videoEditorOpenLibrarySemanticLabel": "ライブラリを開く",
     "videoEditorOpenDrawSemanticLabel": "描画エディタを開く",
     "videoEditorOpenFilterSemanticLabel": "フィルターエディタを開く",
+    "videoEditorOpenStickerSemanticLabel": "スタンプエディタを開く",
     "videoEditorOpenTextSemanticLabel": "テキストエディタを開く",
     "videoEditorPauseSemanticLabel": "一時停止",
     "videoEditorPickColorTitle": "色を選択",
@@ -2727,6 +2763,7 @@
         }
     },
     "videoEditorSplitSelectedClipSemanticLabel": "選択したクリップを分割",
+    "videoEditorStickersDivineOriginals": "Divine オリジナル",
     "videoEditorStickerSearchHint": "ステッカーを検索...",
     "videoEditorTextAlignmentSemanticLabel": "テキストの配置",
     "videoEditorTextBackgroundSemanticLabel": "テキストの背景",
@@ -2929,5 +2966,27 @@
   "fullscreenFeedRemovedMessage": "動画を削除しました",
   "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
   "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+  "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "アバターを閉じる",
+    "profileAvatarLightboxCloseSemanticLabel": "アバタープレビューを閉じる",
+    "notificationsUnreadPrefix": "未読の通知",
+    "notificationsViewProfileSemanticLabel": "{displayName}さんのプロフィールを開く",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "プロフィールを開く",
+    "notificationRepliedToYourComment": "があなたのコメントに返信しました",
+    "notificationAndConnector": "と",
+    "notificationOthersCount": "{count, plural, other{他{count}人}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

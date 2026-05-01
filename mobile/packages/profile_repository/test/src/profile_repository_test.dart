@@ -254,6 +254,49 @@ void main() {
 
         expect(result, equals(0));
       });
+
+      test(
+        'removes pubkey from known cached set on successful delete',
+        () async {
+          final profile = UserProfile.fromNostrEvent(mockProfileEvent);
+          await profileRepository.cacheProfile(profile);
+          expect(profileRepository.hasProfile(testPubkey), isTrue);
+
+          when(
+            () => mockUserProfilesDao.deleteProfile(any()),
+          ).thenAnswer((_) async => 1);
+
+          await profileRepository.deleteCachedProfile(pubkey: testPubkey);
+
+          expect(profileRepository.hasProfile(testPubkey), isFalse);
+        },
+      );
+
+      test('keeps pubkey in known cached set when delete is a no-op', () async {
+        final profile = UserProfile.fromNostrEvent(mockProfileEvent);
+        await profileRepository.cacheProfile(profile);
+        expect(profileRepository.hasProfile(testPubkey), isTrue);
+
+        when(
+          () => mockUserProfilesDao.deleteProfile(any()),
+        ).thenAnswer((_) async => 0);
+
+        await profileRepository.deleteCachedProfile(pubkey: testPubkey);
+
+        expect(profileRepository.hasProfile(testPubkey), isTrue);
+      });
+
+      test('does not mark pubkey as confirmed missing on delete', () async {
+        final profile = UserProfile.fromNostrEvent(mockProfileEvent);
+        await profileRepository.cacheProfile(profile);
+        when(
+          () => mockUserProfilesDao.deleteProfile(any()),
+        ).thenAnswer((_) async => 1);
+
+        await profileRepository.deleteCachedProfile(pubkey: testPubkey);
+
+        expect(profileRepository.isConfirmedMissing(testPubkey), isFalse);
+      });
     });
 
     group('getAllCachedProfiles', () {
@@ -1384,10 +1427,33 @@ void main() {
               profileContent: any(named: 'profileContent'),
             ),
           ).thenAnswer((_) async => null);
+          when(
+            () => mockNostrClient.connectedRelays,
+          ).thenReturn(['wss://relay.example.com']);
 
           await expectLater(
             profileRepository.saveProfileEvent(displayName: 'Test'),
             throwsA(isA<ProfilePublishFailedException>()),
+          );
+          verifyNever(() => mockUserProfilesDao.upsertProfile(any()));
+        },
+      );
+
+      test(
+        'throws NoRelaysConnectedException when no relays are connected',
+        () async {
+          when(
+            () => mockNostrClient.sendProfile(
+              profileContent: any(named: 'profileContent'),
+            ),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockNostrClient.connectedRelays,
+          ).thenReturn([]);
+
+          await expectLater(
+            profileRepository.saveProfileEvent(displayName: 'Test'),
+            throwsA(isA<NoRelaysConnectedException>()),
           );
           verifyNever(() => mockUserProfilesDao.upsertProfile(any()));
         },
@@ -3019,6 +3085,13 @@ void main() {
 
         expect(e.message, isNull);
         expect(e.toString(), contains('ProfileRepositoryException'));
+      });
+
+      test('NoRelaysConnectedException has message and toString', () {
+        const e = NoRelaysConnectedException('no relays');
+
+        expect(e.message, equals('no relays'));
+        expect(e.toString(), equals('NoRelaysConnectedException: no relays'));
       });
     });
 

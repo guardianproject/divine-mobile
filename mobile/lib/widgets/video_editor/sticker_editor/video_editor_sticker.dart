@@ -7,6 +7,25 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:models/models.dart' show StickerData;
 import 'package:openvine/widgets/vine_cached_image.dart';
 
+/// Rehydrates a [VideoEditorSticker] from a serialized
+/// [StickerData] map produced during state-history export.
+///
+/// Used as the `widgetLoader` for `ImportStateHistory.fromMap` and
+/// `WidgetLayer.fromMap` so sticker layers survive the editor's
+/// export/reopen round-trip. Returns an empty box when [meta] is
+/// `null` (legacy widget layers without sticker metadata).
+Widget videoEditorStickerWidgetLoader(
+  String id, {
+  Map<String, dynamic>? meta,
+}) {
+  if (meta == null) return const SizedBox.shrink();
+
+  return VideoEditorSticker(
+    sticker: StickerData.fromJson(meta),
+    enableLimitCacheSize: false,
+  );
+}
+
 /// A sticker widget that displays an image from either an asset or URL.
 ///
 /// Local asset stickers are rendered as SVGs using [SvgPicture.asset].
@@ -15,10 +34,13 @@ class VideoEditorSticker extends StatelessWidget {
   const VideoEditorSticker({
     required this.sticker,
     super.key,
+    this.onTap,
     this.enableLimitCacheSize = true,
   });
 
   final StickerData sticker;
+
+  final VoidCallback? onTap;
 
   /// Whether to limit the image cache size based on the widget's constraints.
   ///
@@ -30,33 +52,39 @@ class VideoEditorSticker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SVG assets don't need raster cache sizing.
-    if (sticker.networkUrl == null) {
-      return Center(child: _SvgAssetImage(sticker: sticker));
-    }
+    return Semantics(
+      label: sticker.description,
+      button: onTap != null,
+      child: GestureDetector(
+        behavior: .translucent,
+        onTap: onTap,
+        child: Center(
+          child: sticker.networkUrl == null
+              ? _SvgAssetImage(sticker: sticker)
+              : enableLimitCacheSize
+              ? LayoutBuilder(
+                  builder: (_, constraints) {
+                    if (!constraints.hasBoundedWidth ||
+                        !constraints.hasBoundedHeight) {
+                      return _NetworkImage(sticker: sticker);
+                    }
 
-    return Center(
-      child: enableLimitCacheSize
-          ? LayoutBuilder(
-              builder: (_, constraints) {
-                if (!constraints.hasBoundedWidth ||
-                    !constraints.hasBoundedHeight) {
-                  return _NetworkImage(sticker: sticker);
-                }
+                    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+                    final cacheWidth = (constraints.maxWidth * pixelRatio)
+                        .toInt();
+                    final cacheHeight = (constraints.maxHeight * pixelRatio)
+                        .toInt();
 
-                final pixelRatio = MediaQuery.devicePixelRatioOf(context);
-                final cacheWidth = (constraints.maxWidth * pixelRatio).toInt();
-                final cacheHeight = (constraints.maxHeight * pixelRatio)
-                    .toInt();
-
-                return _NetworkImage(
-                  sticker: sticker,
-                  cacheWidth: cacheWidth,
-                  cacheHeight: cacheHeight,
-                );
-              },
-            )
-          : _NetworkImage(sticker: sticker),
+                    return _NetworkImage(
+                      sticker: sticker,
+                      cacheWidth: cacheWidth,
+                      cacheHeight: cacheHeight,
+                    );
+                  },
+                )
+              : _NetworkImage(sticker: sticker),
+        ),
+      ),
     );
   }
 }
@@ -105,8 +133,8 @@ class _ErrorImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Icon(
-      Icons.broken_image_outlined,
+    return const DivineIcon(
+      icon: DivineIconName.warningCircle,
       size: 48,
       color: VineTheme.lightText,
     );

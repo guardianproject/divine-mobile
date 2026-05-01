@@ -5,6 +5,7 @@ import 'package:divine_ui/divine_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:models/models.dart';
+import 'package:openvine/l10n/generated/app_localizations.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
 import 'package:openvine/screens/inbox/widgets/conversation_tile.dart';
 import 'package:openvine/widgets/user_avatar.dart';
@@ -127,6 +128,52 @@ void main() {
 
         expect(find.text('Hey, how are you?'), findsOneWidget);
       });
+
+      // #3662 — the structured collab invite carries a deterministic
+      // plaintext fallback ('...Open diVine to review and accept.') so
+      // legacy clients can still see something. Inside diVine that copy
+      // is misleading; the conversation list should show a localized
+      // label instead.
+      testWidgets(
+        'replaces legacy collab invite plaintext with localized preview',
+        (tester) async {
+          final testProfile = createTestProfile(displayName: 'Alice');
+          final testConversation = createTestConversation(
+            lastMessageContent:
+                'You were invited to collaborate on Skate loop. '
+                'Open diVine to review and accept.',
+            lastMessageTimestamp: nowUnix,
+          );
+
+          await tester.pumpWidget(
+            testMaterialApp(
+              additionalOverrides: [
+                fetchUserProfileProvider(
+                  otherPubkey,
+                ).overrideWith((ref) async => testProfile),
+              ],
+              home: Scaffold(
+                body: ConversationTile(
+                  conversation: testConversation,
+                  currentUserPubkey: currentPubkey,
+                  onTap: () {},
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          final l10n = lookupAppLocalizations(const Locale('en'));
+          expect(
+            find.text(l10n.inboxConversationCollabInvitePreview),
+            findsOneWidget,
+          );
+          expect(
+            find.textContaining('Open diVine to review and accept'),
+            findsNothing,
+          );
+        },
+      );
 
       testWidgets('renders unread indicator when conversation is unread', (
         tester,

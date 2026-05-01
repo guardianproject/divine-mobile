@@ -19,6 +19,7 @@ import 'package:openvine/blocs/my_profile/my_profile_bloc.dart';
 import 'package:openvine/blocs/profile_editor/profile_editor_bloc.dart';
 import 'package:openvine/l10n/l10n.dart';
 import 'package:openvine/providers/app_providers.dart';
+import 'package:openvine/providers/nostr_client_provider.dart';
 import 'package:openvine/providers/user_profile_providers.dart';
 import 'package:openvine/services/zendesk_support_service.dart';
 import 'package:openvine/utils/user_profile_utils.dart';
@@ -312,6 +313,26 @@ class _ProfileSetupScreenViewState
                       backgroundColor: VineTheme.error,
                     ),
                   );
+                case ProfileEditorError.noRelaysConnected:
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        context.l10n.profileSetupNoRelaysConnected,
+                      ),
+                      backgroundColor: VineTheme.error,
+                      duration: const Duration(seconds: 6),
+                      action: pubkey == null
+                          ? null
+                          : SnackBarAction(
+                              label: context.l10n.profileSetupRetryLabel,
+                              textColor: VineTheme.whiteText,
+                              onPressed: () => _retryAfterRelayReconnect(
+                                context,
+                                pubkey,
+                              ),
+                            ),
+                    ),
+                  );
                 case null:
                   break;
               }
@@ -396,6 +417,7 @@ class _ProfileSetupScreenViewState
                                         imageProvider:
                                             _buildProfilePictureProvider(),
                                         name: _nameController.text.trim(),
+                                        placeholderSeed: pubkey,
                                         size: 144,
                                         semanticLabel: context
                                             .l10n
@@ -871,10 +893,17 @@ class _ProfileSetupScreenViewState
                                           ),
                                           errorMaxLines: 2,
                                         ),
-                                        // Only allow valid subdomain characters
+                                        // Lowercase as the user types and
+                                        // restrict to canonical subdomain
+                                        // characters. The name server stores
+                                        // and resolves usernames as lowercase,
+                                        // so normalizing here avoids a
+                                        // confusing "invalid format" error
+                                        // for a typed capital letter.
                                         inputFormatters: [
+                                          const LowercaseTextInputFormatter(),
                                           FilteringTextInputFormatter.allow(
-                                            RegExp('[a-zA-Z0-9-]'),
+                                            RegExp('[a-z0-9-]'),
                                           ),
                                         ],
                                         textInputAction: TextInputAction.next,
@@ -1029,6 +1058,32 @@ class _ProfileSetupScreenViewState
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Attempts to reconnect relays and re-dispatches [ProfileSaved].
+  ///
+  /// Called from the retry CTA on the no-relays-connected SnackBar. Triggers
+  /// [NostrClient.retryDisconnectedRelays] before re-submitting so the relay
+  /// pool has a chance to reconnect before the publish is attempted again.
+  Future<void> _retryAfterRelayReconnect(
+    BuildContext context,
+    String pubkey,
+  ) async {
+    await ref.read(nostrServiceProvider).retryDisconnectedRelays();
+    if (!context.mounted) return;
+    context.read<ProfileEditorBloc>().add(
+      ProfileSaved(
+        pubkey: pubkey,
+        displayName: _nameController.text,
+        about: _bioController.text,
+        username: _nip05Controller.text,
+        externalNip05: _externalNip05Controller.text,
+        picture: _pictureController.text,
+        banner: _selectedProfileColor != null
+            ? '0x${_selectedProfileColor!.toARGB32().toRadixString(16).substring(2)}'
+            : null,
       ),
     );
   }
@@ -1435,6 +1490,26 @@ class UsernameStatusIndicator extends StatelessWidget {
         message: errorText ?? 'Failed to check availability',
       ),
     };
+  }
+}
+
+/// Lowercases input text on every edit.
+///
+/// Composes with `FilteringTextInputFormatter` on the username field so that
+/// typed capital letters are normalized in place rather than triggering the
+/// lowercase-only validator. Lowercasing ASCII is a 1:1 character mapping so
+/// the existing selection offsets remain valid.
+class LowercaseTextInputFormatter extends TextInputFormatter {
+  const LowercaseTextInputFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final lowered = newValue.text.toLowerCase();
+    if (lowered == newValue.text) return newValue;
+    return newValue.copyWith(text: lowered);
   }
 }
 

@@ -11,11 +11,13 @@ import 'package:openvine/models/divine_video_clip.dart';
 import 'package:openvine/models/video_editor/video_editor_provider_state.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/clip_manager_provider.dart';
+import 'package:openvine/providers/shared_preferences_provider.dart';
 import 'package:openvine/providers/video_editor_provider.dart';
 import 'package:openvine/services/device_auth/proofsign_provider.dart';
 import 'package:openvine/services/draft_storage_service.dart';
 import 'package:openvine/services/video_editor/video_editor_render_service.dart';
 import 'package:pro_video_editor/pro_video_editor.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _MockDraftStorageService extends Mock implements DraftStorageService {}
 
@@ -23,9 +25,13 @@ void main() {
   group('VideoEditorProvider', () {
     late ProviderContainer container;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
       container = ProviderContainer(
-        overrides: [proofSignAuthProvider.overrideWith((ref) async => null)],
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
       );
     });
 
@@ -802,9 +808,13 @@ void main() {
   group('getActiveDraft', () {
     late ProviderContainer container;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
       container = ProviderContainer(
-        overrides: [proofSignAuthProvider.overrideWith((ref) async => null)],
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
       );
     });
 
@@ -920,9 +930,13 @@ void main() {
   group('getActiveDraft', () {
     late ProviderContainer container;
 
-    setUp(() {
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
       container = ProviderContainer(
-        overrides: [proofSignAuthProvider.overrideWith((ref) async => null)],
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
       );
     });
 
@@ -1071,10 +1085,13 @@ void main() {
       late _MockDraftStorageService mockDraftStorage;
       late ProviderContainer container;
 
-      setUp(() {
+      setUp(() async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
         mockDraftStorage = _MockDraftStorageService();
         container = ProviderContainer(
           overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
             draftStorageServiceProvider.overrideWithValue(mockDraftStorage),
           ],
         );

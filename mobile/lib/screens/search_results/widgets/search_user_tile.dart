@@ -2,6 +2,12 @@ import 'package:divine_ui/divine_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:models/models.dart';
+import 'package:openvine/features/feature_flags/models/feature_flag.dart';
+import 'package:openvine/features/feature_flags/providers/feature_flag_providers.dart';
+import 'package:openvine/features/people_lists/models/people_list_entry_point.dart';
+import 'package:openvine/features/people_lists/view/add_to_people_lists_sheet.dart';
+import 'package:openvine/l10n/l10n.dart';
+import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/nip05_verification_provider.dart';
 import 'package:openvine/services/nip05_verification_service.dart';
 import 'package:openvine/utils/user_profile_utils.dart';
@@ -34,6 +40,13 @@ class SearchUserTile extends ConsumerWidget {
         ? claimedNip05
         : profile.truncatedNpub;
 
+    final profileListFeaturesEnabled = ref.watch(
+      isFeatureEnabledProvider(FeatureFlag.profileListFeatures),
+    );
+    final ownPubkey = ref.watch(authServiceProvider).currentPublicKeyHex;
+    final showAddToList =
+        profileListFeaturesEnabled && profile.pubkey != ownPubkey;
+
     return Semantics(
       identifier: 'search_user_tile_${profile.pubkey}',
       label: profile.bestDisplayName,
@@ -46,7 +59,11 @@ class SearchUserTile extends ConsumerWidget {
           child: Row(
             spacing: 16,
             children: [
-              UserAvatar(imageUrl: profile.picture, size: 40),
+              UserAvatar(
+                imageUrl: profile.picture,
+                placeholderSeed: profile.pubkey,
+                size: 40,
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,6 +84,17 @@ class SearchUserTile extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (showAddToList)
+                IconButton(
+                  icon: const Icon(Icons.playlist_add),
+                  color: VineTheme.secondaryText,
+                  tooltip: context.l10n.peopleListsAddToList,
+                  onPressed: () => AddToPeopleListsSheet.show(
+                    context,
+                    pubkey: profile.pubkey,
+                    entryPoint: PeopleListEntryPoint.searchResult,
+                  ),
+                ),
             ],
           ),
         ),

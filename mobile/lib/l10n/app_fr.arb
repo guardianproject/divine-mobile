@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "Ajouter {displayName} à une liste",
     "profileUserBlockedTitle": "Utilisateur bloqué",
     "profileUserBlockedContent": "Tu ne verras plus son contenu dans tes fils.",
     "profileUserBlockedUnblockHint": "Tu peux le débloquer n'importe quand depuis son profil ou dans Réglages > Sécurité.",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "Ce nom d'utilisateur vient d'être pris. Choisis-en un autre.",
     "profileSetupClaimFailed": "Échec de la réservation du nom d'utilisateur. Réessaie.",
     "profileSetupPublishFailed": "Échec de la publication du profil. Réessaie.",
+    "profileSetupNoRelaysConnected": "Impossible d'accéder au réseau. Vérifie ta connexion et réessaie.",
+    "profileSetupRetryLabel": "Réessayer",
     "profileSetupDisplayNameLabel": "Nom affiché",
     "profileSetupDisplayNameHint": "Comment veux-tu qu'on te reconnaisse ?",
     "profileSetupDisplayNameHelper": "N'importe quel nom ou pseudo. Pas besoin qu'il soit unique.",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "Échec de l'envoi de la vidéo",
     "shareAddedToBookmarks": "Ajouté aux favoris",
+    "shareRemovedFromBookmarks": "Retiré des favoris",
     "shareFailedToAddBookmark": "Échec de l'ajout aux favoris",
+    "shareFailedToRemoveBookmark": "Échec du retrait des favoris",
     "shareActionFailed": "Action échouée",
     "shareWithTitle": "Partager avec",
     "shareFindPeople": "Trouver des gens",
@@ -628,6 +633,7 @@
     "metadataLikesLabel": "J'aime",
     "metadataCommentsLabel": "Commentaires",
     "metadataRepostsLabel": "Reposts",
+    "metadataPostedDateSemantics": "Publié le {date}",
     "devOptionsTitle": "Options développeur",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1294,6 +1300,9 @@
     "shareSheetSaveToGallery": "Enregistrer dans la galerie",
     "shareSheetSaveWithWatermark": "Enregistrer avec filigrane",
     "shareSheetSaveVideo": "Enregistrer la vidéo",
+    "shareSheetAddToClips": "Ajouter aux clips",
+    "shareSheetAddedToClips": "Ajouté aux clips",
+    "shareSheetAddToClipsFailed": "Impossible d'ajouter aux clips",
     "shareSheetAddToList": "Ajouter à une liste",
     "shareSheetCopy": "Copier",
     "shareSheetShareVia": "Partager via",
@@ -1943,6 +1952,10 @@
         }
     },
     "listCreateNewList": "Créer une nouvelle liste",
+    "listNewPeopleList": "Nouvelle liste de personnes",
+    "listCollaboratorsNone": "Aucun",
+    "listAddCollaboratorTitle": "Ajouter un collaborateur",
+    "listCollaboratorSearchHint": "Rechercher dans diVine...",
     "listNameLabel": "Nom de la liste",
     "listDescriptionLabel": "Description (facultatif)",
     "listPublicList": "Liste publique",
@@ -2253,6 +2266,28 @@
                 "type": "String"
             }
         }
+    },
+    "inboxCollabInviteAcceptButton": "Accepter",
+    "inboxCollabInviteAcceptError": "Impossible d'accepter. Réessayez.",
+    "inboxCollabInviteAcceptedStatus": "Acceptée",
+    "inboxCollabInviteCardRoleLabel": "{role} sur cette publication",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "Invitation à collaborer",
+    "inboxCollabInviteIgnoreButton": "Ignorer",
+    "inboxCollabInviteIgnoredStatus": "Ignorée",
+    "inboxConversationCollabInvitePreview": "Invitation à collaborer",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "Invitation envoyée",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
     },
     "inboxConversationMuted": "Conversation mise en sourdine",
     "inboxConversationUnmuted": "Conversation réactivée",
@@ -2660,6 +2695,7 @@
     "videoEditorOpenTextSemanticLabel": "Ouvrir l'éditeur de texte",
     "videoEditorOpenDrawSemanticLabel": "Ouvrir l'éditeur de dessin",
     "videoEditorOpenFilterSemanticLabel": "Ouvrir l'éditeur de filtres",
+    "videoEditorOpenStickerSemanticLabel": "Ouvrir l'éditeur de stickers",
     "videoEditorSaveDraftTitle": "Enregistrer votre brouillon ?",
     "videoEditorSaveDraftSubtitle": "Conservez vos modifications pour plus tard, ou abandonnez-les et quittez l'éditeur.",
     "videoEditorSaveDraftButton": "Enregistrer le brouillon",
@@ -2739,6 +2775,7 @@
     "videoEditorShowTimelineSemanticLabel": "Afficher la timeline",
     "videoEditorHideTimelineSemanticLabel": "Masquer la timeline",
     "videoEditorFeedPreviewContent": "Évitez de placer du contenu derrière ces zones.",
+    "videoEditorStickersDivineOriginals": "Divine Originaux",
     "videoEditorStickerSearchHint": "Rechercher des stickers...",
     "videoEditorSelectFontSemanticLabel": "Sélectionner une police",
     "videoEditorFontUnknown": "Inconnue",
@@ -2929,5 +2966,27 @@
   "fullscreenFeedRemovedMessage": "Vidéo supprimée",
   "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
   "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+  "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "Fermer l'avatar",
+    "profileAvatarLightboxCloseSemanticLabel": "Fermer l'aperçu de l'avatar",
+    "notificationsUnreadPrefix": "Notification non lue",
+    "notificationsViewProfileSemanticLabel": "Voir le profil de {displayName}",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "Voir les profils",
+    "notificationRepliedToYourComment": "a répondu à ton commentaire",
+    "notificationAndConnector": "et",
+    "notificationOthersCount": "{count, plural, =1{1 autre} other{{count} autres}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

@@ -11,6 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart' show AudioEvent, VideoCategory, VideoEvent;
 import 'package:nostr_app_bridge_repository/nostr_app_bridge_repository.dart';
+import 'package:openvine/features/feature_flags/models/feature_flag.dart';
+import 'package:openvine/features/feature_flags/providers/feature_flag_providers.dart';
+import 'package:openvine/features/people_lists/view/add_people_to_list_screen.dart';
+import 'package:openvine/features/people_lists/view/create_people_list_page.dart';
 import 'package:openvine/l10n/l10n.dart';
 import 'package:openvine/notifications/view/notifications_page.dart';
 import 'package:openvine/providers/app_providers.dart';
@@ -68,6 +72,7 @@ import 'package:openvine/screens/settings/nostr_settings_screen.dart';
 import 'package:openvine/screens/settings/settings_screen.dart';
 import 'package:openvine/screens/settings/support_center_screen.dart';
 import 'package:openvine/screens/sound_detail_screen.dart';
+import 'package:openvine/screens/user_list_people_screen.dart';
 import 'package:openvine/screens/video_detail_screen.dart';
 import 'package:openvine/screens/video_editor/video_editor_screen.dart';
 import 'package:openvine/screens/video_metadata/video_metadata_screen.dart';
@@ -76,6 +81,7 @@ import 'package:openvine/services/auth_service.dart';
 import 'package:openvine/services/page_load_observer.dart';
 import 'package:openvine/services/video_stop_navigator_observer.dart';
 import 'package:openvine/widgets/camera_permission_gate.dart';
+import 'package:openvine/widgets/profile/profile_video_feed_view.dart';
 import 'package:unified_logger/unified_logger.dart';
 
 /// Global route observer for [RouteAware] subscribers (e.g. pausing video
@@ -111,6 +117,25 @@ String rewriteResetPasswordDeepLink(Uri uri) {
       ..write(Uri.encodeQueryComponent(email));
   }
   return buffer.toString();
+}
+
+/// Redirects deep links for people-lists routes to the home feed when the
+/// [FeatureFlag.curatedLists] feature flag is off.
+///
+/// The people-lists screens depend on a `PeopleListsBloc` that is only
+/// provided in `main.dart` when the flag is enabled. Without this guard a
+/// deep link / push / saved URL would crash with `ProviderNotFoundException`.
+/// Returns `null` (no redirect) when the flag is on.
+String? _peopleListsRedirectIfDisabled(Ref ref, GoRouterState state) {
+  final enabled = ref.read(isFeatureEnabledProvider(FeatureFlag.curatedLists));
+  if (enabled) return null;
+  Log.info(
+    'Router redirect: ${state.matchedLocation} — '
+    'FeatureFlag.curatedLists is off, redirecting to home',
+    name: 'AppRouter',
+    category: LogCategory.ui,
+  );
+  return VideoFeedPage.pathForIndex(0);
 }
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -408,6 +433,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: HashtagScreenRouter.routeName,
         parentNavigatorKey: NavigatorKeys.root,
         builder: (ctx, st) {
+          // go_router already decodes path parameters once during route
+          // matching (see go_router/src/match.dart). Decoding again here
+          // would crash on legitimate inputs containing literal `%`
+          // (e.g. `100%fun`) because the second decode sees a malformed
+          // sequence. Pass the value through as-is.
           final tag = st.pathParameters['tag'];
           if (tag == null || tag.isEmpty) {
             return Scaffold(
@@ -415,8 +445,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               body: Center(child: Text(ctx.l10n.routeInvalidHashtag)),
             );
           }
-          final decoded = Uri.decodeComponent(tag);
-          return HashtagFeedScreen(hashtag: decoded);
+          return HashtagFeedScreen(hashtag: tag);
         },
       ),
       // SEARCH RESULTS - unified search screen (no bottom nav)
@@ -424,9 +453,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: SearchResultsPage.path,
         parentNavigatorKey: NavigatorKeys.root,
         builder: (ctx, st) {
-          final query = st.pathParameters['query'];
-          final decoded = query != null ? Uri.decodeComponent(query) : '';
-          return SearchResultsPage(initialQuery: decoded);
+          // See note above: do not double-decode path parameters.
+          final query = st.pathParameters['query'] ?? '';
+          return SearchResultsPage(initialQuery: query);
         },
       ),
 
@@ -519,6 +548,75 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: DiscoverListsScreen.path,
         name: DiscoverListsScreen.routeName,
         builder: (ctx, st) => const DiscoverListsScreen(),
+      ),
+
+      // CREATE PEOPLE LIST route. Must come before /people-lists/:listId so
+      // the literal `new` segment is not captured as a list id.
+      // `initialPubkey` query param lets callers (e.g., the share-video
+      // "Add to list" sheet) seed the new list with a target person in
+      // the same submit so the URL remains reloadable.
+      // Gated on FeatureFlag.curatedLists — the PeopleListsBloc this page
+      // depends on is only provided in main.dart when the flag is on, so
+      // a deep link here with the flag off would crash with
+      // ProviderNotFoundException. Redirect home instead.
+      GoRoute(
+        path: CreatePeopleListPage.path,
+        name: CreatePeopleListPage.routeName,
+        redirect: (context, state) =>
+            _peopleListsRedirectIfDisabled(ref, state),
+        builder: (context, state) => CreatePeopleListPage(
+          initialPubkey: state.uri.queryParameters['initialPubkey'],
+        ),
+      ),
+
+      // PEOPLE LIST MEMBERS route (NIP-51 kind 30000 people lists).
+      // Addressed by list id so the screen can select the current list
+      // from PeopleListsBloc and react to repository updates without a
+      // route rebuild. Outside shell — the screen owns its own AppBar.
+      // Gated on FeatureFlag.curatedLists (see CreatePeopleListPage route).
+      GoRoute(
+        path: UserListPeopleScreen.path,
+        name: UserListPeopleScreen.routeName,
+        redirect: (context, state) =>
+            _peopleListsRedirectIfDisabled(ref, state),
+        builder: (context, state) {
+          final listId = state.pathParameters['listId'];
+          if (listId == null || listId.isEmpty) {
+            return Scaffold(
+              appBar: DiVineAppBar(
+                title: context.l10n.peopleListsRouteTitle,
+                showBackButton: true,
+                onBackPressed: context.pop,
+              ),
+              body: Center(child: Text(context.l10n.routeInvalidListId)),
+            );
+          }
+          return UserListPeopleScreen(listId: listId);
+        },
+      ),
+
+      // ADD PEOPLE TO LIST route. Full-screen picker that batches add
+      // requests for the list identified by [listId].
+      // Gated on FeatureFlag.curatedLists (see CreatePeopleListPage route).
+      GoRoute(
+        path: AddPeopleToListScreen.path,
+        name: AddPeopleToListScreen.routeName,
+        redirect: (context, state) =>
+            _peopleListsRedirectIfDisabled(ref, state),
+        builder: (context, state) {
+          final listId = state.pathParameters['listId'];
+          if (listId == null || listId.isEmpty) {
+            return Scaffold(
+              appBar: DiVineAppBar(
+                title: context.l10n.peopleListsAddPeopleTitle,
+                showBackButton: true,
+                onBackPressed: context.pop,
+              ),
+              body: Center(child: Text(context.l10n.routeInvalidListId)),
+            );
+          }
+          return AddPeopleToListScreen(listId: listId);
+        },
       ),
       GoRoute(
         path: WelcomeScreen.path,
@@ -973,24 +1071,35 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: PooledFullscreenVideoFeedScreen.path,
         name: PooledFullscreenVideoFeedScreen.routeName,
         builder: (ctx, st) {
-          final args = st.extra as PooledFullscreenVideoFeedArgs?;
-          if (args == null) {
-            return Scaffold(
-              appBar: DiVineAppBar(title: ctx.l10n.routeErrorTitle),
-              body: Center(child: Text(ctx.l10n.routeNoVideosToDisplay)),
+          final extra = st.extra;
+          if (extra is PooledFullscreenVideoFeedArgs) {
+            return PooledFullscreenVideoFeedScreen(
+              videosStream: extra.videosStream,
+              initialIndex: extra.initialIndex,
+              onLoadMore: extra.onLoadMore,
+              hasMoreStream: extra.hasMoreStream,
+              removedIdsStream: extra.removedIdsStream,
+              contextTitle: extra.contextTitle,
+              trafficSource: extra.trafficSource,
+              sourceDetail: extra.sourceDetail,
+              autoOpenComments: extra.autoOpenComments,
+              onPageChanged: extra.onPageChanged,
             );
           }
-          return PooledFullscreenVideoFeedScreen(
-            videosStream: args.videosStream,
-            initialIndex: args.initialIndex,
-            onLoadMore: args.onLoadMore,
-            hasMoreStream: args.hasMoreStream,
-            removedIdsStream: args.removedIdsStream,
-            contextTitle: args.contextTitle,
-            trafficSource: args.trafficSource,
-            sourceDetail: args.sourceDetail,
-            autoOpenComments: args.autoOpenComments,
-            onPageChanged: args.onPageChanged,
+          if (extra is ProfilePooledFullscreenVideoFeedArgs) {
+            return ProfileVideoFeedView(
+              npub: '',
+              userIdHex: extra.userIdHex,
+              videoIndex: extra.initialIndex,
+              initialVideoId: extra.initialVideoId,
+              initialStableId: extra.initialStableId,
+              contextTitleOverride: extra.contextTitle,
+              onPageChanged: extra.onPageChanged ?? (_) {},
+            );
+          }
+          return Scaffold(
+            appBar: DiVineAppBar(title: ctx.l10n.routeErrorTitle),
+            body: Center(child: Text(ctx.l10n.routeNoVideosToDisplay)),
           );
         },
       ),
@@ -1088,6 +1197,10 @@ int tabIndexFromLocation(String loc) {
     case 'sound':
     case 'list':
     case 'discover-lists':
+    case 'people-lists':
+    case 'people-list-members':
+    case 'people-list-add-people':
+    case 'people-list-create':
     case 'creator-analytics':
     case 'hashtag':
     case 'categories':

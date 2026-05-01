@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "أضف {displayName} إلى قائمة",
     "profileUserBlockedTitle": "تم حظر المستخدم",
     "profileUserBlockedContent": "لن ترى محتوى من هذا المستخدم في تغذياتك.",
     "profileUserBlockedUnblockHint": "يمكنك إلغاء حظره في أي وقت من ملفه الشخصي أو من الإعدادات > الأمان.",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "تم أخذ اسم المستخدم للتو. يرجى اختيار اسم آخر.",
     "profileSetupClaimFailed": "تعذّرت المطالبة باسم المستخدم. حاول مرّة أخرى.",
     "profileSetupPublishFailed": "تعذّر نشر الملف الشخصي. حاول مرّة أخرى.",
+    "profileSetupNoRelaysConnected": "لا يمكن الوصول إلى الشبكة. تحقق من اتصالك وحاول مرة أخرى.",
+    "profileSetupRetryLabel": "إعادة المحاولة",
     "profileSetupDisplayNameLabel": "الاسم المعروض",
     "profileSetupDisplayNameHint": "كيف يجب أن يعرفك الناس؟",
     "profileSetupDisplayNameHelper": "أي اسم أو لقب تريد. لا يلزم أن يكون فريدًا.",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "فشل إرسال الفيديو",
     "shareAddedToBookmarks": "تمت الإضافة إلى الإشارات المرجعية",
+    "shareRemovedFromBookmarks": "تمت الإزالة من الإشارات المرجعية",
     "shareFailedToAddBookmark": "فشل إضافة الإشارة المرجعية",
+    "shareFailedToRemoveBookmark": "فشل إزالة الإشارة المرجعية",
     "shareActionFailed": "فشل الإجراء",
     "shareWithTitle": "المشاركة مع",
     "shareFindPeople": "ابحث عن أشخاص",
@@ -625,6 +630,7 @@
     "metadataLikesLabel": "الإعجابات",
     "metadataCommentsLabel": "التعليقات",
     "metadataRepostsLabel": "إعادات النشر",
+    "metadataPostedDateSemantics": "نُشر في {date}",
     "devOptionsTitle": "خيارات المطور",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1291,6 +1297,9 @@
     "shareSheetSaveToGallery": "حفظ في المعرض",
     "shareSheetSaveWithWatermark": "حفظ مع العلامة المائية",
     "shareSheetSaveVideo": "حفظ الفيديو",
+    "shareSheetAddToClips": "إضافة إلى المقاطع",
+    "shareSheetAddedToClips": "تمت الإضافة إلى المقاطع",
+    "shareSheetAddToClipsFailed": "تعذّرت الإضافة إلى المقاطع",
     "shareSheetAddToList": "إضافة إلى قائمة",
     "shareSheetCopy": "نسخ",
     "shareSheetShareVia": "مشاركة عبر",
@@ -1942,6 +1951,10 @@
         }
     },
     "listCreateNewList": "إنشاء قائمة جديدة",
+    "listNewPeopleList": "قائمة أشخاص جديدة",
+    "listCollaboratorsNone": "لا أحد",
+    "listAddCollaboratorTitle": "إضافة متعاون",
+    "listCollaboratorSearchHint": "ابحث في diVine...",
     "listNameLabel": "اسم القائمة",
     "listDescriptionLabel": "الوصف (اختياري)",
     "listPublicList": "قائمة عامة",
@@ -2252,6 +2265,28 @@
                 "type": "String"
             }
         }
+    },
+    "inboxCollabInviteAcceptButton": "قبول",
+    "inboxCollabInviteAcceptError": "تعذر القبول. حاول مرة أخرى.",
+    "inboxCollabInviteAcceptedStatus": "تم القبول",
+    "inboxCollabInviteCardRoleLabel": "{role} على هذا المنشور",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "دعوة للتعاون",
+    "inboxCollabInviteIgnoreButton": "تجاهل",
+    "inboxCollabInviteIgnoredStatus": "تم التجاهل",
+    "inboxConversationCollabInvitePreview": "دعوة للتعاون",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "تم إرسال الدعوة",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
     },
     "inboxConversationMuted": "تم كتم المحادثة",
     "inboxConversationUnmuted": "تم إلغاء كتم المحادثة",
@@ -2688,6 +2723,7 @@
     "videoEditorOpenLibrarySemanticLabel": "فتح المكتبة",
     "videoEditorOpenDrawSemanticLabel": "فتح محرر الرسم",
     "videoEditorOpenFilterSemanticLabel": "فتح محرر الفلاتر",
+    "videoEditorOpenStickerSemanticLabel": "فتح محرر الملصقات",
     "videoEditorOpenTextSemanticLabel": "فتح محرر النص",
     "videoEditorPauseSemanticLabel": "إيقاف مؤقت",
     "videoEditorPickColorTitle": "اختيار لون",
@@ -2727,6 +2763,7 @@
         }
     },
     "videoEditorSplitSelectedClipSemanticLabel": "تقسيم المقطع المحدد",
+    "videoEditorStickersDivineOriginals": "Divine الأصلية",
     "videoEditorStickerSearchHint": "البحث في الملصقات...",
     "videoEditorTextAlignmentSemanticLabel": "محاذاة النص",
     "videoEditorTextBackgroundSemanticLabel": "خلفية النص",
@@ -2929,5 +2966,27 @@
   "fullscreenFeedRemovedMessage": "تمت إزالة الفيديو",
   "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
   "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+  "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "إغلاق الصورة الرمزية",
+    "profileAvatarLightboxCloseSemanticLabel": "إغلاق معاينة الصورة الرمزية",
+    "notificationsUnreadPrefix": "إشعار غير مقروء",
+    "notificationsViewProfileSemanticLabel": "عرض ملف {displayName}",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "عرض الملفات الشخصية",
+    "notificationRepliedToYourComment": "ردّ على تعليقك",
+    "notificationAndConnector": "و",
+    "notificationOthersCount": "{count, plural, =1{شخص آخر} other{{count} أشخاص آخرين}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

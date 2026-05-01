@@ -1,6 +1,7 @@
 // ABOUTME: Profile header widget showing avatar, stats, name, and bio
 // ABOUTME: Reusable between own profile and others' profile screens
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:divine_ui/divine_ui.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
 import 'package:openvine/blocs/my_profile/my_profile_bloc.dart';
+import 'package:openvine/features/people_lists/view/people_list_membership_indicator.dart';
 import 'package:openvine/l10n/l10n.dart';
 import 'package:openvine/providers/app_providers.dart';
 import 'package:openvine/providers/nip05_verification_provider.dart';
@@ -30,6 +32,7 @@ import 'package:openvine/widgets/profile/profile_stats_row_widget.dart';
 import 'package:openvine/widgets/user_avatar.dart';
 import 'package:openvine/widgets/user_name.dart';
 import 'package:openvine/widgets/vine_cached_image.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// Profile header widget displaying avatar, stats, name, and bio.
 class ProfileHeaderWidget extends ConsumerStatefulWidget {
@@ -250,6 +253,7 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
                 Center(
                   child: _ProfileAvatarWithColor(
                     imageUrl: profilePictureUrl,
+                    userIdHex: widget.userIdHex,
                     profileColor: profileColor,
                     pendingActions: pendingActions,
                     onActionTap: pendingActions.isNotEmpty
@@ -271,6 +275,10 @@ class _ProfileHeaderWidgetState extends ConsumerState<ProfileHeaderWidget> {
                     isOwnProfile: widget.isOwnProfile,
                   ),
                 ),
+                if (!widget.isOwnProfile) ...[
+                  PeopleListMembershipIndicator(pubkey: widget.userIdHex),
+                  const SizedBox(height: 16),
+                ],
 
                 // Stats row: Followers | Following | Likes | Loops
                 Padding(
@@ -653,59 +661,116 @@ class _BannerImage extends StatelessWidget {
 }
 
 /// Stats row displaying Followers, Following, Likes, and Loops with dividers.
-class _ProfileStatsRow extends StatelessWidget {
-  const _ProfileStatsRow({required this.userIdHex, this.profileStats});
+///
+/// Shows a skeleton for up to [_ProfileStatsRowState._skeletonTimeout] while
+/// stats are being fetched. After the timeout the row keeps all four columns
+/// visible but renders a `—` placeholder for each count, rather than
+/// shimmering indefinitely or collapsing the row (which would shift the
+/// surrounding profile layout).
+class _ProfileStatsRow extends StatefulWidget {
+  const _ProfileStatsRow({
+    required this.userIdHex,
+    this.profileStats,
+  });
 
   final String userIdHex;
   final ProfileStats? profileStats;
 
   @override
+  State<_ProfileStatsRow> createState() => _ProfileStatsRowState();
+}
+
+class _ProfileStatsRowState extends State<_ProfileStatsRow> {
+  static const _skeletonTimeout = Duration(seconds: 7);
+
+  /// Two-digit placeholder painted behind the Skeletonizer shimmer while the
+  /// real stats load. The number itself is never visible — it only sets the
+  /// width of the skeleton bar.
+  static const _skeletonPlaceholderCount = 99;
+
+  Timer? _timer;
+  bool _timeoutExpired = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.profileStats == null) {
+      _timer = Timer(_skeletonTimeout, () {
+        if (mounted) setState(() => _timeoutExpired = true);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final hasFollowers = profileStats?.followers != null;
-    final hasFollowing = profileStats?.following != null;
-    final hasLikes = profileStats?.totalLikes != null;
-    final hasLoops = profileStats?.totalViews != null;
+    final isLoading = widget.profileStats == null;
+
+    final hasFollowers = widget.profileStats?.followers != null;
+    final hasFollowing = widget.profileStats?.following != null;
+    final hasLikes = widget.profileStats?.totalLikes != null;
+    final hasLoops = widget.profileStats?.totalViews != null;
 
     final l10n = context.l10n;
     final columns = <Widget>[
-      if (hasLoops)
+      if (hasLoops || isLoading)
         ProfileStatColumn(
-          count: profileStats!.totalViews,
+          count: isLoading
+              ? _skeletonPlaceholderCount
+              : widget.profileStats!.totalViews,
           label: l10n.profileLoopsLabel,
-          isLoading: false,
+          isLoading: isLoading && _timeoutExpired,
         ),
-      if (hasLikes)
+      if (hasLikes || isLoading)
         ProfileStatColumn(
-          count: profileStats!.totalLikes,
+          count: isLoading
+              ? _skeletonPlaceholderCount
+              : widget.profileStats!.totalLikes,
           label: l10n.profileLikesLabel,
-          isLoading: false,
+          isLoading: isLoading && _timeoutExpired,
         ),
-      if (hasFollowing)
+      if (hasFollowing || isLoading)
         ProfileStatColumn(
-          count: profileStats!.following,
+          count: isLoading
+              ? _skeletonPlaceholderCount
+              : widget.profileStats!.following,
           label: l10n.profileFollowingLabel,
-          isLoading: false,
-          onTap: () =>
-              context.push(FollowingScreenRouter.pathForPubkey(userIdHex)),
+          isLoading: isLoading && _timeoutExpired,
+          onTap: () => context.push(
+            FollowingScreenRouter.pathForPubkey(widget.userIdHex),
+          ),
         ),
-      if (hasFollowers)
+      if (hasFollowers || isLoading)
         ProfileStatColumn(
-          count: profileStats!.followers,
+          count: isLoading
+              ? _skeletonPlaceholderCount
+              : widget.profileStats!.followers,
           label: l10n.profileFollowersLabel,
-          isLoading: false,
-          onTap: () =>
-              context.push(FollowersScreenRouter.pathForPubkey(userIdHex)),
+          isLoading: isLoading && _timeoutExpired,
+          onTap: () => context.push(
+            FollowersScreenRouter.pathForPubkey(widget.userIdHex),
+          ),
         ),
     ];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        for (int i = 0; i < columns.length; i++) ...[
-          if (i > 0) const _StatDivider(),
-          columns[i],
+    return Skeletonizer(
+      enabled: isLoading && !_timeoutExpired,
+      enableSwitchAnimation: true,
+      effect: vineSkeletonEffect,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          for (int i = 0; i < columns.length; i++) ...[
+            if (i > 0) const _StatDivider(),
+            columns[i],
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -733,12 +798,17 @@ class _StatDivider extends StatelessWidget {
 class _ProfileAvatarWithColor extends StatelessWidget {
   const _ProfileAvatarWithColor({
     required this.imageUrl,
+    required this.userIdHex,
     this.profileColor,
     this.pendingActions = const [],
     this.onActionTap,
   });
 
   final String? imageUrl;
+
+  /// Hex pubkey used as the placeholder tone seed so the same user gets
+  /// the same accent color here as in notifications and other surfaces.
+  final String userIdHex;
   final Color? profileColor;
 
   /// Ordered list of pending profile actions. The first action determines
@@ -752,10 +822,18 @@ class _ProfileAvatarWithColor extends StatelessWidget {
   Widget build(BuildContext context) {
     const avatarSize = 144.0;
     final hasAvatar = imageUrl != null && imageUrl!.isNotEmpty;
-    final avatarWidget = UserAvatar(imageUrl: imageUrl, size: avatarSize);
+    final avatarWidget = UserAvatar(
+      imageUrl: imageUrl,
+      placeholderSeed: userIdHex,
+      size: avatarSize,
+    );
     final avatar = hasAvatar
         ? GestureDetector(
-            onTap: () => _showAvatarLightbox(context, imageUrl),
+            onTap: () => _showAvatarLightbox(
+              context,
+              imageUrl: imageUrl,
+              userIdHex: userIdHex,
+            ),
             child: avatarWidget,
           )
         : avatarWidget;
@@ -867,27 +945,38 @@ class _ProfileActionLabel extends StatelessWidget {
 // Avatar lightbox
 // ---------------------------------------------------------------------------
 
-void _showAvatarLightbox(BuildContext context, String? imageUrl) {
+void _showAvatarLightbox(
+  BuildContext context, {
+  required String userIdHex,
+  String? imageUrl,
+}) {
   showGeneralDialog<void>(
     context: context,
     barrierColor: VineTheme.transparent,
     barrierDismissible: true,
-    barrierLabel: 'Close avatar',
-    pageBuilder: (context, _, _) => _AvatarLightbox(imageUrl: imageUrl),
+    barrierLabel: context.l10n.profileAvatarLightboxBarrierLabel,
+    pageBuilder: (context, _, _) => _AvatarLightbox(
+      imageUrl: imageUrl,
+      userIdHex: userIdHex,
+    ),
   );
 }
 
 class _AvatarLightbox extends StatelessWidget {
-  const _AvatarLightbox({this.imageUrl});
+  const _AvatarLightbox({required this.userIdHex, this.imageUrl});
 
   final String? imageUrl;
+
+  /// Pubkey used as the placeholder seed so the lightbox's fallback
+  /// colour matches the avatar everywhere else when the image fails.
+  final String userIdHex;
 
   @override
   Widget build(BuildContext context) {
     final safeAreaTop = MediaQuery.of(context).padding.top;
 
     return Semantics(
-      label: 'Close avatar preview',
+      label: context.l10n.profileAvatarLightboxCloseSemanticLabel,
       button: true,
       child: GestureDetector(
         onTap: () => Navigator.of(context).pop(),
@@ -901,6 +990,7 @@ class _AvatarLightbox extends StatelessWidget {
                   Center(
                     child: UserAvatar(
                       imageUrl: imageUrl,
+                      placeholderSeed: userIdHex,
                       size: 288,
                       cornerRadius: 112,
                     ),

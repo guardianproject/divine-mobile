@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "{displayName} aan een lijst toevoegen",
     "profileUserBlockedTitle": "Gebruiker geblokkeerd",
     "profileUserBlockedContent": "Je ziet geen inhoud meer van deze gebruiker in je feeds.",
     "profileUserBlockedUnblockHint": "Je kunt ze altijd deblokkeren via hun profiel of bij Instellingen > Veiligheid.",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "Deze gebruikersnaam is net bezet. Kies een andere.",
     "profileSetupClaimFailed": "Gebruikersnaam claimen mislukt. Probeer het opnieuw.",
     "profileSetupPublishFailed": "Profiel publiceren mislukt. Probeer het opnieuw.",
+    "profileSetupNoRelaysConnected": "Kan het netwerk niet bereiken. Controleer je verbinding en probeer het opnieuw.",
+    "profileSetupRetryLabel": "Opnieuw",
     "profileSetupDisplayNameLabel": "Weergavenaam",
     "profileSetupDisplayNameHint": "Hoe moeten mensen je kennen?",
     "profileSetupDisplayNameHelper": "Elke naam of label die je wilt. Hoeft niet uniek te zijn.",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "Video versturen mislukt",
     "shareAddedToBookmarks": "Toegevoegd aan bladwijzers",
+    "shareRemovedFromBookmarks": "Verwijderd uit bladwijzers",
     "shareFailedToAddBookmark": "Bladwijzer toevoegen mislukt",
+    "shareFailedToRemoveBookmark": "Verwijderen uit bladwijzers mislukt",
     "shareActionFailed": "Actie mislukt",
     "shareWithTitle": "Delen met",
     "shareFindPeople": "Mensen zoeken",
@@ -628,6 +633,7 @@
     "metadataLikesLabel": "Likes",
     "metadataCommentsLabel": "Reacties",
     "metadataRepostsLabel": "Reposts",
+    "metadataPostedDateSemantics": "Geplaatst op {date}",
     "devOptionsTitle": "Ontwikkelaarsopties",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1294,6 +1300,9 @@
     "shareSheetSaveToGallery": "Opslaan in galerij",
     "shareSheetSaveWithWatermark": "Opslaan met watermerk",
     "shareSheetSaveVideo": "Video opslaan",
+    "shareSheetAddToClips": "Toevoegen aan clips",
+    "shareSheetAddedToClips": "Toegevoegd aan clips",
+    "shareSheetAddToClipsFailed": "Kon niet toevoegen aan clips",
     "shareSheetAddToList": "Toevoegen aan lijst",
     "shareSheetCopy": "Kopiëren",
     "shareSheetShareVia": "Delen via",
@@ -1943,6 +1952,10 @@
         }
     },
     "listCreateNewList": "Nieuwe lijst maken",
+    "listNewPeopleList": "Nieuwe personenlijst",
+    "listCollaboratorsNone": "Geen",
+    "listAddCollaboratorTitle": "Medewerker toevoegen",
+    "listCollaboratorSearchHint": "Zoek in diVine...",
     "listNameLabel": "Lijstnaam",
     "listDescriptionLabel": "Beschrijving (optioneel)",
     "listPublicList": "Openbare lijst",
@@ -2253,6 +2266,28 @@
                 "type": "String"
             }
         }
+    },
+    "inboxCollabInviteAcceptButton": "Accepteren",
+    "inboxCollabInviteAcceptError": "Accepteren is niet gelukt. Probeer het opnieuw.",
+    "inboxCollabInviteAcceptedStatus": "Geaccepteerd",
+    "inboxCollabInviteCardRoleLabel": "{role} bij deze post",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "Uitnodiging om samen te werken",
+    "inboxCollabInviteIgnoreButton": "Negeren",
+    "inboxCollabInviteIgnoredStatus": "Genegeerd",
+    "inboxConversationCollabInvitePreview": "Uitnodiging om samen te werken",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "Uitnodiging verzonden",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
     },
     "inboxConversationMuted": "Gesprek gedempt",
     "inboxConversationUnmuted": "Gesprek niet meer gedempt",
@@ -2660,6 +2695,7 @@
     "videoEditorOpenTextSemanticLabel": "Teksteditor openen",
     "videoEditorOpenDrawSemanticLabel": "Tekeneditor openen",
     "videoEditorOpenFilterSemanticLabel": "Filtereditor openen",
+    "videoEditorOpenStickerSemanticLabel": "Stickereditor openen",
     "videoEditorSaveDraftTitle": "Je concept opslaan?",
     "videoEditorSaveDraftSubtitle": "Bewaar je bewerkingen voor later, of verwerp ze en verlaat de editor.",
     "videoEditorSaveDraftButton": "Concept opslaan",
@@ -2739,6 +2775,7 @@
     "videoEditorShowTimelineSemanticLabel": "Tijdlijn tonen",
     "videoEditorHideTimelineSemanticLabel": "Tijdlijn verbergen",
     "videoEditorFeedPreviewContent": "Plaats geen content achter deze gebieden.",
+    "videoEditorStickersDivineOriginals": "Divine Originelen",
     "videoEditorStickerSearchHint": "Stickers zoeken...",
     "videoEditorSelectFontSemanticLabel": "Lettertype selecteren",
     "videoEditorFontUnknown": "Onbekend",
@@ -2929,5 +2966,27 @@
   "fullscreenFeedRemovedMessage": "Video verwijderd",
   "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
   "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+  "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "Avatar sluiten",
+    "profileAvatarLightboxCloseSemanticLabel": "Avatarvoorbeeld sluiten",
+    "notificationsUnreadPrefix": "Ongelezen melding",
+    "notificationsViewProfileSemanticLabel": "Profiel van {displayName} bekijken",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "Profielen bekijken",
+    "notificationRepliedToYourComment": "heeft op je reactie gereageerd",
+    "notificationAndConnector": "en",
+    "notificationOthersCount": "{count, plural, =1{1 ander} other{{count} anderen}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

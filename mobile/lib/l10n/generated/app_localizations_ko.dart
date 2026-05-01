@@ -260,6 +260,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileMoreSemanticLabel => '더 많은 옵션';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => '아바타 닫기';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel => '아바타 미리보기 닫기';
+
+  @override
   String get profileFollowingLabel => '팔로잉';
 
   @override
@@ -351,6 +357,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String profileUnblockDisplayName(String displayName) {
     return '$displayName님 차단 해제';
+  }
+
+  @override
+  String profileAddToListDisplayName(String displayName) {
+    return '$displayName을(를) 목록에 추가';
   }
 
   @override
@@ -575,6 +586,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get profileSetupPublishFailed => '프로필을 게시하지 못했어요. 다시 시도해보세요.';
+
+  @override
+  String get profileSetupNoRelaysConnected =>
+      '네트워크에 연결할 수 없어요. 연결 상태를 확인하고 다시 시도해보세요.';
+
+  @override
+  String get profileSetupRetryLabel => '다시 시도';
 
   @override
   String get profileSetupDisplayNameLabel => '표시 이름';
@@ -1133,7 +1151,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shareAddedToBookmarks => '북마크에 추가했어요';
 
   @override
+  String get shareRemovedFromBookmarks => '북마크에서 뺐어요';
+
+  @override
   String get shareFailedToAddBookmark => '북마크 추가에 실패했어요';
+
+  @override
+  String get shareFailedToRemoveBookmark => '북마크를 지우지 못했어요';
 
   @override
   String get shareActionFailed => '작업에 실패했어요';
@@ -1279,6 +1303,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get metadataRepostsLabel => '리포스트';
+
+  @override
+  String metadataPostedDateSemantics(String date) {
+    return '$date에 게시됨';
+  }
 
   @override
   String get devOptionsTitle => '개발자 옵션';
@@ -2508,6 +2537,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shareSheetSaveVideo => '영상 저장';
 
   @override
+  String get shareSheetAddToClips => '클립에 추가';
+
+  @override
+  String get shareSheetAddedToClips => '클립에 추가했어요';
+
+  @override
+  String get shareSheetAddToClipsFailed => '클립에 추가할 수 없어요';
+
+  @override
   String get shareSheetAddToList => '리스트에 추가';
 
   @override
@@ -2849,6 +2887,156 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String shareMenuFollowSetsAvailable(int count) {
     return '팔로우 세트 $count개 사용 가능';
+  }
+
+  @override
+  String get peopleListsAddToList => 'Add to list';
+
+  @override
+  String get peopleListsAddToListSubtitle =>
+      'Put this creator in one of your lists';
+
+  @override
+  String get peopleListsSheetTitle => 'Add to list';
+
+  @override
+  String get peopleListsEmptyTitle => 'No lists yet';
+
+  @override
+  String get peopleListsEmptySubtitle =>
+      'Create a list to start grouping people.';
+
+  @override
+  String get peopleListsCreateList => 'Create list';
+
+  @override
+  String get peopleListsNewListTitle => 'New list';
+
+  @override
+  String get peopleListsRouteTitle => 'People list';
+
+  @override
+  String get peopleListsListNameLabel => 'List name';
+
+  @override
+  String get peopleListsListNameHint => 'Close friends';
+
+  @override
+  String get peopleListsCreateButton => 'Create';
+
+  @override
+  String get peopleListsAddPeopleTitle => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleTooltip => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleSemanticLabel => 'Add people to list';
+
+  @override
+  String get peopleListsListNotFoundTitle => 'List not found';
+
+  @override
+  String get peopleListsListNotFoundSubtitle =>
+      'List not found. It may have been deleted.';
+
+  @override
+  String get peopleListsListDeletedSubtitle =>
+      'This list may have been deleted.';
+
+  @override
+  String get peopleListsNoPeopleTitle => 'No people in this list';
+
+  @override
+  String get peopleListsNoPeopleSubtitle => 'Add some people to get started';
+
+  @override
+  String get peopleListsNoVideosTitle => 'No videos yet';
+
+  @override
+  String get peopleListsNoVideosSubtitle =>
+      'Videos from list members will appear here';
+
+  @override
+  String get peopleListsNoVideosAvailable => 'No videos available';
+
+  @override
+  String get peopleListsFailedToLoadVideos => 'Failed to load videos';
+
+  @override
+  String get peopleListsVideoNotAvailable => 'Video not available';
+
+  @override
+  String get peopleListsBackToGridTooltip => 'Back to grid';
+
+  @override
+  String get peopleListsErrorLoadingVideos => 'Error loading videos';
+
+  @override
+  String get peopleListsNoPeopleToAdd => 'No people available to add.';
+
+  @override
+  String peopleListsAddToListName(String name) {
+    return 'Add to $name';
+  }
+
+  @override
+  String get peopleListsAddPeopleSearchHint => 'Search people';
+
+  @override
+  String get peopleListsAddPeopleError =>
+      'Couldn\'t load people. Please try again.';
+
+  @override
+  String get peopleListsAddPeopleRetry => 'Try again';
+
+  @override
+  String get peopleListsAddButton => 'Add';
+
+  @override
+  String peopleListsAddButtonWithCount(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String peopleListsInNLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count lists',
+      one: 'In 1 list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String peopleListsRemoveConfirmTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get peopleListsRemoveConfirmBody =>
+      'They will be removed from this list.';
+
+  @override
+  String get peopleListsRemove => 'Remove';
+
+  @override
+  String peopleListsRemovedFromList(String name) {
+    return 'Removed $name from list';
+  }
+
+  @override
+  String get peopleListsUndo => 'Undo';
+
+  @override
+  String peopleListsProfileLongPressHint(String name) {
+    return 'Profile for $name. Long press to remove.';
+  }
+
+  @override
+  String peopleListsViewProfileHint(String name) {
+    return 'View profile for $name';
   }
 
   @override
@@ -3252,6 +3440,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get notificationsEmptyDescription => '다른 사람들이 내 콘텐츠에 반응하면 여기에 표시돼요';
+
+  @override
+  String get notificationsUnreadPrefix => '읽지 않은 알림';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return '$displayName님의 프로필 보기';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => '프로필 보기';
 
   @override
   String notificationsLoadingType(String type) {
@@ -3736,6 +3935,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get listCreateNewList => '새 목록 만들기';
+
+  @override
+  String get listNewPeopleList => '새 사람 목록';
+
+  @override
+  String get listCollaboratorsNone => '없음';
+
+  @override
+  String get listAddCollaboratorTitle => '협업자 추가';
+
+  @override
+  String get listCollaboratorSearchHint => 'diVine 검색...';
 
   @override
   String get listNameLabel => '목록 이름';
@@ -4352,6 +4563,35 @@ class AppLocalizationsKo extends AppLocalizations {
   String get inboxConversationUnmuted => '대화 알림을 다시 켰어요';
 
   @override
+  String get inboxCollabInviteCardTitle => '콜라보 초대';
+
+  @override
+  String inboxCollabInviteCardRoleLabel(String role) {
+    return '이 게시물의 $role';
+  }
+
+  @override
+  String get inboxCollabInviteAcceptButton => '수락';
+
+  @override
+  String get inboxCollabInviteIgnoreButton => '무시';
+
+  @override
+  String get inboxCollabInviteAcceptedStatus => '수락됨';
+
+  @override
+  String get inboxCollabInviteIgnoredStatus => '무시됨';
+
+  @override
+  String get inboxCollabInviteAcceptError => '수락하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get inboxCollabInviteSentStatus => '초대를 보냈어요';
+
+  @override
+  String get inboxConversationCollabInvitePreview => '콜라보 초대';
+
+  @override
   String get reportDialogCancel => '취소';
 
   @override
@@ -4829,6 +5069,22 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get notificationRepliedToYourComment => '님이 회원님의 댓글에 답글을 남겼습니다';
+
+  @override
+  String get notificationAndConnector => '및';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '외 $count명',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get draftUntitled => '제목 없음';
 
   @override
@@ -5020,6 +5276,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get videoEditorOpenFilterSemanticLabel => '필터 편집기 열기';
+
+  @override
+  String get videoEditorOpenStickerSemanticLabel => '스티커 편집기 열기';
 
   @override
   String get videoEditorSaveDraftTitle => '임시저장 하시겠어요?';
@@ -5224,6 +5483,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get videoEditorFeedPreviewContent => '이 영역 뒤에 콘텐츠를 배치하지 마세요.';
+
+  @override
+  String get videoEditorStickersDivineOriginals => 'Divine 오리지널';
 
   @override
   String get videoEditorStickerSearchHint => '스티커 검색...';

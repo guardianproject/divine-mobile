@@ -279,6 +279,13 @@ class AppLocalizationsSv extends AppLocalizations {
   String get profileMoreSemanticLabel => 'Fler alternativ';
 
   @override
+  String get profileAvatarLightboxBarrierLabel => 'Stäng avatar';
+
+  @override
+  String get profileAvatarLightboxCloseSemanticLabel =>
+      'Stäng avatarförhandsvisning';
+
+  @override
   String get profileFollowingLabel => 'Följer';
 
   @override
@@ -375,6 +382,11 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String profileUnblockDisplayName(String displayName) {
     return 'Avblockera $displayName';
+  }
+
+  @override
+  String profileAddToListDisplayName(String displayName) {
+    return 'Lägg till $displayName i en lista';
   }
 
   @override
@@ -611,6 +623,13 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get profileSetupPublishFailed =>
       'Kunde inte publicera profilen. Försök igen.';
+
+  @override
+  String get profileSetupNoRelaysConnected =>
+      'Kunde inte nå nätverket. Kontrollera din anslutning och försök igen.';
+
+  @override
+  String get profileSetupRetryLabel => 'Försök igen';
 
   @override
   String get profileSetupDisplayNameLabel => 'Visningsnamn';
@@ -1204,7 +1223,13 @@ class AppLocalizationsSv extends AppLocalizations {
   String get shareAddedToBookmarks => 'Tillagd i bokmärken';
 
   @override
-  String get shareFailedToAddBookmark => 'Kunde inte lägga till bokmärke';
+  String get shareRemovedFromBookmarks => 'Borttagen från bokmärken';
+
+  @override
+  String get shareFailedToAddBookmark => 'Kunde inte lägga till bokmärket';
+
+  @override
+  String get shareFailedToRemoveBookmark => 'Kunde inte ta bort från bokmärken';
 
   @override
   String get shareActionFailed => 'Åtgärden misslyckades';
@@ -1352,6 +1377,11 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get metadataRepostsLabel => 'Återpubliceringar';
+
+  @override
+  String metadataPostedDateSemantics(String date) {
+    return 'Publicerat den $date';
+  }
 
   @override
   String get devOptionsTitle => 'Utvecklaralternativ';
@@ -2630,6 +2660,15 @@ class AppLocalizationsSv extends AppLocalizations {
   String get shareSheetSaveVideo => 'Spara video';
 
   @override
+  String get shareSheetAddToClips => 'Lägg till i klipp';
+
+  @override
+  String get shareSheetAddedToClips => 'Tillagt i klipp';
+
+  @override
+  String get shareSheetAddToClipsFailed => 'Kunde inte lägga till i klipp';
+
+  @override
   String get shareSheetAddToList => 'Lägg till i lista';
 
   @override
@@ -2989,10 +3028,160 @@ class AppLocalizationsSv extends AppLocalizations {
   }
 
   @override
+  String get peopleListsAddToList => 'Add to list';
+
+  @override
+  String get peopleListsAddToListSubtitle =>
+      'Put this creator in one of your lists';
+
+  @override
+  String get peopleListsSheetTitle => 'Add to list';
+
+  @override
+  String get peopleListsEmptyTitle => 'No lists yet';
+
+  @override
+  String get peopleListsEmptySubtitle =>
+      'Create a list to start grouping people.';
+
+  @override
+  String get peopleListsCreateList => 'Create list';
+
+  @override
+  String get peopleListsNewListTitle => 'New list';
+
+  @override
+  String get peopleListsRouteTitle => 'People list';
+
+  @override
+  String get peopleListsListNameLabel => 'List name';
+
+  @override
+  String get peopleListsListNameHint => 'Close friends';
+
+  @override
+  String get peopleListsCreateButton => 'Create';
+
+  @override
+  String get peopleListsAddPeopleTitle => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleTooltip => 'Add people';
+
+  @override
+  String get peopleListsAddPeopleSemanticLabel => 'Add people to list';
+
+  @override
+  String get peopleListsListNotFoundTitle => 'List not found';
+
+  @override
+  String get peopleListsListNotFoundSubtitle =>
+      'List not found. It may have been deleted.';
+
+  @override
+  String get peopleListsListDeletedSubtitle =>
+      'This list may have been deleted.';
+
+  @override
+  String get peopleListsNoPeopleTitle => 'No people in this list';
+
+  @override
+  String get peopleListsNoPeopleSubtitle => 'Add some people to get started';
+
+  @override
+  String get peopleListsNoVideosTitle => 'No videos yet';
+
+  @override
+  String get peopleListsNoVideosSubtitle =>
+      'Videos from list members will appear here';
+
+  @override
+  String get peopleListsNoVideosAvailable => 'No videos available';
+
+  @override
+  String get peopleListsFailedToLoadVideos => 'Failed to load videos';
+
+  @override
+  String get peopleListsVideoNotAvailable => 'Video not available';
+
+  @override
+  String get peopleListsBackToGridTooltip => 'Back to grid';
+
+  @override
+  String get peopleListsErrorLoadingVideos => 'Error loading videos';
+
+  @override
+  String get peopleListsNoPeopleToAdd => 'No people available to add.';
+
+  @override
+  String peopleListsAddToListName(String name) {
+    return 'Add to $name';
+  }
+
+  @override
+  String get peopleListsAddPeopleSearchHint => 'Search people';
+
+  @override
+  String get peopleListsAddPeopleError =>
+      'Couldn\'t load people. Please try again.';
+
+  @override
+  String get peopleListsAddPeopleRetry => 'Try again';
+
+  @override
+  String get peopleListsAddButton => 'Add';
+
+  @override
+  String peopleListsAddButtonWithCount(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String peopleListsInNLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count lists',
+      one: 'In 1 list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String peopleListsRemoveConfirmTitle(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get peopleListsRemoveConfirmBody =>
+      'They will be removed from this list.';
+
+  @override
+  String get peopleListsRemove => 'Remove';
+
+  @override
+  String peopleListsRemovedFromList(String name) {
+    return 'Removed $name from list';
+  }
+
+  @override
+  String get peopleListsUndo => 'Undo';
+
+  @override
+  String peopleListsProfileLongPressHint(String name) {
+    return 'Profile for $name. Long press to remove.';
+  }
+
+  @override
+  String peopleListsViewProfileHint(String name) {
+    return 'View profile for $name';
+  }
+
+  @override
   String get shareMenuAddedToBookmarks => 'Tillagd i bokmärken!';
 
   @override
-  String get shareMenuFailedToAddBookmark => 'Kunde inte lägga till bokmärke';
+  String get shareMenuFailedToAddBookmark => 'Kunde inte lägga till bokmärket';
 
   @override
   String shareMenuCreatedListAndAddedVideo(String name) {
@@ -3404,6 +3593,17 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get notificationsEmptyDescription =>
       'När folk interagerar med ditt innehåll ser du det här';
+
+  @override
+  String get notificationsUnreadPrefix => 'Oläst avisering';
+
+  @override
+  String notificationsViewProfileSemanticLabel(String displayName) {
+    return 'Visa ${displayName}s profil';
+  }
+
+  @override
+  String get notificationsViewProfilesSemanticLabel => 'Visa profiler';
 
   @override
   String notificationsLoadingType(String type) {
@@ -3902,6 +4102,18 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get listCreateNewList => 'Skapa ny lista';
+
+  @override
+  String get listNewPeopleList => 'Ny personlista';
+
+  @override
+  String get listCollaboratorsNone => 'Inga';
+
+  @override
+  String get listAddCollaboratorTitle => 'Lägg till medarbetare';
+
+  @override
+  String get listCollaboratorSearchHint => 'Sök i diVine...';
 
   @override
   String get listNameLabel => 'Listnamn';
@@ -4523,6 +4735,36 @@ class AppLocalizationsSv extends AppLocalizations {
   String get inboxConversationUnmuted => 'Konversation inte tystad';
 
   @override
+  String get inboxCollabInviteCardTitle => 'Inbjudan att samarbeta';
+
+  @override
+  String inboxCollabInviteCardRoleLabel(String role) {
+    return '$role i det här inlägget';
+  }
+
+  @override
+  String get inboxCollabInviteAcceptButton => 'Acceptera';
+
+  @override
+  String get inboxCollabInviteIgnoreButton => 'Ignorera';
+
+  @override
+  String get inboxCollabInviteAcceptedStatus => 'Accepterad';
+
+  @override
+  String get inboxCollabInviteIgnoredStatus => 'Ignorerad';
+
+  @override
+  String get inboxCollabInviteAcceptError =>
+      'Det gick inte att acceptera. Försök igen.';
+
+  @override
+  String get inboxCollabInviteSentStatus => 'Inbjudan skickad';
+
+  @override
+  String get inboxConversationCollabInvitePreview => 'Inbjudan att samarbeta';
+
+  @override
   String get reportDialogCancel => 'Avbryt';
 
   @override
@@ -5006,6 +5248,23 @@ class AppLocalizationsSv extends AppLocalizations {
   }
 
   @override
+  String get notificationRepliedToYourComment => 'svarade på din kommentar';
+
+  @override
+  String get notificationAndConnector => 'och';
+
+  @override
+  String notificationOthersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count till',
+      one: '1 till',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get draftUntitled => 'Namnlös';
 
   @override
@@ -5207,6 +5466,10 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get videoEditorOpenFilterSemanticLabel => 'Öppna filtereditor';
+
+  @override
+  String get videoEditorOpenStickerSemanticLabel =>
+      'Öppna klistermärkesredigerare';
 
   @override
   String get videoEditorSaveDraftTitle => 'Spara ditt utkast?';
@@ -5421,6 +5684,9 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get videoEditorFeedPreviewContent =>
       'Undvik att placera innehåll bakom dessa områden.';
+
+  @override
+  String get videoEditorStickersDivineOriginals => 'Divine Original';
 
   @override
   String get videoEditorStickerSearchHint => 'Sök stickers...';

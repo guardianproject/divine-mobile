@@ -75,7 +75,7 @@ class _NotificationsViewState extends ConsumerState<NotificationsView> {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: VineTheme.backgroundColor,
+      color: VineTheme.surfaceContainerHigh,
       child: BlocBuilder<NotificationFeedBloc, NotificationFeedState>(
         builder: (context, state) {
           return switch (state.status) {
@@ -394,10 +394,8 @@ class _NotificationList extends StatelessWidget {
                     notification.timestamp.millisecondsSinceEpoch ~/ 1000,
                     locale: Localizations.localeOf(context).toLanguageTag(),
                   ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: VineTheme.secondaryText,
+                  style: VineTheme.labelLargeFont(
+                    color: VineTheme.onSurfaceMuted,
                   ),
                 ),
               ),
@@ -413,13 +411,6 @@ class _NotificationList extends StatelessWidget {
                 if (pubkey != null) onFollowBack(pubkey);
               },
             ),
-            if (index < notifications.length - 1)
-              const Divider(
-                height: 1,
-                thickness: 0.5,
-                color: VineTheme.onSurfaceMuted,
-                indent: 72,
-              ),
           ],
         );
       },

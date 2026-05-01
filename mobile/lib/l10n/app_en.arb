@@ -166,6 +166,14 @@
   "profileRefreshSemanticLabel": "Refresh profile",
   "profileMoreTooltip": "More",
   "profileMoreSemanticLabel": "More options",
+  "profileAvatarLightboxBarrierLabel": "Close avatar",
+  "@profileAvatarLightboxBarrierLabel": {
+    "description": "Screen-reader label for the dismissable scrim behind the maximized profile-avatar dialog. Read aloud when focus lands on the barrier."
+  },
+  "profileAvatarLightboxCloseSemanticLabel": "Close avatar preview",
+  "@profileAvatarLightboxCloseSemanticLabel": {
+    "description": "Screen-reader label for the maximized profile-avatar dialog's tap-to-close gesture detector."
+  },
   "profileFollowingLabel": "Following",
   "profileFollowLabel": "Follow",
   "profileBlockedLabel": "Blocked",
@@ -235,6 +243,14 @@
   },
   "profileUnblockDisplayName": "Unblock {displayName}",
   "@profileUnblockDisplayName": {
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "profileAddToListDisplayName": "Add {displayName} to a list",
+  "@profileAddToListDisplayName": {
     "placeholders": {
       "displayName": {
         "type": "String"
@@ -330,6 +346,8 @@
   "profileSetupUsernameTaken": "Username was just taken. Please choose another.",
   "profileSetupClaimFailed": "Failed to claim username. Please try again.",
   "profileSetupPublishFailed": "Failed to publish profile. Please try again.",
+  "profileSetupNoRelaysConnected": "Couldn't reach the network. Check your connection and try again.",
+  "profileSetupRetryLabel": "Retry",
   "profileSetupDisplayNameLabel": "Display Name",
   "profileSetupDisplayNameHint": "How should people know you?",
   "profileSetupDisplayNameHelper": "Any name or label you want. Doesn't have to be unique.",
@@ -591,7 +609,15 @@
   },
   "shareFailedToSend": "Failed to send video",
   "shareAddedToBookmarks": "Added to bookmarks",
+  "shareRemovedFromBookmarks": "Removed from bookmarks",
+  "@shareRemovedFromBookmarks": {
+    "description": "Snackbar shown after removing a video from global bookmarks via Save on the share sheet."
+  },
   "shareFailedToAddBookmark": "Failed to add bookmark",
+  "shareFailedToRemoveBookmark": "Failed to remove bookmark",
+  "@shareFailedToRemoveBookmark": {
+    "description": "Snackbar when toggling Save off (remove from bookmarks) fails."
+  },
   "shareActionFailed": "Action failed",
   "shareWithTitle": "Share with",
   "shareFindPeople": "Find people",
@@ -673,6 +699,15 @@
   "metadataLikesLabel": "Likes",
   "metadataCommentsLabel": "Comments",
   "metadataRepostsLabel": "Reposts",
+  "metadataPostedDateSemantics": "Posted on {date}",
+  "@metadataPostedDateSemantics": {
+    "description": "Screen reader label for the publish date in the video info sheet. {date} is the locale-formatted absolute date, e.g. 'Apr 22, 2003'.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "devOptionsTitle": "Developer Options",
   "@devOptionsTitle": {
     "description": "Developer options screen app bar title"
@@ -1339,6 +1374,18 @@
   "shareSheetSaveToGallery": "Save to Gallery",
   "shareSheetSaveWithWatermark": "Save with Watermark",
   "shareSheetSaveVideo": "Save Video",
+  "shareSheetAddToClips": "Add to clips",
+  "@shareSheetAddToClips": {
+    "description": "Share sheet action label for importing a classic Vine into the clip library"
+  },
+  "shareSheetAddedToClips": "Added to clips",
+  "@shareSheetAddedToClips": {
+    "description": "Snackbar shown after successfully importing a classic Vine into the clip library"
+  },
+  "shareSheetAddToClipsFailed": "Couldn't add to clips",
+  "@shareSheetAddToClipsFailed": {
+    "description": "Snackbar shown when importing a classic Vine into the clip library fails"
+  },
   "shareSheetAddToList": "Add to List",
   "shareSheetCopy": "Copy",
   "shareSheetShareVia": "Share via",
@@ -1513,7 +1560,7 @@
   "shareMenuAddToBookmarksSubtitle": "Save for later viewing",
   "shareMenuAddToBookmarkSet": "Add to Bookmark Set",
   "shareMenuAddToBookmarkSetSubtitle": "Organize in collections",
-  "shareMenuFollowSets": "Follow Sets",
+  "shareMenuFollowSets": "People Lists",
   "shareMenuCreateFollowSet": "Create Follow Set",
   "shareMenuCreateFollowSetSubtitle": "Start new collection with this creator",
   "shareMenuAddToFollowSet": "Add to Follow Set",
@@ -1522,6 +1569,99 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "peopleListsAddToList": "Add to list",
+  "peopleListsAddToListSubtitle": "Put this creator in one of your lists",
+  "peopleListsSheetTitle": "Add to list",
+  "peopleListsEmptyTitle": "No lists yet",
+  "peopleListsEmptySubtitle": "Create a list to start grouping people.",
+  "peopleListsCreateList": "Create list",
+  "peopleListsNewListTitle": "New list",
+  "peopleListsRouteTitle": "People list",
+  "@peopleListsRouteTitle": {
+    "description": "AppBar title for the people-list members route when it is reached with a missing or empty list id (e.g., via a malformed deep link)."
+  },
+  "peopleListsListNameLabel": "List name",
+  "peopleListsListNameHint": "Close friends",
+  "peopleListsCreateButton": "Create",
+  "peopleListsAddPeopleTitle": "Add people",
+  "peopleListsAddPeopleTooltip": "Add people",
+  "peopleListsAddPeopleSemanticLabel": "Add people to list",
+  "peopleListsListNotFoundTitle": "List not found",
+  "peopleListsListNotFoundSubtitle": "List not found. It may have been deleted.",
+  "peopleListsListDeletedSubtitle": "This list may have been deleted.",
+  "peopleListsNoPeopleTitle": "No people in this list",
+  "peopleListsNoPeopleSubtitle": "Add some people to get started",
+  "peopleListsNoVideosTitle": "No videos yet",
+  "peopleListsNoVideosSubtitle": "Videos from list members will appear here",
+  "peopleListsNoVideosAvailable": "No videos available",
+  "peopleListsFailedToLoadVideos": "Failed to load videos",
+  "peopleListsVideoNotAvailable": "Video not available",
+  "peopleListsBackToGridTooltip": "Back to grid",
+  "peopleListsErrorLoadingVideos": "Error loading videos",
+  "peopleListsNoPeopleToAdd": "No people available to add.",
+  "peopleListsAddToListName": "Add to {name}",
+  "@peopleListsAddToListName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsAddPeopleSearchHint": "Search people",
+  "peopleListsAddPeopleError": "Couldn't load people. Please try again.",
+  "peopleListsAddPeopleRetry": "Try again",
+  "peopleListsAddButton": "Add",
+  "peopleListsAddButtonWithCount": "Add {count}",
+  "@peopleListsAddButtonWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "peopleListsInNLists": "{count, plural, =1{In 1 list} other{In {count} lists}}",
+  "@peopleListsInNLists": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "peopleListsRemoveConfirmTitle": "Remove {name}?",
+  "@peopleListsRemoveConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsRemoveConfirmBody": "They will be removed from this list.",
+  "peopleListsRemove": "Remove",
+  "peopleListsRemovedFromList": "Removed {name} from list",
+  "@peopleListsRemovedFromList": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsUndo": "Undo",
+  "peopleListsProfileLongPressHint": "Profile for {name}. Long press to remove.",
+  "@peopleListsProfileLongPressHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "peopleListsViewProfileHint": "View profile for {name}",
+  "@peopleListsViewProfileHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   },
@@ -1758,6 +1898,23 @@
     }
   },
   "notificationsEmptyDescription": "When people interact with your content, you'll see it here",
+  "notificationsUnreadPrefix": "Unread notification",
+  "@notificationsUnreadPrefix": {
+    "description": "Screen-reader prefix announced before an unread notification row's content, so the user hears that the row is unread before the message itself."
+  },
+  "notificationsViewProfileSemanticLabel": "View {displayName} profile",
+  "@notificationsViewProfileSemanticLabel": {
+    "description": "Screen-reader label for the avatar tap target on a notification row, which opens the user's profile.",
+    "placeholders": {
+      "displayName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsViewProfilesSemanticLabel": "View profiles",
+  "@notificationsViewProfilesSemanticLabel": {
+    "description": "Screen-reader label for a grouped notification's avatar stack, which opens the list of involved profiles."
+  },
   "notificationsLoadingType": "Loading {type} notifications...",
   "@notificationsLoadingType": {
     "placeholders": {
@@ -1996,6 +2153,10 @@
     }
   },
   "listCreateNewList": "Create New List",
+  "listNewPeopleList": "New people list",
+  "listCollaboratorsNone": "None",
+  "listAddCollaboratorTitle": "Add a collaborator",
+  "listCollaboratorSearchHint": "Search diVine...",
   "listNameLabel": "List Name",
   "listDescriptionLabel": "Description (optional)",
   "listPublicList": "Public List",
@@ -2291,6 +2452,34 @@
 
   "inboxConversationMuted": "Conversation muted",
   "inboxConversationUnmuted": "Conversation unmuted",
+
+  "inboxCollabInviteCardTitle": "Collaborator invite",
+  "@inboxCollabInviteCardTitle": {
+    "description": "Header label on a collaborator invite card in the DM conversation."
+  },
+  "inboxCollabInviteCardRoleLabel": "{role} on this post",
+  "@inboxCollabInviteCardRoleLabel": {
+    "description": "Subtitle on the collaborator invite card describing the offered collaborator role.",
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inboxCollabInviteAcceptButton": "Accept",
+  "inboxCollabInviteIgnoreButton": "Ignore",
+  "inboxCollabInviteAcceptedStatus": "Accepted",
+  "inboxCollabInviteIgnoredStatus": "Ignored",
+  "inboxCollabInviteAcceptError": "Could not accept. Try again.",
+  "inboxCollabInviteSentStatus": "Invitation sent",
+  "@inboxCollabInviteSentStatus": {
+    "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
+  },
+
+  "inboxConversationCollabInvitePreview": "Collaborator invite",
+  "@inboxConversationCollabInvitePreview": {
+    "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list. The plaintext copy ('Open diVine to review and accept') is misleading inside diVine."
+  },
 
   "reportDialogCancel": "Cancel",
   "reportDialogReport": "Report",
@@ -2671,6 +2860,21 @@
       "actorName": { "type": "String" }
     }
   },
+  "notificationRepliedToYourComment": "replied to your comment",
+  "@notificationRepliedToYourComment": {
+    "description": "Verb phrase shown after the actor name in a reply notification."
+  },
+  "notificationAndConnector": "and",
+  "@notificationAndConnector": {
+    "description": "Connector word between the first actor and the 'N others' count in a grouped notification (e.g. 'Alice and 3 others liked your video')."
+  },
+  "notificationOthersCount": "{count, plural, =1{1 other} other{{count} others}}",
+  "@notificationOthersCount": {
+    "description": "Number of additional actors beyond the first in a grouped notification.",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
 
   "searchSomethingWentWrong": "Something went wrong",
   "searchTryAgain": "Try again",
@@ -2742,6 +2946,7 @@
   "videoEditorOpenTextSemanticLabel": "Open text editor",
   "videoEditorOpenDrawSemanticLabel": "Open draw editor",
   "videoEditorOpenFilterSemanticLabel": "Open filter editor",
+  "videoEditorOpenStickerSemanticLabel": "Open sticker editor",
   "videoEditorSaveDraftTitle": "Save your draft?",
   "videoEditorSaveDraftSubtitle": "Keep your edits for later, or discard them and leave the editor.",
   "videoEditorSaveDraftButton": "Save draft",
@@ -2822,6 +3027,7 @@
   "videoEditorShowTimelineSemanticLabel": "Show timeline",
   "videoEditorHideTimelineSemanticLabel": "Hide timeline",
   "videoEditorFeedPreviewContent": "Avoid placing content behind these areas.",
+  "videoEditorStickersDivineOriginals": "Divine Originals",
   "videoEditorStickerSearchHint": "Search stickers...",
   "videoEditorSelectFontSemanticLabel": "Select font",
   "videoEditorFontUnknown": "Unknown",

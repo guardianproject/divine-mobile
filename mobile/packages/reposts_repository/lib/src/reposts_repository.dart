@@ -5,6 +5,7 @@
 // ABOUTME: Supports offline queuing via callback injection.
 
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:nostr_client/nostr_client.dart';
@@ -293,8 +294,12 @@ class RepostsRepository {
       return placeholderId;
     }
 
-    // 3. Online → publish kind 16; on success swap placeholder for real id,
-    // on failure roll back memory + DB + count + stream.
+    // 3. Online → publish kind 16; on success swap placeholder for real id.
+    // On failure, prefer queuing via [_queueOfflineAction] when wired so the
+    // optimistic state survives transient relay-pool problems (mirror of
+    // [LikesRepository.likeEvent]). Without a wired callback, fall back to
+    // rollback + rethrow to preserve the original contract for tests and
+    // non-app embedders.
     try {
       final sentEvent = await _nostrClient.sendGenericRepost(
         addressableId: addressableId,
@@ -319,7 +324,22 @@ class RepostsRepository {
       await _localStorage?.saveRepostRecord(confirmed);
 
       return sentEvent.id;
-    } catch (_) {
+    } catch (e, stackTrace) {
+      if (_queueOfflineAction != null) {
+        developer.log(
+          'Repost publish failed; queuing optimistic action for retry',
+          name: 'RepostsRepository',
+          error: e,
+          stackTrace: stackTrace,
+        );
+        await _queueOfflineAction(
+          isRepost: true,
+          addressableId: addressableId,
+          originalAuthorPubkey: originalAuthorPubkey,
+          eventId: eventId,
+        );
+        return placeholderId;
+      }
       _repostRecords.remove(addressableId);
       await _localStorage?.deleteRepostRecord(addressableId);
       if (previousCount != null) {
@@ -416,8 +436,11 @@ class RepostsRepository {
       return;
     }
 
-    // 3. Online → publish kind 5 (skipped for never-synced placeholders);
-    // on failure roll back memory + DB + count + stream.
+    // 3. Online → publish kind 5 (skipped for never-synced placeholders).
+    // On failure, prefer queuing via [_queueOfflineAction] when wired so the
+    // optimistic unrepost survives transient relay-pool problems (mirror of
+    // [repostVideo]). Without a wired callback, fall back to rollback +
+    // rethrow to preserve the original contract.
     if (snapshotRecord.repostEventId.startsWith('pending_')) {
       // Pending repost never reached the relay; nothing to delete on the wire.
       return;
@@ -432,7 +455,21 @@ class RepostsRepository {
           'Failed to publish unrepost deletion',
         );
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      if (_queueOfflineAction != null) {
+        developer.log(
+          'Unrepost publish failed; queuing optimistic action for retry',
+          name: 'RepostsRepository',
+          error: e,
+          stackTrace: stackTrace,
+        );
+        await _queueOfflineAction(
+          isRepost: false,
+          addressableId: addressableId,
+          originalAuthorPubkey: snapshotRecord.originalAuthorPubkey,
+        );
+        return;
+      }
       _repostRecords[addressableId] = snapshotRecord;
       await _localStorage?.saveRepostRecord(snapshotRecord);
       if (previousCount != null) {

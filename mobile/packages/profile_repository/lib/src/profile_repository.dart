@@ -175,9 +175,17 @@ class ProfileRepository {
 
   /// Deletes a cached profile from local storage.
   ///
-  /// Returns the number of rows deleted (0 or 1).
-  Future<int> deleteCachedProfile({required String pubkey}) {
-    return _userProfilesDao.deleteProfile(pubkey);
+  /// Returns the number of rows deleted (0 or 1). On a successful delete
+  /// (rows > 0), also removes the pubkey from the in-memory known-cached
+  /// set so [hasProfile] returns `false` for the rest of the session.
+  /// Does not add the pubkey to the confirmed-missing set — a local
+  /// eviction does not prove remote absence.
+  Future<int> deleteCachedProfile({required String pubkey}) async {
+    final rowsAffected = await _userProfilesDao.deleteProfile(pubkey);
+    if (rowsAffected > 0) {
+      _knownCached.remove(pubkey);
+    }
+    return rowsAffected;
   }
 
   /// Returns all cached profiles from local storage.
@@ -528,9 +536,22 @@ class ProfileRepository {
     );
 
     if (profileEvent == null) {
+      // Distinguish "no relays at all" from "relay rejected / send error".
+      // publishEvent already called retryDisconnectedRelays() internally, so
+      // if connectedRelays is still empty the device has no relay connections.
+      if (_nostrClient.connectedRelays.isEmpty) {
+        Log.error(
+          'sendProfile returned null — no connected relays after retry',
+          name: 'ProfileRepository.saveProfileEvent',
+          category: LogCategory.relay,
+        );
+        throw const NoRelaysConnectedException(
+          'No relays connected. Check your connection and try again.',
+        );
+      }
       Log.error(
         'sendProfile returned null '
-        '(no relays connected or relay rejected the event)',
+        '(relay rejected the event or send failed)',
         name: 'ProfileRepository.saveProfileEvent',
         category: LogCategory.relay,
       );

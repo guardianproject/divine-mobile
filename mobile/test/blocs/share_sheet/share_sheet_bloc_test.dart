@@ -10,7 +10,9 @@ import 'package:follow_repository/follow_repository.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:models/models.dart';
 import 'package:openvine/blocs/share_sheet/share_sheet_bloc.dart';
+import 'package:openvine/models/divine_video_clip.dart';
 import 'package:openvine/services/bookmark_service.dart';
+import 'package:openvine/services/classic_vine_clip_import_service.dart';
 import 'package:openvine/services/video_sharing_service.dart';
 import 'package:profile_repository/profile_repository.dart';
 
@@ -22,11 +24,16 @@ class _MockFollowRepository extends Mock implements FollowRepository {}
 
 class _MockBookmarkService extends Mock implements BookmarkService {}
 
+class _MockClassicVineClipImportService extends Mock
+    implements ClassicVineClipImportService {}
+
 class _MockCacheManager extends Mock implements BaseCacheManager {}
 
 class _MockFile extends Mock implements File {}
 
 class _FakeVideoEvent extends Fake implements VideoEvent {}
+
+class _FakeDivineVideoClip extends Fake implements DivineVideoClip {}
 
 /// A [VideoEvent] whose [toJson] always throws, used to test error paths.
 class _ThrowingJsonVideoEvent extends Fake implements VideoEvent {
@@ -98,6 +105,7 @@ void main() {
       Future<BookmarkService?>? bookmarkServiceFuture,
       String relayUrl = 'wss://relay.test.example',
       BaseCacheManager? cacheManager,
+      ClassicVineClipImportService? classicVineClipImportService,
     }) => ShareSheetBloc(
       video: testVideo,
       relayUrl: relayUrl,
@@ -107,6 +115,7 @@ void main() {
       bookmarkServiceFuture:
           bookmarkServiceFuture ?? Future.value(mockBookmarkService),
       cacheManager: cacheManager,
+      classicVineClipImportService: classicVineClipImportService,
     );
 
     test('initial state is correct', () {
@@ -592,10 +601,13 @@ void main() {
 
     group('ShareSheetSaveRequested', () {
       blocTest<ShareSheetBloc, ShareSheetState>(
-        'emits $ShareSheetSaveResult with succeeded=true when bookmark succeeds',
+        'emits $ShareSheetSaveResult with succeeded=true, removed=false when adding bookmark',
         setUp: () {
           when(
-            () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
+            () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+          ).thenReturn(false);
+          when(
+            () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
           ).thenAnswer((_) async => true);
         },
         build: createBloc,
@@ -604,11 +616,42 @@ void main() {
           isA<ShareSheetState>().having(
             (s) => s.actionResult,
             'actionResult',
-            isA<ShareSheetSaveResult>().having(
-              (r) => r.succeeded,
-              'succeeded',
-              isTrue,
-            ),
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.succeeded, 'succeeded', isTrue)
+                .having((r) => r.removed, 'removed', isFalse)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isFalse,
+                ),
+          ),
+        ],
+      );
+
+      blocTest<ShareSheetBloc, ShareSheetState>(
+        'emits $ShareSheetSaveResult with succeeded=true, removed=true when removing bookmark',
+        setUp: () {
+          when(
+            () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+          ).thenReturn(true);
+          when(
+            () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
+          ).thenAnswer((_) async => true);
+        },
+        build: createBloc,
+        act: (bloc) => bloc.add(const ShareSheetSaveRequested()),
+        expect: () => [
+          isA<ShareSheetState>().having(
+            (s) => s.actionResult,
+            'actionResult',
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.succeeded, 'succeeded', isTrue)
+                .having((r) => r.removed, 'removed', isTrue)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isTrue,
+                ),
           ),
         ],
       );
@@ -617,7 +660,10 @@ void main() {
         'emits $ShareSheetSaveResult with succeeded=false when bookmark fails',
         setUp: () {
           when(
-            () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
+            () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+          ).thenReturn(false);
+          when(
+            () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
           ).thenAnswer((_) async => false);
         },
         build: createBloc,
@@ -626,11 +672,43 @@ void main() {
           isA<ShareSheetState>().having(
             (s) => s.actionResult,
             'actionResult',
-            isA<ShareSheetSaveResult>().having(
-              (r) => r.succeeded,
-              'succeeded',
-              isFalse,
-            ),
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.succeeded, 'succeeded', isFalse)
+                .having((r) => r.removed, 'removed', isFalse)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isFalse,
+                ),
+          ),
+        ],
+      );
+
+      blocTest<ShareSheetBloc, ShareSheetState>(
+        'emits failure with wasBookmarkedBeforeToggle true when removing '
+        'bookmark fails',
+        setUp: () {
+          when(
+            () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+          ).thenReturn(true);
+          when(
+            () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
+          ).thenAnswer((_) async => false);
+        },
+        build: createBloc,
+        act: (bloc) => bloc.add(const ShareSheetSaveRequested()),
+        expect: () => [
+          isA<ShareSheetState>().having(
+            (s) => s.actionResult,
+            'actionResult',
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.succeeded, 'succeeded', isFalse)
+                .having((r) => r.removed, 'removed', isFalse)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isTrue,
+                ),
           ),
         ],
       );
@@ -639,7 +717,10 @@ void main() {
         'emits $ShareSheetSaveResult with succeeded=false when bookmark throws',
         setUp: () {
           when(
-            () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
+            () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+          ).thenReturn(false);
+          when(
+            () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
           ).thenThrow(Exception('offline'));
         },
         build: createBloc,
@@ -648,11 +729,43 @@ void main() {
           isA<ShareSheetState>().having(
             (s) => s.actionResult,
             'actionResult',
-            isA<ShareSheetSaveResult>().having(
-              (r) => r.succeeded,
-              'succeeded',
-              isFalse,
-            ),
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.succeeded, 'succeeded', isFalse)
+                .having((r) => r.removed, 'removed', isFalse)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isFalse,
+                ),
+          ),
+        ],
+      );
+
+      blocTest<ShareSheetBloc, ShareSheetState>(
+        'emits failure with wasBookmarkedBeforeToggle true when toggle '
+        'throws while bookmarked',
+        setUp: () {
+          when(
+            () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+          ).thenReturn(true);
+          when(
+            () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
+          ).thenThrow(Exception('offline'));
+        },
+        build: createBloc,
+        act: (bloc) => bloc.add(const ShareSheetSaveRequested()),
+        expect: () => [
+          isA<ShareSheetState>().having(
+            (s) => s.actionResult,
+            'actionResult',
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.succeeded, 'succeeded', isFalse)
+                .having((r) => r.removed, 'removed', isFalse)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isTrue,
+                ),
           ),
         ],
       );
@@ -666,11 +779,14 @@ void main() {
           isA<ShareSheetState>().having(
             (s) => s.actionResult,
             'actionResult',
-            isA<ShareSheetSaveResult>().having(
-              (r) => r.succeeded,
-              'succeeded',
-              isFalse,
-            ),
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.succeeded, 'succeeded', isFalse)
+                .having((r) => r.removed, 'removed', isFalse)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isFalse,
+                ),
           ),
         ],
       );
@@ -678,9 +794,16 @@ void main() {
       blocTest<ShareSheetBloc, ShareSheetState>(
         'consecutive saves emit distinct states via identity equality',
         setUp: () {
+          var inGlobalBookmarks = false;
           when(
-            () => mockBookmarkService.addVideoToGlobalBookmarks(any()),
-          ).thenAnswer((_) async => true);
+            () => mockBookmarkService.isVideoBookmarkedGlobally(any()),
+          ).thenAnswer((_) => inGlobalBookmarks);
+          when(
+            () => mockBookmarkService.toggleVideoInGlobalBookmarks(any()),
+          ).thenAnswer((_) async {
+            inGlobalBookmarks = !inGlobalBookmarks;
+            return true;
+          });
         },
         build: createBloc,
         act: (bloc) async {
@@ -692,12 +815,105 @@ void main() {
           isA<ShareSheetState>().having(
             (s) => s.actionResult,
             'actionResult',
-            isA<ShareSheetSaveResult>(),
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.removed, 'removed', isFalse)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isFalse,
+                ),
           ),
           isA<ShareSheetState>().having(
             (s) => s.actionResult,
             'actionResult',
-            isA<ShareSheetSaveResult>(),
+            isA<ShareSheetSaveResult>()
+                .having((r) => r.removed, 'removed', isTrue)
+                .having(
+                  (r) => r.wasBookmarkedBeforeToggle,
+                  'wasBookmarkedBeforeToggle',
+                  isTrue,
+                ),
+          ),
+        ],
+      );
+    });
+
+    // -----------------------------------------------------------------------
+    // Add classic Vine to clips
+    // -----------------------------------------------------------------------
+
+    group('ShareSheetAddClassicVineToClipsRequested', () {
+      late _MockClassicVineClipImportService mockImporter;
+
+      setUp(() {
+        mockImporter = _MockClassicVineClipImportService();
+      });
+
+      blocTest<ShareSheetBloc, ShareSheetState>(
+        'emits import success when classic Vine is added to clips',
+        setUp: () {
+          when(() => mockImporter.importToLibrary(any())).thenAnswer(
+            (_) async => ClassicVineClipImportSuccess(_FakeDivineVideoClip()),
+          );
+        },
+        build: () => createBloc(classicVineClipImportService: mockImporter),
+        act: (bloc) =>
+            bloc.add(const ShareSheetAddClassicVineToClipsRequested()),
+        expect: () => [
+          isA<ShareSheetState>().having(
+            (state) => state.actionResult,
+            'actionResult',
+            isA<ShareSheetClassicVineClipImportResult>().having(
+              (result) => result.succeeded,
+              'succeeded',
+              isTrue,
+            ),
+          ),
+        ],
+        verify: (_) {
+          verify(() => mockImporter.importToLibrary(testVideo)).called(1);
+        },
+      );
+
+      blocTest<ShareSheetBloc, ShareSheetState>(
+        'emits import failure when importer cannot add the clip',
+        setUp: () {
+          when(() => mockImporter.importToLibrary(any())).thenAnswer(
+            (_) async => const ClassicVineClipImportFailure(
+              ClassicVineClipImportFailureReason.downloadFailed,
+            ),
+          );
+        },
+        build: () => createBloc(classicVineClipImportService: mockImporter),
+        act: (bloc) =>
+            bloc.add(const ShareSheetAddClassicVineToClipsRequested()),
+        expect: () => [
+          isA<ShareSheetState>().having(
+            (state) => state.actionResult,
+            'actionResult',
+            isA<ShareSheetClassicVineClipImportResult>().having(
+              (result) => result.succeeded,
+              'succeeded',
+              isFalse,
+            ),
+          ),
+        ],
+      );
+
+      blocTest<ShareSheetBloc, ShareSheetState>(
+        'emits import failure when importer is unavailable',
+        build: createBloc,
+        act: (bloc) =>
+            bloc.add(const ShareSheetAddClassicVineToClipsRequested()),
+        expect: () => [
+          isA<ShareSheetState>().having(
+            (state) => state.actionResult,
+            'actionResult',
+            isA<ShareSheetClassicVineClipImportResult>().having(
+              (result) => result.succeeded,
+              'succeeded',
+              isFalse,
+            ),
           ),
         ],
       );

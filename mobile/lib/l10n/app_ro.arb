@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "Adaugă {displayName} la o listă",
     "profileUserBlockedTitle": "Utilizator blocat",
     "profileUserBlockedContent": "Nu vei mai vedea conținut de la acest utilizator în feedurile tale.",
     "profileUserBlockedUnblockHint": "Îl poți debloca oricând din profilul lui sau din Setări > Siguranță.",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "Numele tocmai a fost luat. Alege altul.",
     "profileSetupClaimFailed": "N-am putut revendica numele. Încearcă din nou.",
     "profileSetupPublishFailed": "N-am putut publica profilul. Încearcă din nou.",
+    "profileSetupNoRelaysConnected": "Nu s-a putut accesa rețeaua. Verifică conexiunea și încearcă din nou.",
+    "profileSetupRetryLabel": "Încearcă din nou",
     "profileSetupDisplayNameLabel": "Nume afișat",
     "profileSetupDisplayNameHint": "Cum să te știe oamenii?",
     "profileSetupDisplayNameHelper": "Orice nume sau etichetă vrei. Nu trebuie să fie unic.",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "N-am putut trimite videoclipul",
     "shareAddedToBookmarks": "Adăugat la semne de carte",
+    "shareRemovedFromBookmarks": "Eliminat din semne de carte",
     "shareFailedToAddBookmark": "N-am putut adăuga semnul de carte",
+    "shareFailedToRemoveBookmark": "N-am putut elimina semnul de carte",
     "shareActionFailed": "Acțiunea a eșuat",
     "shareWithTitle": "Partajează cu",
     "shareFindPeople": "Găsește oameni",
@@ -628,6 +633,7 @@
     "metadataLikesLabel": "Aprecieri",
     "metadataCommentsLabel": "Comentarii",
     "metadataRepostsLabel": "Redistribuiri",
+    "metadataPostedDateSemantics": "Publicat pe {date}",
     "devOptionsTitle": "Opțiuni dezvoltator",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1294,6 +1300,9 @@
     "shareSheetSaveToGallery": "Salvează în galerie",
     "shareSheetSaveWithWatermark": "Salvează cu filigran",
     "shareSheetSaveVideo": "Salvează videoclipul",
+    "shareSheetAddToClips": "Adaugă la clipuri",
+    "shareSheetAddedToClips": "Adăugat la clipuri",
+    "shareSheetAddToClipsFailed": "Nu s-a putut adăuga la clipuri",
     "shareSheetAddToList": "Adaugă la listă",
     "shareSheetCopy": "Copiază",
     "shareSheetShareVia": "Partajează prin",
@@ -1943,6 +1952,10 @@
         }
     },
     "listCreateNewList": "Creează o listă nouă",
+    "listNewPeopleList": "Listă nouă de persoane",
+    "listCollaboratorsNone": "Niciunul",
+    "listAddCollaboratorTitle": "Adaugă un colaborator",
+    "listCollaboratorSearchHint": "Caută în diVine...",
     "listNameLabel": "Numele listei",
     "listDescriptionLabel": "Descriere (opțional)",
     "listPublicList": "Listă publică",
@@ -2254,6 +2267,28 @@
             }
         }
     },
+    "inboxCollabInviteAcceptButton": "Acceptă",
+    "inboxCollabInviteAcceptError": "Nu s-a putut accepta. Încearcă din nou.",
+    "inboxCollabInviteAcceptedStatus": "Acceptată",
+    "inboxCollabInviteCardRoleLabel": "{role} la această postare",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "Invitație de colaborare",
+    "inboxCollabInviteIgnoreButton": "Ignoră",
+    "inboxCollabInviteIgnoredStatus": "Ignorată",
+    "inboxConversationCollabInvitePreview": "Invitație de colaborare",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "Invitație trimisă",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
+    },
     "inboxConversationMuted": "Conversație dezactivată",
     "inboxConversationUnmuted": "Conversație reactivată",
     "inboxEmptySubtitle": "Butonul + nu mușcă.",
@@ -2395,14 +2430,14 @@
     "searchDiscoverSomethingInteresting": "Descoperă ceva interesant",
     "searchEnterQuery": "Introdu un termen de căutare",
     "searchFindCuratedVideoLists": "Găsește liste de videoclipuri selectate",
-  "searchPeopleSectionHeader": "People",
-  "searchPeopleLoadingLabel": "Loading people results",
-  "searchTagsSectionHeader": "Tags",
-  "searchTagsLoadingLabel": "Loading tag results",
-  "searchVideosSectionHeader": "Videos",
-  "searchVideosLoadingLabel": "Loading video results",
+    "searchPeopleSectionHeader": "People",
+    "searchPeopleLoadingLabel": "Loading people results",
+    "searchTagsSectionHeader": "Tags",
+    "searchTagsLoadingLabel": "Loading tag results",
+    "searchVideosSectionHeader": "Videos",
+    "searchVideosLoadingLabel": "Loading video results",
     "searchListsSectionHeader": "Liste",
-  "searchListsLoadingLabel": "Se încarcă rezultatele listelor",
+    "searchListsLoadingLabel": "Se încarcă rezultatele listelor",
     "searchForLists": "Caută liste",
     "searchSomethingWentWrong": "Ceva nu a mers bine",
     "searchTryAgain": "Încearcă din nou",
@@ -2660,6 +2695,7 @@
     "videoEditorOpenTextSemanticLabel": "Deschide editorul de text",
     "videoEditorOpenDrawSemanticLabel": "Deschide editorul de desen",
     "videoEditorOpenFilterSemanticLabel": "Deschide editorul de filtre",
+    "videoEditorOpenStickerSemanticLabel": "Deschide editorul de stickere",
     "videoEditorSaveDraftTitle": "Salvezi schița?",
     "videoEditorSaveDraftSubtitle": "Păstrează editările pentru mai târziu sau renunță la ele și părăsește editorul.",
     "videoEditorSaveDraftButton": "Salvează schița",
@@ -2739,6 +2775,7 @@
     "videoEditorShowTimelineSemanticLabel": "Afișează cronologia",
     "videoEditorHideTimelineSemanticLabel": "Ascunde cronologia",
     "videoEditorFeedPreviewContent": "Evită să plasezi conținut în spatele acestor zone.",
+    "videoEditorStickersDivineOriginals": "Divine Originale",
     "videoEditorStickerSearchHint": "Caută stickere...",
     "videoEditorSelectFontSemanticLabel": "Selectează fontul",
     "videoEditorFontUnknown": "Necunoscut",
@@ -2922,12 +2959,34 @@
     "shareMenuDeleteFailedNotOwner": "Poți șterge doar propriile videoclipuri.",
     "videoFeedLoopCountLine": "{compactCount} {count, plural, =1{buclă} other{bucle}}",
     "shareMenuDeleteFailedRelayRejected": "Couldn't reach the relay. Check your connection and try again.",
-  "videoEditorAudioSegmentInstruction": "Alege segmentul audio pentru videoclipul tău",
-  "videoEditorClipGalleryInstruction": "Atinge pentru editare. Ține apăsat și trage pentru reordonare.",
-  "navSearch": "Caută",
-  "navSearchTooltip": "Caută",
-  "fullscreenFeedRemovedMessage": "Videoclip eliminat",
-  "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
-  "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+    "videoEditorAudioSegmentInstruction": "Alege segmentul audio pentru videoclipul tău",
+    "videoEditorClipGalleryInstruction": "Atinge pentru editare. Ține apăsat și trage pentru reordonare.",
+    "navSearch": "Caută",
+    "navSearchTooltip": "Caută",
+    "fullscreenFeedRemovedMessage": "Videoclip eliminat",
+    "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
+    "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
+    "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "Închide avatarul",
+    "profileAvatarLightboxCloseSemanticLabel": "Închide previzualizarea avatarului",
+    "notificationsUnreadPrefix": "Notificare necitită",
+    "notificationsViewProfileSemanticLabel": "Vezi profilul {displayName}",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "Vezi profilurile",
+    "notificationRepliedToYourComment": "a răspuns la comentariul tău",
+    "notificationAndConnector": "și",
+    "notificationOthersCount": "{count, plural, =1{încă 1 persoană} other{încă {count} persoane}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

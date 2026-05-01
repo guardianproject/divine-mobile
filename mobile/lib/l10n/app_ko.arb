@@ -102,6 +102,7 @@
     "profileUnfollowDisplayName": "{displayName}님 언팔로우",
     "profileBlockDisplayName": "{displayName}님 차단",
     "profileUnblockDisplayName": "{displayName}님 차단 해제",
+    "profileAddToListDisplayName": "{displayName}을(를) 목록에 추가",
     "profileUserBlockedTitle": "사용자를 차단했어요",
     "profileUserBlockedContent": "이 사용자의 콘텐츠는 피드에서 보이지 않아요.",
     "profileUserBlockedUnblockHint": "언제든 프로필이나 설정 > 안전에서 차단을 해제할 수 있어요.",
@@ -163,6 +164,8 @@
     "profileSetupUsernameTaken": "이 사용자명은 방금 선점됐어요. 다른 이름을 고르세요.",
     "profileSetupClaimFailed": "사용자명을 가져오지 못했어요. 다시 시도해보세요.",
     "profileSetupPublishFailed": "프로필을 게시하지 못했어요. 다시 시도해보세요.",
+    "profileSetupNoRelaysConnected": "네트워크에 연결할 수 없어요. 연결 상태를 확인하고 다시 시도해보세요.",
+    "profileSetupRetryLabel": "다시 시도",
     "profileSetupDisplayNameLabel": "표시 이름",
     "profileSetupDisplayNameHint": "사람들에게 어떻게 불리고 싶으세요?",
     "profileSetupDisplayNameHelper": "원하는 아무 이름이나 라벨이요. 고유하지 않아도 돼요.",
@@ -330,7 +333,9 @@
     "sharePostSharedWith": "{recipientName}님과 게시물을 공유했어요",
     "shareFailedToSend": "영상을 보내지 못했어요",
     "shareAddedToBookmarks": "북마크에 추가했어요",
+    "shareRemovedFromBookmarks": "북마크에서 뺐어요",
     "shareFailedToAddBookmark": "북마크 추가에 실패했어요",
+    "shareFailedToRemoveBookmark": "북마크를 지우지 못했어요",
     "shareActionFailed": "작업에 실패했어요",
     "shareWithTitle": "공유 대상",
     "shareFindPeople": "사람 찾기",
@@ -364,6 +369,7 @@
     "metadataLikesLabel": "좋아요",
     "metadataCommentsLabel": "댓글",
     "metadataRepostsLabel": "리포스트",
+    "metadataPostedDateSemantics": "{date}에 게시됨",
     "devOptionsTitle": "개발자 옵션",
     "devOptionsPageLoadTimes": "페이지 로딩 시간",
     "devOptionsNoPageLoads": "아직 기록된 페이지 로드가 없어요.\n앱을 둘러보며 타이밍 데이터를 쌓아보세요.",
@@ -734,6 +740,9 @@
     "shareSheetSaveToGallery": "갤러리에 저장",
     "shareSheetSaveWithWatermark": "워터마크와 함께 저장",
     "shareSheetSaveVideo": "영상 저장",
+    "shareSheetAddToClips": "클립에 추가",
+    "shareSheetAddedToClips": "클립에 추가했어요",
+    "shareSheetAddToClipsFailed": "클립에 추가할 수 없어요",
     "shareSheetAddToList": "리스트에 추가",
     "shareSheetCopy": "복사",
     "shareSheetShareVia": "다른 곳으로 공유",
@@ -1231,6 +1240,10 @@
         }
     },
     "listCreateNewList": "새 목록 만들기",
+    "listNewPeopleList": "새 사람 목록",
+    "listCollaboratorsNone": "없음",
+    "listAddCollaboratorTitle": "협업자 추가",
+    "listCollaboratorSearchHint": "diVine 검색...",
     "listNameLabel": "목록 이름",
     "listDescriptionLabel": "설명 (선택)",
     "listPublicList": "공개 목록",
@@ -1541,6 +1554,28 @@
                 "type": "String"
             }
         }
+    },
+    "inboxCollabInviteAcceptButton": "수락",
+    "inboxCollabInviteAcceptError": "수락하지 못했어요. 다시 시도해 주세요.",
+    "inboxCollabInviteAcceptedStatus": "수락됨",
+    "inboxCollabInviteCardRoleLabel": "이 게시물의 {role}",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "콜라보 초대",
+    "inboxCollabInviteIgnoreButton": "무시",
+    "inboxCollabInviteIgnoredStatus": "무시됨",
+    "inboxConversationCollabInvitePreview": "콜라보 초대",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "초대를 보냈어요",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
     },
     "inboxConversationMuted": "대화 알림을 껐어요",
     "inboxConversationUnmuted": "대화 알림을 다시 켰어요",
@@ -1977,6 +2012,7 @@
     "videoEditorOpenLibrarySemanticLabel": "라이브러리 열기",
     "videoEditorOpenDrawSemanticLabel": "그리기 편집기 열기",
     "videoEditorOpenFilterSemanticLabel": "필터 편집기 열기",
+    "videoEditorOpenStickerSemanticLabel": "스티커 편집기 열기",
     "videoEditorOpenTextSemanticLabel": "텍스트 편집기 열기",
     "videoEditorPauseSemanticLabel": "일시 정지",
     "videoEditorPickColorTitle": "색상 선택",
@@ -2016,6 +2052,7 @@
         }
     },
     "videoEditorSplitSelectedClipSemanticLabel": "선택한 클립 분할",
+    "videoEditorStickersDivineOriginals": "Divine 오리지널",
     "videoEditorStickerSearchHint": "스티커 검색...",
     "videoEditorTextAlignmentSemanticLabel": "텍스트 정렬",
     "videoEditorTextBackgroundSemanticLabel": "텍스트 배경",
@@ -2218,5 +2255,27 @@
   "fullscreenFeedRemovedMessage": "동영상이 삭제됐어요",
   "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
   "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+  "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "아바타 닫기",
+    "profileAvatarLightboxCloseSemanticLabel": "아바타 미리보기 닫기",
+    "notificationsUnreadPrefix": "읽지 않은 알림",
+    "notificationsViewProfileSemanticLabel": "{displayName}님의 프로필 보기",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "프로필 보기",
+    "notificationRepliedToYourComment": "님이 회원님의 댓글에 답글을 남겼습니다",
+    "notificationAndConnector": "및",
+    "notificationOthersCount": "{count, plural, other{외 {count}명}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

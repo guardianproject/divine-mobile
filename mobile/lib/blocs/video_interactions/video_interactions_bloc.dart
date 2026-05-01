@@ -8,6 +8,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:likes_repository/likes_repository.dart';
 import 'package:models/models.dart' show NIP71VideoKinds;
+import 'package:openvine/observability/reportable_error.dart';
 import 'package:reposts_repository/reposts_repository.dart';
 import 'package:unified_logger/unified_logger.dart';
 
@@ -183,24 +184,19 @@ class VideoInteractionsBloc
               ? repostCount
               : null,
           commentCount: commentCount,
-          clearError: true,
         ),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       Log.error(
         'VideoInteractionsBloc: Failed to fetch for $_eventId - $e',
         name: 'VideoInteractionsBloc',
         category: LogCategory.system,
       );
+      addError(e, stackTrace);
 
       // Still mark as success if we have partial data
       // The UI can handle null counts gracefully
-      emit(
-        state.copyWith(
-          status: VideoInteractionsStatus.success,
-          error: VideoInteractionsError.fetchFailed,
-        ),
-      );
+      emit(state.copyWith(status: VideoInteractionsStatus.success));
     }
   }
 
@@ -230,7 +226,6 @@ class VideoInteractionsBloc
         // copyWith treats null as "no change", so when the count hasn't
         // been fetched yet we leave it null (don't synthesize a 0).
         likeCount: _adjustCount(wasCount, increment: optimisticLiked),
-        clearError: true,
       ),
     );
 
@@ -272,7 +267,7 @@ class VideoInteractionsBloc
         name: 'VideoInteractionsBloc',
         category: LogCategory.system,
       );
-      addError(e, stackTrace);
+      addError(Reportable(e, context: '_publishLike'), stackTrace);
       outcome = _LikeSettleFailed(wasLiked: wasLiked);
     }
 
@@ -303,11 +298,7 @@ class VideoInteractionsBloc
         emit(state.copyWith(isLiked: false, likeCount: event.wasCount));
       case _LikeSettleFailed(:final wasLiked):
         emit(
-          state.copyWith(
-            isLiked: wasLiked,
-            likeCount: event.wasCount,
-            error: VideoInteractionsError.likeFailed,
-          ),
+          state.copyWith(isLiked: wasLiked, likeCount: event.wasCount),
         );
     }
   }
@@ -342,7 +333,6 @@ class VideoInteractionsBloc
         name: 'VideoInteractionsBloc',
         category: LogCategory.system,
       );
-      emit(state.copyWith(error: VideoInteractionsError.repostFailed));
       return;
     }
 
@@ -354,7 +344,6 @@ class VideoInteractionsBloc
       state.copyWith(
         isReposted: optimisticReposted,
         repostCount: _adjustCount(wasCount, increment: optimisticReposted),
-        clearError: true,
       ),
     );
 
@@ -425,11 +414,7 @@ class VideoInteractionsBloc
         emit(state.copyWith(isReposted: false, repostCount: event.wasCount));
       case _RepostSettleFailed(:final wasReposted):
         emit(
-          state.copyWith(
-            isReposted: wasReposted,
-            repostCount: event.wasCount,
-            error: VideoInteractionsError.repostFailed,
-          ),
+          state.copyWith(isReposted: wasReposted, repostCount: event.wasCount),
         );
     }
   }

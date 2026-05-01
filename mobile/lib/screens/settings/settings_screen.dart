@@ -457,7 +457,12 @@ class _AccountHeaderProfile extends ConsumerWidget {
 
     return Column(
       children: [
-        UserAvatar(imageUrl: profile?.picture, name: displayName, size: 96),
+        UserAvatar(
+          imageUrl: profile?.picture,
+          name: displayName,
+          placeholderSeed: pubkey,
+          size: 96,
+        ),
         const SizedBox(height: 16),
         Text(
           displayName,
@@ -487,7 +492,6 @@ class _VersionTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDeveloperMode = ref.watch(isDeveloperModeEnabledProvider);
     final environmentService = ref.watch(environmentServiceProvider);
-    final newCount = ref.watch(developerModeTapCounterProvider);
 
     return Semantics(
       button: true,
@@ -504,15 +508,17 @@ class _VersionTile extends ConsumerWidget {
             return;
           }
 
-          ref.read(developerModeTapCounterProvider.notifier).tap();
+          final tapCount = ref
+              .read(developerModeTapCounterProvider.notifier)
+              .tap();
 
           Log.debug(
-            'Dev mode count: $newCount',
+            'Dev mode count: $tapCount',
             name: 'SettingsScreen',
             category: LogCategory.ui,
           );
 
-          if (newCount >= 7) {
+          if (tapCount >= 7) {
             await environmentService.enableDeveloperMode();
             ref.read(developerModeTapCounterProvider.notifier).reset();
 
@@ -522,21 +528,6 @@ class _VersionTile extends ConsumerWidget {
                   content: Text(context.l10n.settingsDeveloperModeEnabled),
                   backgroundColor: VineTheme.vineGreen,
                   duration: const Duration(seconds: 2),
-                ),
-              );
-            }
-            return;
-          }
-
-          if (newCount >= 4) {
-            final remaining = 7 - newCount;
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    context.l10n.settingsDeveloperModeTapsRemaining(remaining),
-                  ),
-                  duration: const Duration(milliseconds: 500),
                 ),
               );
             }
@@ -654,6 +645,7 @@ class _AccountSwitchTile extends ConsumerWidget {
                 UserAvatar(
                   imageUrl: profile?.picture,
                   name: displayName,
+                  placeholderSeed: account.pubkeyHex,
                   size: 40,
                 ),
                 Expanded(

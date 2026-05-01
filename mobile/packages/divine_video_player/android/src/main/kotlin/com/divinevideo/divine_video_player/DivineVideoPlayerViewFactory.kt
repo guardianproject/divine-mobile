@@ -31,19 +31,28 @@ internal class DivineVideoPlayerViewFactory(
  * Android [PlatformView] that renders video via Media3's [PlayerView].
  */
 internal class DivineVideoPlayerPlatformView(
-    context: Context,
-    playerId: Int,
+    private val playerView: PlayerView,
 ) : PlatformView {
 
-    private val playerView: PlayerView = PlayerView(context).apply {
-        useController = false
-        val instance = PlayerRegistry.get(playerId)
-        player = instance?.getPlayer()
-    }
+    constructor(context: Context, playerId: Int) : this(
+        PlayerView(context).apply {
+            useController = false
+            val instance = PlayerRegistry.get(playerId)
+            player = instance?.getPlayer()
+        },
+    )
 
     override fun getView(): View = playerView
 
     override fun dispose() {
+        // Stop decoder before the PlatformView's ImageReader is torn down;
+        // narrows the window where an in-flight frame can land in a
+        // detaching ImageReaderSurfaceProducer. See #3416.
+        val player = playerView.player
+        player?.let {
+            it.stop()
+            it.clearVideoSurface()
+        }
         playerView.player = null
     }
 }

@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "Tambahkan {displayName} ke daftar",
     "profileUserBlockedTitle": "Pengguna Diblokir",
     "profileUserBlockedContent": "Kamu tidak akan melihat konten dari pengguna ini di feed-mu.",
     "profileUserBlockedUnblockHint": "Kamu bisa membuka blokir mereka kapan saja dari profilnya atau di Pengaturan > Keamanan.",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "Username baru saja diambil. Pilih yang lain.",
     "profileSetupClaimFailed": "Gagal mengklaim username. Silakan coba lagi.",
     "profileSetupPublishFailed": "Gagal mempublikasikan profil. Silakan coba lagi.",
+    "profileSetupNoRelaysConnected": "Tidak dapat menjangkau jaringan. Periksa koneksimu dan coba lagi.",
+    "profileSetupRetryLabel": "Coba lagi",
     "profileSetupDisplayNameLabel": "Nama Tampilan",
     "profileSetupDisplayNameHint": "Bagaimana orang harus mengenalmu?",
     "profileSetupDisplayNameHelper": "Nama atau label apa pun yang kamu mau. Tidak harus unik.",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "Gagal mengirim video",
     "shareAddedToBookmarks": "Ditambahkan ke bookmark",
+    "shareRemovedFromBookmarks": "Dihapus dari bookmark",
     "shareFailedToAddBookmark": "Gagal menambahkan bookmark",
+    "shareFailedToRemoveBookmark": "Gagal menghapus bookmark",
     "shareActionFailed": "Aksi gagal",
     "shareWithTitle": "Bagikan dengan",
     "shareFindPeople": "Cari orang",
@@ -625,6 +630,7 @@
     "metadataLikesLabel": "Suka",
     "metadataCommentsLabel": "Komentar",
     "metadataRepostsLabel": "Repost",
+    "metadataPostedDateSemantics": "Diposting pada {date}",
     "devOptionsTitle": "Opsi Pengembang",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1291,6 +1297,9 @@
     "shareSheetSaveToGallery": "Simpan ke Galeri",
     "shareSheetSaveWithWatermark": "Simpan dengan Watermark",
     "shareSheetSaveVideo": "Simpan Video",
+    "shareSheetAddToClips": "Tambahkan ke klip",
+    "shareSheetAddedToClips": "Ditambahkan ke klip",
+    "shareSheetAddToClipsFailed": "Tidak dapat menambahkan ke klip",
     "shareSheetAddToList": "Tambah ke Daftar",
     "shareSheetCopy": "Salin",
     "shareSheetShareVia": "Bagikan via",
@@ -1942,6 +1951,10 @@
         }
     },
     "listCreateNewList": "Buat Daftar Baru",
+    "listNewPeopleList": "Daftar orang baru",
+    "listCollaboratorsNone": "Tidak ada",
+    "listAddCollaboratorTitle": "Tambah kolaborator",
+    "listCollaboratorSearchHint": "Cari di diVine...",
     "listNameLabel": "Nama Daftar",
     "listDescriptionLabel": "Deskripsi (opsional)",
     "listPublicList": "Daftar Publik",
@@ -2252,6 +2265,28 @@
                 "type": "String"
             }
         }
+    },
+    "inboxCollabInviteAcceptButton": "Terima",
+    "inboxCollabInviteAcceptError": "Tidak bisa menerima. Coba lagi.",
+    "inboxCollabInviteAcceptedStatus": "Diterima",
+    "inboxCollabInviteCardRoleLabel": "{role} di postingan ini",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "Undangan kolaborasi",
+    "inboxCollabInviteIgnoreButton": "Abaikan",
+    "inboxCollabInviteIgnoredStatus": "Diabaikan",
+    "inboxConversationCollabInvitePreview": "Undangan kolaborasi",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "Undangan terkirim",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
     },
     "inboxConversationMuted": "Percakapan dibisukan",
     "inboxConversationUnmuted": "Bisu percakapan dibatalkan",
@@ -2688,6 +2723,7 @@
     "videoEditorOpenLibrarySemanticLabel": "Buka perpustakaan",
     "videoEditorOpenDrawSemanticLabel": "Buka editor gambar",
     "videoEditorOpenFilterSemanticLabel": "Buka editor filter",
+    "videoEditorOpenStickerSemanticLabel": "Buka editor stiker",
     "videoEditorOpenTextSemanticLabel": "Buka editor teks",
     "videoEditorPauseSemanticLabel": "Jeda",
     "videoEditorPickColorTitle": "Pilih warna",
@@ -2727,6 +2763,7 @@
         }
     },
     "videoEditorSplitSelectedClipSemanticLabel": "Bagi klip yang dipilih",
+    "videoEditorStickersDivineOriginals": "Divine Orisinal",
     "videoEditorStickerSearchHint": "Cari stiker...",
     "videoEditorTextAlignmentSemanticLabel": "Perataan teks",
     "videoEditorTextBackgroundSemanticLabel": "Latar belakang teks",
@@ -2929,5 +2966,27 @@
   "fullscreenFeedRemovedMessage": "Video dihapus",
   "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
   "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+  "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "Tutup avatar",
+    "profileAvatarLightboxCloseSemanticLabel": "Tutup pratinjau avatar",
+    "notificationsUnreadPrefix": "Notifikasi belum dibaca",
+    "notificationsViewProfileSemanticLabel": "Lihat profil {displayName}",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "Lihat profil",
+    "notificationRepliedToYourComment": "membalas komentar Anda",
+    "notificationAndConnector": "dan",
+    "notificationOthersCount": "{count, plural, other{{count} lainnya}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }

@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.9+498
+version: 1.0.10+499
 
 environment:
   sdk: ^3.11.0
@@ -55,6 +55,7 @@ workspace:
   - packages/nostr_client
   - packages/nostr_key_manager
   - packages/nostr_apps
+  - packages/people_lists_repository
   - packages/permissions_service
   - packages/pooled_video_player
   - packages/profile_repository
@@ -205,6 +206,9 @@ dependencies:
   # FeatureFlag.hlsAuthWebPlayer.
   hls_auth_web_player:
 
+  # People Lists Repository - NIP-51 kind 30000 follow sets
+  people_lists_repository:
+
   # Videos Repository - Video feed data layer
   videos_repository:
 
@@ -216,6 +220,9 @@ dependencies:
 
   # Count Formatter - Compact number formatting
   count_formatter:
+
+  # Time Formatter - Locale-aware timestamp formatting
+  time_formatter:
 
   # Divine UI - Shared UI components
   divine_ui:

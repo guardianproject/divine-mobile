@@ -1,14 +1,15 @@
-// ABOUTME: Widget for displaying individual notification items in the notifications list
-// ABOUTME: Shows actor avatar, notification message, timestamp, and action buttons
+// ABOUTME: Notification list item used by the legacy relay-based feed inside
+// ABOUTME: the inbox tab. Renders the Figma layout (type icon column, avatar
+// ABOUTME: above the message) on top of the [NotificationModel] data shape.
 
 import 'package:divine_ui/divine_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
+import 'package:openvine/constants/notification_constants.dart';
 import 'package:openvine/l10n/l10n.dart';
 import 'package:openvine/l10n/localized_time_formatter.dart';
-import 'package:openvine/theme/app_theme.dart';
-import 'package:openvine/widgets/vine_cached_image.dart';
-import 'package:unified_logger/unified_logger.dart';
+import 'package:openvine/widgets/notification_type_icon.dart';
+import 'package:openvine/widgets/user_avatar.dart';
 
 class NotificationListItem extends StatelessWidget {
   const NotificationListItem({
@@ -17,6 +18,7 @@ class NotificationListItem extends StatelessWidget {
     this.onProfileTap,
     super.key,
   });
+
   final NotificationModel notification;
   final VoidCallback onTap;
   final VoidCallback? onProfileTap;
@@ -24,309 +26,252 @@ class NotificationListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: notification.isRead
-          ? VineTheme.backgroundColor
-          : VineTheme.cardBackground,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar or icon
-              _buildLeadingWidget(),
-              const SizedBox(width: 12),
-
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Main message
-                    _buildMessage(context),
-                    const SizedBox(height: 4),
-
-                    // Additional content (comment text, etc.)
-                    if (_hasAdditionalContent()) ...[
-                      const SizedBox(height: 4),
-                      _buildAdditionalContent(),
-                    ],
-
-                    // Timestamp
-                    const SizedBox(height: 4),
-                    Text(
-                      LocalizedTimeFormatter.formatNotificationTimestamp(
-                        context.l10n,
-                        notification.timestamp,
-                        context: context,
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: VineTheme.lightText,
-                      ),
-                    ),
-                  ],
-                ),
+      type: .transparency,
+      child: Semantics(
+        button: true,
+        container: true,
+        label: notification.isRead
+            ? null
+            : context.l10n.notificationsUnreadPrefix,
+        child: InkWell(
+          onTap: onTap,
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: VineTheme.outlineDisabled),
               ),
-
-              // Thumbnail or action button
-              if (notification.targetVideoThumbnail != null)
-                _buildVideoThumbnail(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLeadingWidget() {
-    if (notification.type == NotificationType.system) {
-      // System notification icon
-      return Container(
-        width: 48,
-        height: 48,
-        decoration: const BoxDecoration(
-          color: VineTheme.cardBackground,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            notification.typeIcon,
-            style: const TextStyle(fontSize: 24),
-          ),
-        ),
-      );
-    }
-
-    // User avatar with overlay icon
-    return Semantics(
-      label: notification.actorName != null
-          ? 'View ${notification.actorName} profile'
-          : 'View profile',
-      button: true,
-      child: GestureDetector(
-        onTap: onProfileTap,
-        child: Stack(
-          children: [
-            // Avatar
-            ClipOval(
-              child: notification.actorPictureUrl != null
-                  ? VineCachedImage(
-                      imageUrl: notification.actorPictureUrl!,
-                      width: 48,
-                      height: 48,
-                      placeholder: (context, url) => Container(
-                        width: 48,
-                        height: 48,
-                        color: VineTheme.cardBackground,
-                      ),
-                      errorWidget: (context, url, error) {
-                        // Log the failed URL for debugging
-                        if (error.toString().contains('Invalid image data') ||
-                            error.toString().contains('Image codec failed')) {
-                          Log.warning(
-                            'Invalid image data for actor avatar URL: $url - Error: $error',
-                            name: 'NotificationListItem',
-                            category: LogCategory.ui,
-                          );
-                        } else {
-                          Log.debug(
-                            'Actor avatar load failed, URL: $url - Error: $error',
-                            name: 'NotificationListItem',
-                            category: LogCategory.ui,
-                          );
-                        }
-                        return _buildDefaultAvatar();
-                      },
-                    )
-                  : _buildDefaultAvatar(),
             ),
-
-            // Type icon overlay
-            PositionedDirectional(
-              end: 0,
-              bottom: 0,
-              child: Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: _getIconBackgroundColor(),
-                  shape: BoxShape.circle,
-                  border: Border.all(width: 2),
-                ),
-                child: Center(
-                  child: Text(
-                    notification.typeIcon,
-                    style: const TextStyle(fontSize: 10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                spacing: 16,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _LeadingTypeIcon(
+                    type: notification.type,
+                    showUnreadDot: !notification.isRead,
                   ),
-                ),
+                  Expanded(
+                    child: _Content(
+                      notification: notification,
+                      onProfileTap: onProfileTap,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildDefaultAvatar() => Container(
-    width: 48,
-    height: 48,
-    decoration: BoxDecoration(
-      color: DivineTheme.primaryPurple.withValues(alpha: 0.2),
-      shape: BoxShape.circle,
+// ---------------------------------------------------------------------------
+// Leading type icon — maps NotificationType → accent pair + DivineIcon.
+// ---------------------------------------------------------------------------
+
+class _LeadingTypeIcon extends StatelessWidget {
+  const _LeadingTypeIcon({required this.type, required this.showUnreadDot});
+
+  final NotificationType type;
+  final bool showUnreadDot;
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = _typeIconSpec(type);
+    return NotificationTypeIcon(
+      icon: spec.icon,
+      backgroundColor: spec.background,
+      foregroundColor: spec.foreground,
+      showUnreadDot: showUnreadDot,
+    );
+  }
+}
+
+class _TypeIconSpec {
+  const _TypeIconSpec({
+    required this.icon,
+    required this.background,
+    required this.foreground,
+  });
+  final DivineIconName icon;
+  final Color background;
+  final Color foreground;
+}
+
+_TypeIconSpec _typeIconSpec(NotificationType type) {
+  return switch (type) {
+    NotificationType.like => const _TypeIconSpec(
+      icon: DivineIconName.heart,
+      background: VineTheme.accentPinkBackground,
+      foreground: VineTheme.accentPink,
     ),
-    child: const Center(
-      child: Icon(Icons.person, color: DivineTheme.primaryPurple, size: 24),
+    NotificationType.follow => const _TypeIconSpec(
+      icon: DivineIconName.user,
+      background: VineTheme.accentLimeBackground,
+      foreground: VineTheme.accentLime,
     ),
-  );
+    NotificationType.comment || NotificationType.mention => const _TypeIconSpec(
+      icon: DivineIconName.chat,
+      background: VineTheme.accentVioletBackground,
+      foreground: VineTheme.accentViolet,
+    ),
+    NotificationType.repost => const _TypeIconSpec(
+      icon: DivineIconName.repeat,
+      background: VineTheme.accentYellowBackground,
+      foreground: VineTheme.accentYellow,
+    ),
+    NotificationType.system => const _TypeIconSpec(
+      icon: DivineIconName.logo,
+      background: VineTheme.onPrimaryButton,
+      foreground: VineTheme.primary,
+    ),
+  };
+}
 
-  Widget _buildMessage(BuildContext context) {
-    final textStyle = VineTheme.bodyMediumFont();
-    final message = _displayMessage(context);
+// ---------------------------------------------------------------------------
+// Content column — avatar above message text, with optional comment quote.
+// ---------------------------------------------------------------------------
 
-    final actorName = notification.actorName;
-    if (_messageStartsWithActorName(actorName, message)) {
-      // Build rich text with bold actor name
-      return RichText(
-        textScaler: MediaQuery.textScalerOf(context),
-        text: TextSpan(
-          style: textStyle,
-          children: [
-            TextSpan(
-              text: actorName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            TextSpan(text: message.substring(actorName!.length)),
-          ],
-        ),
+class _Content extends StatelessWidget {
+  const _Content({required this.notification, this.onProfileTap});
+
+  final NotificationModel notification;
+  final VoidCallback? onProfileTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final commentText = _commentText();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (notification.type != NotificationType.system) ...[
+          _AvatarTap(notification: notification, onProfileTap: onProfileTap),
+          const SizedBox(height: 8),
+        ],
+        _MessageText(notification: notification),
+        if (commentText != null) ...[
+          const SizedBox(height: 4),
+          _CommentQuote(text: commentText),
+        ],
+      ],
+    );
+  }
+
+  String? _commentText() {
+    if (notification.type == NotificationType.comment) {
+      return notification.metadata?['comment'] as String?;
+    }
+    if (notification.type == NotificationType.mention) {
+      return notification.metadata?['text'] as String?;
+    }
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Avatar — uses the shared UserAvatar so the deterministic placeholder
+// matches what the profile screen shows for users without a picture.
+// ---------------------------------------------------------------------------
+
+class _AvatarTap extends StatelessWidget {
+  const _AvatarTap({required this.notification, this.onProfileTap});
+
+  final NotificationModel notification;
+  final VoidCallback? onProfileTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final displayName =
+        notification.actorName ??
+        UserProfile.defaultDisplayNameFor(notification.actorPubkey);
+    return UserAvatar(
+      imageUrl: notification.actorPictureUrl,
+      name: displayName,
+      placeholderSeed: notification.actorPubkey,
+      size: NotificationConstants.avatarSize,
+      cornerRadius: NotificationConstants.avatarCornerRadius,
+      onTap: onProfileTap,
+      semanticLabel: context.l10n.notificationsViewProfileSemanticLabel(
+        displayName,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Message — bold actor name, regular verb, muted timestamp.
+// ---------------------------------------------------------------------------
+
+class _MessageText extends StatelessWidget {
+  const _MessageText({required this.notification});
+
+  final NotificationModel notification;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final spans = <InlineSpan>[];
+    final base = VineTheme.bodyMediumFont();
+    final bold = VineTheme.labelLargeFont();
+
+    if (notification.type == NotificationType.system) {
+      spans.add(TextSpan(text: notification.message, style: base));
+    } else {
+      final actorName = notification.actorName?.isNotEmpty == true
+          ? notification.actorName!
+          : UserProfile.defaultDisplayNameFor(notification.actorPubkey);
+      spans.add(TextSpan(text: actorName, style: bold));
+      spans.add(
+        TextSpan(text: ' ${_verb(l10n, notification.type)}', style: base),
       );
     }
 
-    return Text(message, style: textStyle);
+    spans.add(
+      TextSpan(
+        text:
+            ' ${LocalizedTimeFormatter.formatRelative(
+              l10n,
+              notification.timestamp.millisecondsSinceEpoch ~/ 1000,
+            )}',
+        style: VineTheme.bodyMediumFont(color: VineTheme.onSurfaceMuted55),
+      ),
+    );
+
+    return Text.rich(
+      TextSpan(children: spans),
+      textScaler: MediaQuery.textScalerOf(context),
+    );
   }
 
-  String _displayMessage(BuildContext context) {
-    final actorName = notification.actorName;
-    final displayName = actorName?.isNotEmpty == true
-        ? actorName!
-        : UserProfile.defaultDisplayNameFor(notification.actorPubkey);
-
-    return switch (notification.type) {
-      NotificationType.like => context.l10n.notificationLikedYourVideo(
-        displayName,
-      ),
-      NotificationType.comment => context.l10n.notificationCommentedOnYourVideo(
-        displayName,
-      ),
-      NotificationType.follow => context.l10n.notificationStartedFollowing(
-        displayName,
-      ),
-      NotificationType.mention => context.l10n.notificationMentionedYou(
-        displayName,
-      ),
-      NotificationType.repost => context.l10n.notificationRepostedYourVideo(
-        displayName,
-      ),
-      NotificationType.system => notification.message,
+  String _verb(AppLocalizations l10n, NotificationType type) {
+    return switch (type) {
+      NotificationType.like => l10n.notificationLikedYourVideo('').trimLeft(),
+      NotificationType.comment =>
+        l10n.notificationCommentedOnYourVideo('').trimLeft(),
+      NotificationType.follow =>
+        l10n.notificationStartedFollowing('').trimLeft(),
+      NotificationType.mention => l10n.notificationMentionedYou('').trimLeft(),
+      NotificationType.repost =>
+        l10n.notificationRepostedYourVideo('').trimLeft(),
+      NotificationType.system => '',
     };
   }
+}
 
-  bool _messageStartsWithActorName(String? actorName, String message) {
-    if (actorName == null) return false;
-    return message == actorName || message.startsWith('$actorName ');
-  }
+class _CommentQuote extends StatelessWidget {
+  const _CommentQuote({required this.text});
 
-  bool _hasAdditionalContent() {
-    if (notification.type == NotificationType.comment) {
-      return notification.metadata?['comment'] != null;
-    } else if (notification.type == NotificationType.mention) {
-      return notification.metadata?['text'] != null;
-    }
-    return false;
-  }
+  final String text;
 
-  Widget _buildAdditionalContent() {
-    String? content;
-
-    if (notification.type == NotificationType.comment) {
-      content = notification.metadata?['comment'] as String?;
-    } else if (notification.type == NotificationType.mention) {
-      content = notification.metadata?['text'] as String?;
-    }
-
-    if (content == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: VineTheme.cardBackground,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        content,
-        style: const TextStyle(fontSize: 13, color: VineTheme.secondaryText),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '“$text”',
+      style: VineTheme.bodyMediumFont(),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
-  }
-
-  Widget _buildVideoThumbnail() => Padding(
-    padding: const EdgeInsetsDirectional.only(start: 8),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: VineCachedImage(
-        imageUrl: notification.targetVideoThumbnail!,
-        width: 64,
-        height: 64,
-        placeholder: (context, url) => Container(
-          width: 64,
-          height: 64,
-          color: VineTheme.cardBackground,
-          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-        ),
-        errorWidget: (context, url, error) {
-          // Log the failed URL for debugging
-          if (error.toString().contains('Invalid image data') ||
-              error.toString().contains('Image codec failed')) {
-            Log.warning(
-              'Invalid image data for video thumbnail URL: $url - Error: $error',
-              name: 'NotificationListItem',
-              category: LogCategory.ui,
-            );
-          } else {
-            Log.debug(
-              'Video thumbnail load failed, URL: $url - Error: $error',
-              name: 'NotificationListItem',
-              category: LogCategory.ui,
-            );
-          }
-          return Container(
-            width: 64,
-            height: 64,
-            color: VineTheme.cardBackground,
-            child: const Icon(Icons.video_library, color: VineTheme.lightText),
-          );
-        },
-      ),
-    ),
-  );
-
-  Color _getIconBackgroundColor() {
-    switch (notification.type) {
-      case NotificationType.like:
-        return VineTheme.error;
-      case NotificationType.comment:
-        return VineTheme.info;
-      case NotificationType.follow:
-        return DivineTheme.primaryPurple;
-      case NotificationType.mention:
-        return VineTheme.warning;
-      case NotificationType.repost:
-        return VineTheme.vineGreen;
-      case NotificationType.system:
-        return VineTheme.lightText;
-    }
   }
 }

@@ -241,6 +241,7 @@
             }
         }
     },
+    "profileAddToListDisplayName": "Lägg till {displayName} i en lista",
     "profileUserBlockedTitle": "Användare blockerad",
     "profileUserBlockedContent": "Du kommer inte se innehåll från den här användaren i dina flöden.",
     "profileUserBlockedUnblockHint": "Du kan avblockera när som helst från deras profil eller under Inställningar > Säkerhet.",
@@ -316,6 +317,8 @@
     "profileSetupUsernameTaken": "Användarnamnet togs precis. Välj ett annat.",
     "profileSetupClaimFailed": "Kunde inte claima användarnamnet. Försök igen.",
     "profileSetupPublishFailed": "Kunde inte publicera profilen. Försök igen.",
+    "profileSetupNoRelaysConnected": "Kunde inte nå nätverket. Kontrollera din anslutning och försök igen.",
+    "profileSetupRetryLabel": "Försök igen",
     "profileSetupDisplayNameLabel": "Visningsnamn",
     "profileSetupDisplayNameHint": "Hur ska folk känna dig?",
     "profileSetupDisplayNameHelper": "Vilket namn eller etikett du vill. Behöver inte vara unikt.",
@@ -577,7 +580,9 @@
     },
     "shareFailedToSend": "Kunde inte skicka video",
     "shareAddedToBookmarks": "Tillagd i bokmärken",
-    "shareFailedToAddBookmark": "Kunde inte lägga till bokmärke",
+    "shareRemovedFromBookmarks": "Borttagen från bokmärken",
+    "shareFailedToAddBookmark": "Kunde inte lägga till bokmärket",
+    "shareFailedToRemoveBookmark": "Kunde inte ta bort från bokmärken",
     "shareActionFailed": "Åtgärden misslyckades",
     "shareWithTitle": "Dela med",
     "shareFindPeople": "Hitta personer",
@@ -628,6 +633,7 @@
     "metadataLikesLabel": "Gillamarkeringar",
     "metadataCommentsLabel": "Kommentarer",
     "metadataRepostsLabel": "Återpubliceringar",
+    "metadataPostedDateSemantics": "Publicerat den {date}",
     "devOptionsTitle": "Utvecklaralternativ",
     "@devOptionsTitle": {
         "description": "Developer options screen app bar title"
@@ -1294,6 +1300,9 @@
     "shareSheetSaveToGallery": "Spara i galleriet",
     "shareSheetSaveWithWatermark": "Spara med vattenmärke",
     "shareSheetSaveVideo": "Spara video",
+    "shareSheetAddToClips": "Lägg till i klipp",
+    "shareSheetAddedToClips": "Tillagt i klipp",
+    "shareSheetAddToClipsFailed": "Kunde inte lägga till i klipp",
     "shareSheetAddToList": "Lägg till i lista",
     "shareSheetCopy": "Kopiera",
     "shareSheetShareVia": "Dela via",
@@ -1481,7 +1490,7 @@
         }
     },
     "shareMenuAddedToBookmarks": "Tillagd i bokmärken!",
-    "shareMenuFailedToAddBookmark": "Kunde inte lägga till bokmärke",
+    "shareMenuFailedToAddBookmark": "Kunde inte lägga till bokmärket",
     "shareMenuCreatedListAndAddedVideo": "Skapade listan \"{name}\" och la till videon",
     "@shareMenuCreatedListAndAddedVideo": {
         "placeholders": {
@@ -1943,6 +1952,10 @@
         }
     },
     "listCreateNewList": "Skapa ny lista",
+    "listNewPeopleList": "Ny personlista",
+    "listCollaboratorsNone": "Inga",
+    "listAddCollaboratorTitle": "Lägg till medarbetare",
+    "listCollaboratorSearchHint": "Sök i diVine...",
     "listNameLabel": "Listnamn",
     "listDescriptionLabel": "Beskrivning (valfritt)",
     "listPublicList": "Publik lista",
@@ -2254,6 +2267,28 @@
             }
         }
     },
+    "inboxCollabInviteAcceptButton": "Acceptera",
+    "inboxCollabInviteAcceptError": "Det gick inte att acceptera. Försök igen.",
+    "inboxCollabInviteAcceptedStatus": "Accepterad",
+    "inboxCollabInviteCardRoleLabel": "{role} i det här inlägget",
+    "@inboxCollabInviteCardRoleLabel": {
+        "placeholders": {
+            "role": {
+                "type": "String"
+            }
+        }
+    },
+    "inboxCollabInviteCardTitle": "Inbjudan att samarbeta",
+    "inboxCollabInviteIgnoreButton": "Ignorera",
+    "inboxCollabInviteIgnoredStatus": "Ignorerad",
+    "inboxConversationCollabInvitePreview": "Inbjudan att samarbeta",
+    "@inboxConversationCollabInvitePreview": {
+        "description": "Substituted for the legacy NIP-04 plaintext invite copy when shown as the most-recent-message preview in the DM conversation list."
+    },
+    "inboxCollabInviteSentStatus": "Inbjudan skickad",
+    "@inboxCollabInviteSentStatus": {
+        "description": "Shown on the inviter's own outgoing collaborator invite card in their DM with the collaborator. Replaces Accept/Ignore which are recipient-only actions."
+    },
     "inboxConversationMuted": "Konversation tystad",
     "inboxConversationUnmuted": "Konversation inte tystad",
     "inboxEmptySubtitle": "+-knappen bits inte.",
@@ -2395,14 +2430,14 @@
     "searchDiscoverSomethingInteresting": "Upptäck något intressant",
     "searchEnterQuery": "Skriv en sökterm",
     "searchFindCuratedVideoLists": "Hitta kurerade videolistor",
-  "searchPeopleSectionHeader": "People",
-  "searchPeopleLoadingLabel": "Loading people results",
-  "searchTagsSectionHeader": "Tags",
-  "searchTagsLoadingLabel": "Loading tag results",
-  "searchVideosSectionHeader": "Videos",
-  "searchVideosLoadingLabel": "Loading video results",
+    "searchPeopleSectionHeader": "People",
+    "searchPeopleLoadingLabel": "Loading people results",
+    "searchTagsSectionHeader": "Tags",
+    "searchTagsLoadingLabel": "Loading tag results",
+    "searchVideosSectionHeader": "Videos",
+    "searchVideosLoadingLabel": "Loading video results",
     "searchListsSectionHeader": "Listor",
-  "searchListsLoadingLabel": "Laddar listresultat",
+    "searchListsLoadingLabel": "Laddar listresultat",
     "searchForLists": "Sök efter listor",
     "searchSomethingWentWrong": "Något gick fel",
     "searchTryAgain": "Försök igen",
@@ -2660,6 +2695,7 @@
     "videoEditorOpenTextSemanticLabel": "Öppna textredigerare",
     "videoEditorOpenDrawSemanticLabel": "Öppna ritredigerare",
     "videoEditorOpenFilterSemanticLabel": "Öppna filtereditor",
+    "videoEditorOpenStickerSemanticLabel": "Öppna klistermärkesredigerare",
     "videoEditorSaveDraftTitle": "Spara ditt utkast?",
     "videoEditorSaveDraftSubtitle": "Spara dina redigeringar till senare, eller kasta dem och lämna redigeraren.",
     "videoEditorSaveDraftButton": "Spara utkast",
@@ -2739,6 +2775,7 @@
     "videoEditorShowTimelineSemanticLabel": "Visa tidslinje",
     "videoEditorHideTimelineSemanticLabel": "Dölj tidslinje",
     "videoEditorFeedPreviewContent": "Undvik att placera innehåll bakom dessa områden.",
+    "videoEditorStickersDivineOriginals": "Divine Original",
     "videoEditorStickerSearchHint": "Sök stickers...",
     "videoEditorSelectFontSemanticLabel": "Välj typsnitt",
     "videoEditorFontUnknown": "Okänt",
@@ -2922,12 +2959,34 @@
     "shareMenuDeleteFailedNotOwner": "Du kan bara ta bort dina egna videor.",
     "videoFeedLoopCountLine": "{compactCount} {count, plural, =1{loop} other{loopar}}",
     "shareMenuDeleteFailedRelayRejected": "Couldn't reach the relay. Check your connection and try again.",
-  "videoEditorAudioSegmentInstruction": "Välj ljudsegmentet för din video",
-  "videoEditorClipGalleryInstruction": "Tryck för att redigera. Håll ned och dra för att ändra ordning.",
-  "navSearch": "Sök",
-  "navSearchTooltip": "Sök",
-  "fullscreenFeedRemovedMessage": "Video borttagen",
-  "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
-  "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
-  "invitesGenerateButtonLabel": "Generate invite"
+    "videoEditorAudioSegmentInstruction": "Välj ljudsegmentet för din video",
+    "videoEditorClipGalleryInstruction": "Tryck för att redigera. Håll ned och dra för att ändra ordning.",
+    "navSearch": "Sök",
+    "navSearchTooltip": "Sök",
+    "fullscreenFeedRemovedMessage": "Video borttagen",
+    "invitesGenerateCardTitle": "{count, plural, =1{1 invite ready to generate} other{{count} invites ready to generate}}",
+    "invitesGenerateCardSubtitle": "Generate a code when you are ready to share one.",
+    "invitesGenerateButtonLabel": "Generate invite",
+    "profileAvatarLightboxBarrierLabel": "Stäng avatar",
+    "profileAvatarLightboxCloseSemanticLabel": "Stäng avatarförhandsvisning",
+    "notificationsUnreadPrefix": "Oläst avisering",
+    "notificationsViewProfileSemanticLabel": "Visa {displayName}s profil",
+    "@notificationsViewProfileSemanticLabel": {
+        "placeholders": {
+            "displayName": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationsViewProfilesSemanticLabel": "Visa profiler",
+    "notificationRepliedToYourComment": "svarade på din kommentar",
+    "notificationAndConnector": "och",
+    "notificationOthersCount": "{count, plural, =1{1 till} other{{count} till}}",
+    "@notificationOthersCount": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }
