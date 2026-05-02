@@ -8,6 +8,8 @@ This guide helps you test deep linking functionality on iOS and Android devices.
 - OR Android device/emulator (Android app links work on both)
 - App installed on device
 - Server verification files deployed at `https://divine.video/.well-known/`
+- If Apple `www.divine.video` links are expected to open the app too, the AASA
+  file must also be served from `https://www.divine.video/.well-known/`
 
 ## Quick Test URLs
 
@@ -17,12 +19,14 @@ Use these test URLs for verification:
 ```
 https://divine.video/video/abc123
 https://divine.video/video/{actual-video-event-id}
+https://www.divine.video/video/{actual-video-event-id}
 ```
 
 ### Profile Links
 ```
 https://divine.video/profile/npub1abc...xyz
 https://divine.video/profile/{actual-npub}
+https://www.divine.video/profile/{actual-npub}
 ```
 
 ### Hashtag Links
@@ -60,6 +64,8 @@ https://divine.video/search/{search-term}
 1. **Open Safari (iOS) or Chrome (Android)**
 
 2. **Type/paste the URL**: `https://divine.video/video/test123`
+   - For the Apple-specific `www` host coverage in this PR, also try
+     `https://www.divine.video/video/test123`
 
 3. **Tap the link or press Enter**
 
@@ -105,6 +111,7 @@ adb shell pm verify-app-links --re-verify co.openvine.app
 1. **Browser stays open** instead of app opening
    - Means server verification file not accessible/correct
    - Check: `curl -I https://divine.video/.well-known/apple-app-site-association`
+   - Check: `curl -I https://www.divine.video/.well-known/apple-app-site-association`
    - Check: `curl -I https://divine.video/.well-known/assetlinks.json`
 
 2. **"Open with" dialog appears**
@@ -199,6 +206,7 @@ Before marking deep linking as complete:
 - [ ] iOS universal links work (physical device)
   - [ ] Video link opens app and shows video
   - [ ] Profile link opens app and shows profile
+  - [ ] `www.divine.video` video/profile links open app too, if supported
   - [ ] Links from Messages work
   - [ ] Links from Safari work
 
@@ -208,6 +216,8 @@ Before marking deep linking as complete:
   - [ ] Links from Chrome work
   - [ ] ADB test commands work
   - [ ] `pm get-app-links` shows "verified"
+  - Note: `www.divine.video` Android coverage is tracked separately from this
+    Apple host-claim PR
 
 - [ ] Server verification
   - [ ] Apple file returns HTTP 200
