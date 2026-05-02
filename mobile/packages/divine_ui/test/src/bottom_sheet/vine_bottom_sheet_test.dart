@@ -79,6 +79,8 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: MediaQuery(
+            // Inject a keyboard inset directly so the test can assert layout
+            // without needing a real platform keyboard.
             data: MediaQueryData(
               size: Size(400, 800),
               viewInsets: EdgeInsets.only(bottom: keyboardHeight),
@@ -103,6 +105,8 @@ void main() {
         find.byKey(const Key('keyboard-safe-input')),
       );
 
+      // The animated padding should move the entire bottom input above the
+      // keyboard, not just add space below it.
       expect(inputRect.bottom, lessThanOrEqualTo(800 - keyboardHeight));
     });
 

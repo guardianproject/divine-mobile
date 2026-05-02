@@ -568,6 +568,8 @@ class _KeyboardAwareBottomInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Let the bottom input ride the keyboard in both scrollable and fixed
+    // sheet layouts so composers stay visible while typing.
     final paddedInput = AnimatedPadding(
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOutCubic,
@@ -575,6 +577,8 @@ class _KeyboardAwareBottomInput extends StatelessWidget {
       child: child,
     );
 
+    // Scrollable sheets still need the platform bottom inset once the keyboard
+    // is gone. Fixed sheets are already wrapped in SafeArea higher up.
     if (!includeSafeArea) return paddedInput;
 
     return SafeArea(top: false, child: paddedInput);
