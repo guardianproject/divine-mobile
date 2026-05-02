@@ -96,6 +96,32 @@ void main() {
       expect(textField.textInputAction, TextInputAction.search);
     });
 
+    testWidgets('calls onSubmitted and dismisses focus on submit', (
+      tester,
+    ) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      String? submittedValue;
+      await tester.pumpWidget(
+        buildTestWidget(
+          focusNode: focusNode,
+          onSubmitted: (value) => submittedValue = value,
+        ),
+      );
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      textField.onSubmitted?.call('divine search');
+      await tester.pump();
+
+      expect(submittedValue, equals('divine search'));
+      expect(focusNode.hasFocus, isFalse);
+    });
+
     testWidgets('dismisses focus on outside tap', (tester) async {
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
