@@ -5904,6 +5904,9 @@ class AppLocalizationsSv extends AppLocalizations {
   String get commentReplyToPrefix => 'Sv:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'Namnlös';
 
   @override

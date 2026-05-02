@@ -5863,6 +5863,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commentReplyToPrefix => 'رد:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'بدون عنوان';
 
   @override

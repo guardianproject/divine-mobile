@@ -5793,6 +5793,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get commentReplyToPrefix => 'ድጋሚ፡';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'ርዕስ አልባ';
 
   @override

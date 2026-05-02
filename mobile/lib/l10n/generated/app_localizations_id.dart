@@ -5881,6 +5881,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get commentReplyToPrefix => 'Bls:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'Tanpa judul';
 
   @override

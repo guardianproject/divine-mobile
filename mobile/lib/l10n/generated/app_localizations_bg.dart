@@ -5970,6 +5970,9 @@ class AppLocalizationsBg extends AppLocalizations {
   String get commentReplyToPrefix => 'Отг.:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'Без заглавие';
 
   @override

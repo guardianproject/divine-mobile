@@ -5889,6 +5889,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commentReplyToPrefix => 'Yan:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'Başlıksız';
 
   @override

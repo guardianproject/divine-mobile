@@ -6049,6 +6049,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get commentReplyToPrefix => 'Odp.:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'Bez tytułu';
 
   @override

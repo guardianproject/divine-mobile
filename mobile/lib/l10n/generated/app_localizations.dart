@@ -10398,6 +10398,12 @@ abstract class AppLocalizations {
   /// **'Re:'**
   String get commentReplyToPrefix;
 
+  /// Accessibility label for the comment input control that dismisses the keyboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide keyboard'**
+  String get commentHideKeyboard;
+
   /// No description provided for @draftUntitled.
   ///
   /// In en, this message translates to:
