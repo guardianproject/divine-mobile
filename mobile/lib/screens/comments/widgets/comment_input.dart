@@ -97,6 +97,9 @@ class _CommentInputState extends State<CommentInput> {
   }
 
   void _attachFocusNode(FocusNode? focusNode) {
+    // CommentInput can either own its own FocusNode or mirror one supplied by
+    // the parent comments screen. Tracking ownership lets us show focus-driven
+    // UI without disposing a node we do not own.
     _ownsFocusNode = focusNode == null;
     _focusNode = focusNode ?? FocusNode();
     _focusNode.addListener(_handleFocusChanged);
@@ -228,6 +231,9 @@ class _CommentInputState extends State<CommentInput> {
                   ),
                   if (showKeyboardDismiss || _hasText) ...[
                     const SizedBox(width: 8),
+                    // Keep an explicit in-field dismiss affordance visible while
+                    // the keyboard is up so the send button does not become the
+                    // only actionable control on compact screens.
                     if (showKeyboardDismiss)
                       _KeyboardDismissButton(onPressed: _focusNode.unfocus),
                     if (showKeyboardDismiss && _hasText)
@@ -275,6 +281,8 @@ class _CommentTextField extends StatelessWidget {
         ? 'Add a reply'
         : 'Add a comment';
     final hintText = isEditing ? 'Edit comment...' : 'Add comment...';
+    // Top-level comments keep Enter-to-send for quick posting, while reply/edit
+    // flows stay multiline so users can compose longer text in-place.
     final isComposingMultiline = isReplying || isEditing;
 
     return Padding(
@@ -323,6 +331,8 @@ class _KeyboardDismissButton extends StatelessWidget {
     return Semantics(
       identifier: 'hide_comment_keyboard_button',
       button: true,
+      // This label is localized because the control is newly introduced in
+      // this PR rather than inherited legacy copy.
       label: context.l10n.commentHideKeyboard,
       child: Container(
         width: 40,
@@ -335,6 +345,8 @@ class _KeyboardDismissButton extends StatelessWidget {
         child: IconButton(
           onPressed: onPressed,
           padding: EdgeInsets.zero,
+          // Use the design-system icon set for new UI so the bottom-sheet input
+          // stays visually consistent with the rest of Divine.
           icon: const DivineIcon(
             icon: DivineIconName.caretDown,
             color: VineTheme.whiteText,

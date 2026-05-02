@@ -147,6 +147,8 @@ void main() {
 
       final textField = tester.widget<TextField>(find.byType(TextField));
 
+      // The composer still supports bounded multiline layout; only the primary
+      // keyboard action changes for top-level comments.
       expect(textField.keyboardType, TextInputType.multiline);
       expect(textField.textInputAction, TextInputAction.send);
       expect(textField.minLines, 1);
@@ -172,6 +174,8 @@ void main() {
       );
 
       final textField = tester.widget<TextField>(find.byType(TextField));
+      // Invoke the callback directly so the test asserts our submit wiring
+      // rather than platform text-input plumbing.
       textField.onSubmitted?.call('Test comment');
 
       expect(submitted, isTrue);
@@ -197,6 +201,8 @@ void main() {
 
       final textField = tester.widget<TextField>(find.byType(TextField));
 
+      // Replies keep newline semantics so they can expand into multi-line
+      // composition without submitting early.
       expect(textField.textInputAction, TextInputAction.newline);
       expect(textField.onSubmitted, isNull);
     });
@@ -221,6 +227,8 @@ void main() {
         ),
       );
 
+      // The dismiss control should be focus-driven rather than permanently
+      // visible, otherwise it competes with the send affordance when idle.
       expect(find.bySemanticsIdentifier('hide_comment_keyboard_button'), findsNothing);
 
       focusNode.requestFocus();
