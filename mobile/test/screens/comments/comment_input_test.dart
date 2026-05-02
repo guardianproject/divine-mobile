@@ -229,12 +229,18 @@ void main() {
 
       // The dismiss control should be focus-driven rather than permanently
       // visible, otherwise it competes with the send affordance when idle.
-      expect(find.bySemanticsIdentifier('hide_comment_keyboard_button'), findsNothing);
+      expect(
+        find.bySemanticsIdentifier('hide_comment_keyboard_button'),
+        findsNothing,
+      );
 
       focusNode.requestFocus();
       await tester.pump();
 
-      expect(find.bySemanticsIdentifier('hide_comment_keyboard_button'), findsOneWidget);
+      expect(
+        find.bySemanticsIdentifier('hide_comment_keyboard_button'),
+        findsOneWidget,
+      );
     });
 
     testWidgets(
