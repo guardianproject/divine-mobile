@@ -48,6 +48,11 @@ class DivineSearchBar extends StatelessWidget {
   /// Called when the user submits the text.
   final ValueChanged<String>? onSubmitted;
 
+  void _handleSubmitted(BuildContext context, String value) {
+    onSubmitted?.call(value);
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
@@ -60,7 +65,9 @@ class DivineSearchBar extends StatelessWidget {
           readOnly: readOnly,
           onTap: onTap,
           onChanged: onChanged,
-          onSubmitted: onSubmitted,
+          onSubmitted: (value) => _handleSubmitted(context, value),
+          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+          textInputAction: TextInputAction.search,
           style: VineTheme.bodyLargeFont(),
           decoration: InputDecoration(
             hintText: hintText,

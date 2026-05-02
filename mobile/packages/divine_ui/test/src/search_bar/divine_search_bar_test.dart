@@ -88,6 +88,31 @@ void main() {
       expect(changedValue, equals('test'));
     });
 
+    testWidgets('uses search as the keyboard action', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+
+      expect(textField.textInputAction, TextInputAction.search);
+    });
+
+    testWidgets('dismisses focus on outside tap', (tester) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(buildTestWidget(focusNode: focusNode));
+
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      textField.onTapOutside?.call(const PointerDownEvent());
+      await tester.pump();
+
+      expect(focusNode.hasFocus, isFalse);
+    });
+
     testWidgets('calls onTap when tapped', (tester) async {
       var tapped = false;
       await tester.pumpWidget(

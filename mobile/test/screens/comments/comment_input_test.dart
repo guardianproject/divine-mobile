@@ -129,6 +129,56 @@ void main() {
       expect(controller.text, equals('Test comment'));
     });
 
+    testWidgets('uses bounded multiline input for comments', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: CommentInput(
+              controller: controller,
+              onSubmit: () {},
+            ),
+          ),
+        ),
+      );
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+
+      expect(textField.keyboardType, TextInputType.multiline);
+      expect(textField.textInputAction, TextInputAction.newline);
+      expect(textField.minLines, 1);
+      expect(textField.maxLines, 5);
+    });
+
+    testWidgets('shows keyboard dismissal control while focused', (
+      tester,
+    ) async {
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: CommentInput(
+              controller: controller,
+              focusNode: focusNode,
+              onSubmit: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
+
+      focusNode.requestFocus();
+      await tester.pump();
+
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+    });
+
     testWidgets(
       'tap inside the bubble but above the TextField keeps focus on iOS '
       '(regression: issue #3770)',

@@ -446,7 +446,11 @@ class _ScrollableContent extends StatelessWidget {
           const Divider(height: 2, color: VineTheme.outlinedDisabled),
 
         // Optional bottom input
-        ?bottomInput,
+        if (bottomInput != null)
+          _KeyboardAwareBottomInput(
+            includeSafeArea: true,
+            child: bottomInput!,
+          ),
       ],
     );
   }
@@ -542,10 +546,38 @@ class _FixedContent extends StatelessWidget {
             const Divider(height: 2, color: VineTheme.outlinedDisabled),
 
           // Optional bottom input
-          ?bottomInput,
+          if (bottomInput != null)
+            _KeyboardAwareBottomInput(
+              includeSafeArea: false,
+              child: bottomInput!,
+            ),
         ],
       ),
     );
+  }
+}
+
+class _KeyboardAwareBottomInput extends StatelessWidget {
+  const _KeyboardAwareBottomInput({
+    required this.child,
+    required this.includeSafeArea,
+  });
+
+  final Widget child;
+  final bool includeSafeArea;
+
+  @override
+  Widget build(BuildContext context) {
+    final paddedInput = AnimatedPadding(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: child,
+    );
+
+    if (!includeSafeArea) return paddedInput;
+
+    return SafeArea(top: false, child: paddedInput);
   }
 }
 

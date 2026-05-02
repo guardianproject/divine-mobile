@@ -70,11 +70,45 @@ class CommentInput extends StatefulWidget {
 
 class _CommentInputState extends State<CommentInput> {
   bool _hasText = false;
+  late FocusNode _focusNode;
+  late bool _ownsFocusNode;
 
   @override
   void initState() {
     super.initState();
     _hasText = widget.controller.text.trim().isNotEmpty;
+    _attachFocusNode(widget.focusNode);
+  }
+
+  @override
+  void didUpdateWidget(CommentInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.focusNode != widget.focusNode) {
+      _detachFocusNode();
+      _attachFocusNode(widget.focusNode);
+    }
+  }
+
+  @override
+  void dispose() {
+    _detachFocusNode();
+    super.dispose();
+  }
+
+  void _attachFocusNode(FocusNode? focusNode) {
+    _ownsFocusNode = focusNode == null;
+    _focusNode = focusNode ?? FocusNode();
+    _focusNode.addListener(_handleFocusChanged);
+  }
+
+  void _detachFocusNode() {
+    _focusNode.removeListener(_handleFocusChanged);
+    if (_ownsFocusNode) _focusNode.dispose();
+  }
+
+  void _handleFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   void _handleTextChanged(String text) {
@@ -137,72 +171,74 @@ class _CommentInputState extends State<CommentInput> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding =
-        MediaQuery.of(context).viewInsets.bottom +
-        MediaQuery.of(context).padding.bottom +
-        8;
-
     final isReplying = widget.replyToDisplayName != null;
     final isEditing = widget.isEditing;
+    final showKeyboardDismiss = _focusNode.hasFocus;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Mention overlay (shows above input when suggestions available)
-        if (widget.mentionSuggestions.isNotEmpty)
-          MentionOverlay(
-            suggestions: widget.mentionSuggestions,
-            onSelect: _handleMentionSelected,
-          ),
-        // Input container
-        Container(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: bottomPadding,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: VineTheme.iconButtonBackground,
-              borderRadius: BorderRadius.circular(20),
+    return TextFieldTapRegion(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Mention overlay (shows above input when suggestions available)
+          if (widget.mentionSuggestions.isNotEmpty)
+            MentionOverlay(
+              suggestions: widget.mentionSuggestions,
+              onSelect: _handleMentionSelected,
             ),
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: _CommentTextField(
-                          controller: widget.controller,
-                          focusNode: widget.focusNode,
-                          isReplying: isReplying,
-                          isEditing: isEditing,
-                          onChanged: _handleTextChanged,
+          // Input container
+          Container(
+            padding: const EdgeInsetsDirectional.only(
+              start: 16,
+              end: 16,
+              top: 16,
+              bottom: 8,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: VineTheme.iconButtonBackground,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: _CommentTextField(
+                            controller: widget.controller,
+                            focusNode: _focusNode,
+                            isReplying: isReplying,
+                            isEditing: isEditing,
+                            onChanged: _handleTextChanged,
+                          ),
                         ),
-                      ),
-                      if (isEditing)
-                        _EditIndicator(onCancel: widget.onCancelEdit!)
-                      else if (isReplying)
-                        _ReplyIndicator(
-                          displayName: widget.replyToDisplayName!,
-                          onCancel: widget.onCancelReply!,
-                        ),
-                    ],
+                        if (isEditing)
+                          _EditIndicator(onCancel: widget.onCancelEdit!)
+                        else if (isReplying)
+                          _ReplyIndicator(
+                            displayName: widget.replyToDisplayName!,
+                            onCancel: widget.onCancelReply!,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                if (_hasText) ...[
-                  const SizedBox(width: 8),
-                  _SendButton(onSubmit: widget.onSubmit),
+                  if (showKeyboardDismiss || _hasText) ...[
+                    const SizedBox(width: 8),
+                    if (showKeyboardDismiss)
+                      _KeyboardDismissButton(onPressed: _focusNode.unfocus),
+                    if (showKeyboardDismiss && _hasText)
+                      const SizedBox(width: 4),
+                    if (_hasText) _SendButton(onSubmit: widget.onSubmit),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -236,7 +272,6 @@ class _CommentTextField extends StatelessWidget {
         ? 'Add a reply'
         : 'Add a comment';
     final hintText = isEditing ? 'Edit comment...' : 'Add comment...';
-    final isMultiline = isReplying || isEditing;
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(start: 16, bottom: 14, top: 14),
@@ -249,6 +284,8 @@ class _CommentTextField extends StatelessWidget {
           controller: controller,
           focusNode: focusNode,
           onChanged: onChanged,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
           enableInteractiveSelection: true,
           style: VineTheme.bodyLargeFont(color: VineTheme.onSurface),
           cursorColor: VineTheme.tabIndicatorGreen,
@@ -261,9 +298,41 @@ class _CommentTextField extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             isDense: true,
           ),
-          maxLines: isMultiline ? 5 : null,
-          minLines: isMultiline ? 1 : null,
-          textAlignVertical: isMultiline ? null : TextAlignVertical.center,
+          maxLines: 5,
+          minLines: 1,
+        ),
+      ),
+    );
+  }
+}
+
+class _KeyboardDismissButton extends StatelessWidget {
+  const _KeyboardDismissButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      identifier: 'hide_comment_keyboard_button',
+      button: true,
+      label: 'Hide keyboard',
+      child: Container(
+        width: 40,
+        height: 40,
+        margin: const EdgeInsets.only(bottom: 4),
+        decoration: BoxDecoration(
+          color: VineTheme.containerLow,
+          borderRadius: BorderRadius.circular(17),
+        ),
+        child: IconButton(
+          onPressed: onPressed,
+          padding: EdgeInsets.zero,
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: VineTheme.whiteText,
+            size: 22,
+          ),
         ),
       ),
     );
