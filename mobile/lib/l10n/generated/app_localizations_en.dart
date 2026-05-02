@@ -5913,6 +5913,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commentReplyToPrefix => 'Re:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => 'Untitled';
 
   @override

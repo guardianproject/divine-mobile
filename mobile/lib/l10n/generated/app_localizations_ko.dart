@@ -5713,6 +5713,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get commentReplyToPrefix => 'Re:';
 
   @override
+  String get commentHideKeyboard => 'Hide keyboard';
+
+  @override
   String get draftUntitled => '제목 없음';
 
   @override

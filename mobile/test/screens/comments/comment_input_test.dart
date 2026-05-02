@@ -129,7 +129,9 @@ void main() {
       expect(controller.text, equals('Test comment'));
     });
 
-    testWidgets('uses bounded multiline input for comments', (tester) async {
+    testWidgets('top-level comments use send as the keyboard action', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -146,9 +148,57 @@ void main() {
       final textField = tester.widget<TextField>(find.byType(TextField));
 
       expect(textField.keyboardType, TextInputType.multiline);
-      expect(textField.textInputAction, TextInputAction.newline);
+      expect(textField.textInputAction, TextInputAction.send);
       expect(textField.minLines, 1);
       expect(textField.maxLines, 5);
+    });
+
+    testWidgets('submits top-level comments from the keyboard action', (
+      tester,
+    ) async {
+      var submitted = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: CommentInput(
+              controller: controller,
+              onSubmit: () => submitted = true,
+            ),
+          ),
+        ),
+      );
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      textField.onSubmitted?.call('Test comment');
+
+      expect(submitted, isTrue);
+    });
+
+    testWidgets('reply input keeps newline as the keyboard action', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: CommentInput(
+              controller: controller,
+              replyToDisplayName: 'alice',
+              onCancelReply: () {},
+              onSubmit: () {},
+            ),
+          ),
+        ),
+      );
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+
+      expect(textField.textInputAction, TextInputAction.newline);
+      expect(textField.onSubmitted, isNull);
     });
 
     testWidgets('shows keyboard dismissal control while focused', (
@@ -171,12 +221,12 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsNothing);
+      expect(find.bySemanticsIdentifier('hide_comment_keyboard_button'), findsNothing);
 
       focusNode.requestFocus();
       await tester.pump();
 
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+      expect(find.bySemanticsIdentifier('hide_comment_keyboard_button'), findsOneWidget);
     });
 
     testWidgets(

@@ -212,6 +212,7 @@ class _CommentInputState extends State<CommentInput> {
                             focusNode: _focusNode,
                             isReplying: isReplying,
                             isEditing: isEditing,
+                            onSubmitted: widget.onSubmit,
                             onChanged: _handleTextChanged,
                           ),
                         ),
@@ -248,6 +249,7 @@ class _CommentTextField extends StatelessWidget {
   const _CommentTextField({
     required this.controller,
     required this.isReplying,
+    required this.onSubmitted,
     required this.onChanged,
     this.isEditing = false,
     this.focusNode,
@@ -257,6 +259,7 @@ class _CommentTextField extends StatelessWidget {
   final FocusNode? focusNode;
   final bool isReplying;
   final bool isEditing;
+  final VoidCallback onSubmitted;
   final ValueChanged<String> onChanged;
 
   @override
@@ -272,6 +275,7 @@ class _CommentTextField extends StatelessWidget {
         ? 'Add a reply'
         : 'Add a comment';
     final hintText = isEditing ? 'Edit comment...' : 'Add comment...';
+    final isComposingMultiline = isReplying || isEditing;
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(start: 16, bottom: 14, top: 14),
@@ -285,7 +289,10 @@ class _CommentTextField extends StatelessWidget {
           focusNode: focusNode,
           onChanged: onChanged,
           keyboardType: TextInputType.multiline,
-          textInputAction: TextInputAction.newline,
+          textInputAction: isComposingMultiline
+              ? TextInputAction.newline
+              : TextInputAction.send,
+          onSubmitted: isComposingMultiline ? null : (_) => onSubmitted(),
           enableInteractiveSelection: true,
           style: VineTheme.bodyLargeFont(color: VineTheme.onSurface),
           cursorColor: VineTheme.tabIndicatorGreen,
@@ -316,7 +323,7 @@ class _KeyboardDismissButton extends StatelessWidget {
     return Semantics(
       identifier: 'hide_comment_keyboard_button',
       button: true,
-      label: 'Hide keyboard',
+      label: context.l10n.commentHideKeyboard,
       child: Container(
         width: 40,
         height: 40,
@@ -328,8 +335,8 @@ class _KeyboardDismissButton extends StatelessWidget {
         child: IconButton(
           onPressed: onPressed,
           padding: EdgeInsets.zero,
-          icon: const Icon(
-            Icons.keyboard_arrow_down,
+          icon: const DivineIcon(
+            icon: DivineIconName.caretDown,
             color: VineTheme.whiteText,
             size: 22,
           ),
