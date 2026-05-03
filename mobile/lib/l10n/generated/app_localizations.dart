@@ -7530,6 +7530,18 @@ abstract class AppLocalizations {
   /// **'Please select a reason for reporting this content'**
   String get reportSelectReason;
 
+  /// No description provided for @reportOtherRequiresDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the issue when selecting Other'**
+  String get reportOtherRequiresDetails;
+
+  /// No description provided for @reportDetailsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the issue'**
+  String get reportDetailsRequired;
+
   /// No description provided for @reportReasonSpam.
   ///
   /// In en, this message translates to:

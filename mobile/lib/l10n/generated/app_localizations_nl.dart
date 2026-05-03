@@ -4290,6 +4290,13 @@ class AppLocalizationsNl extends AppLocalizations {
       'Selecteer een reden om deze inhoud te melden';
 
   @override
+  String get reportOtherRequiresDetails =>
+      'Please describe the issue when selecting Other';
+
+  @override
+  String get reportDetailsRequired => 'Please describe the issue';
+
+  @override
   String get reportReasonSpam => 'Spam of ongewenste inhoud';
 
   @override

@@ -4333,6 +4333,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Sélectionne une raison pour signaler ce contenu';
 
   @override
+  String get reportOtherRequiresDetails =>
+      'Please describe the issue when selecting Other';
+
+  @override
+  String get reportDetailsRequired => 'Please describe the issue';
+
+  @override
   String get reportReasonSpam => 'Spam ou contenu indésirable';
 
   @override

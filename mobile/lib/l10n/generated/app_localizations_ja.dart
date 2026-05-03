@@ -4080,6 +4080,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reportSelectReason => '報告する理由を選んでね';
 
   @override
+  String get reportOtherRequiresDetails =>
+      'Please describe the issue when selecting Other';
+
+  @override
+  String get reportDetailsRequired => 'Please describe the issue';
+
+  @override
   String get reportReasonSpam => 'スパムや迷惑なコンテンツ';
 
   @override

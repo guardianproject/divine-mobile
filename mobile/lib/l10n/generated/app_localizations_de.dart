@@ -4325,6 +4325,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bitte wähl einen Grund für die Meldung dieses Inhalts';
 
   @override
+  String get reportOtherRequiresDetails =>
+      'Please describe the issue when selecting Other';
+
+  @override
+  String get reportDetailsRequired => 'Please describe the issue';
+
+  @override
   String get reportReasonSpam => 'Spam oder unerwünschte Inhalte';
 
   @override

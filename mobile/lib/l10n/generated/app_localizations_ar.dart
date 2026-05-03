@@ -4232,6 +4232,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportSelectReason => 'يُرجى اختيار سبب للإبلاغ عن هذا المحتوى';
 
   @override
+  String get reportOtherRequiresDetails =>
+      'Please describe the issue when selecting Other';
+
+  @override
+  String get reportDetailsRequired => 'Please describe the issue';
+
+  @override
   String get reportReasonSpam => 'محتوى غير مرغوب فيه أو مزعج';
 
   @override
