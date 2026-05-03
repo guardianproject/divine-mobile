@@ -2530,6 +2530,24 @@ class AppLocalizationsBg extends AppLocalizations {
   String get authPasswordLabel => 'Парола';
 
   @override
+  String get authConfirmPasswordLabel => 'Потвърди паролата';
+
+  @override
+  String get authEmailRequired => 'Имейлът е задължителен';
+
+  @override
+  String get authEmailInvalid => 'Моля, въведи валиден имейл';
+
+  @override
+  String get authPasswordRequired => 'Паролата е задължителна';
+
+  @override
+  String get authConfirmPasswordRequired => 'Моля, потвърди паролата си';
+
+  @override
+  String get authPasswordsDoNotMatch => 'Паролите не съвпадат';
+
+  @override
   String get authForgotPassword => 'Забравена парола?';
 
   @override
@@ -2787,6 +2805,9 @@ class AppLocalizationsBg extends AppLocalizations {
 
   @override
   String get authNewPasswordLabel => 'Нова парола';
+
+  @override
+  String get authConfirmNewPasswordLabel => 'Потвърди новата парола';
 
   @override
   String get authPasswordTooShort => 'Паролата трябва да е поне 8 знака';

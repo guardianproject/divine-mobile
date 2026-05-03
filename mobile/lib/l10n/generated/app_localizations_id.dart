@@ -2463,6 +2463,24 @@ class AppLocalizationsId extends AppLocalizations {
   String get authPasswordLabel => 'Kata Sandi';
 
   @override
+  String get authConfirmPasswordLabel => 'Konfirmasi kata sandi';
+
+  @override
+  String get authEmailRequired => 'Email wajib diisi';
+
+  @override
+  String get authEmailInvalid => 'Masukkan email yang valid';
+
+  @override
+  String get authPasswordRequired => 'Kata sandi wajib diisi';
+
+  @override
+  String get authConfirmPasswordRequired => 'Konfirmasikan kata sandi Anda';
+
+  @override
+  String get authPasswordsDoNotMatch => 'Kata sandi tidak cocok';
+
+  @override
   String get authForgotPassword => 'Lupa kata sandi?';
 
   @override
@@ -2718,6 +2736,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get authNewPasswordLabel => 'Kata Sandi Baru';
+
+  @override
+  String get authConfirmNewPasswordLabel => 'Konfirmasi kata sandi baru';
 
   @override
   String get authPasswordTooShort => 'Kata sandi harus minimal 8 karakter';

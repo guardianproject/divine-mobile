@@ -2484,6 +2484,24 @@ class AppLocalizationsSv extends AppLocalizations {
   String get authPasswordLabel => 'Lösenord';
 
   @override
+  String get authConfirmPasswordLabel => 'Bekräfta lösenord';
+
+  @override
+  String get authEmailRequired => 'E-post krävs';
+
+  @override
+  String get authEmailInvalid => 'Ange en giltig e-postadress';
+
+  @override
+  String get authPasswordRequired => 'Lösenord krävs';
+
+  @override
+  String get authConfirmPasswordRequired => 'Bekräfta ditt lösenord';
+
+  @override
+  String get authPasswordsDoNotMatch => 'Lösenorden matchar inte';
+
+  @override
   String get authForgotPassword => 'Glömt lösenord?';
 
   @override
@@ -2739,6 +2757,9 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get authNewPasswordLabel => 'Nytt lösenord';
+
+  @override
+  String get authConfirmNewPasswordLabel => 'Bekräfta nytt lösenord';
 
   @override
   String get authPasswordTooShort => 'Lösenordet måste vara minst 8 tecken';

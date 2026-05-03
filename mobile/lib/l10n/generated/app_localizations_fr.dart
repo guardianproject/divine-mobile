@@ -2523,6 +2523,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get authPasswordLabel => 'Mot de passe';
 
   @override
+  String get authConfirmPasswordLabel => 'Confirmer le mot de passe';
+
+  @override
+  String get authEmailRequired => 'L\'e-mail est obligatoire';
+
+  @override
+  String get authEmailInvalid => 'Veuillez saisir un e-mail valide';
+
+  @override
+  String get authPasswordRequired => 'Le mot de passe est obligatoire';
+
+  @override
+  String get authConfirmPasswordRequired =>
+      'Veuillez confirmer votre mot de passe';
+
+  @override
+  String get authPasswordsDoNotMatch =>
+      'Les mots de passe ne correspondent pas';
+
+  @override
   String get authForgotPassword => 'Mot de passe oublié ?';
 
   @override
@@ -2779,6 +2799,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get authNewPasswordLabel => 'Nouveau mot de passe';
+
+  @override
+  String get authConfirmNewPasswordLabel => 'Confirmer le nouveau mot de passe';
 
   @override
   String get authPasswordTooShort =>

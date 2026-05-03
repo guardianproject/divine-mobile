@@ -2471,6 +2471,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get authPasswordLabel => 'Parola';
 
   @override
+  String get authConfirmPasswordLabel => 'Parolayı onayla';
+
+  @override
+  String get authEmailRequired => 'E-posta gereklidir';
+
+  @override
+  String get authEmailInvalid => 'Geçerli bir e-posta girin';
+
+  @override
+  String get authPasswordRequired => 'Parola gereklidir';
+
+  @override
+  String get authConfirmPasswordRequired => 'Lütfen parolanızı onaylayın';
+
+  @override
+  String get authPasswordsDoNotMatch => 'Parolalar eşleşmiyor';
+
+  @override
   String get authForgotPassword => 'Parolanı mı unuttun?';
 
   @override
@@ -2726,6 +2744,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get authNewPasswordLabel => 'Yeni Parola';
+
+  @override
+  String get authConfirmNewPasswordLabel => 'Yeni parolayı onayla';
 
   @override
   String get authPasswordTooShort => 'Parola en az 8 karakter olmalı';

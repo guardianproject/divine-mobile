@@ -331,6 +331,16 @@ const _knownUntranslatedDebt = {
   'badgesIssuedNoRecipients',
   'badgesRecipientAcceptedStatus',
   'badgesRecipientWaitingStatus',
+  // Added with signup credential validation. Translated for es/fr/de/it/pt/
+  // nl/sv/pl/ro/bg/id/tr; ja/ko/ar/am still fall back to English pending a
+  // native-speaker translation pass.
+  'authConfirmPasswordLabel',
+  'authEmailRequired',
+  'authEmailInvalid',
+  'authPasswordRequired',
+  'authConfirmPasswordRequired',
+  'authPasswordsDoNotMatch',
+  'authConfirmNewPasswordLabel',
 };
 
 Map<String, Object?> _readArb(File file) {
