@@ -2742,6 +2742,9 @@ class AppLocalizationsRo extends AppLocalizations {
       'Dă-ne emailul tău și âți vom trimite noutăți pe măsură ce se deschide accesul.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Ajutor pentru accesul prin invitație';
 
   @override

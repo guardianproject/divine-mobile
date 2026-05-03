@@ -1217,6 +1217,7 @@
     "authJoinWaitlist": "انضم لقائمة الانتظار",
     "authJoinWaitlistTitle": "انضم إلى قائمة الانتظار",
     "authJoinWaitlistDescription": "شاركنا بريدك وسنرسل لك التحديثات عند فتح الوصول.",
+    "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
     "authInviteAccessHelp": "مساعدة وصول الدعوة",
     "authGeneratingConnection": "جاري إنشاء الاتصال...",
     "authConnectedAuthenticating": "تم الاتصال! جاري المصادقة...",

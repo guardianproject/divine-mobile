@@ -2613,6 +2613,9 @@ class AppLocalizationsAm extends AppLocalizations {
       'ኢሜልዎን ያጋሩ እና መዳረሻ ሲከፈት ማሻሻያዎችን እንልካለን።';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'የመዳረሻ እገዛን ጋብዝ';
 
   @override

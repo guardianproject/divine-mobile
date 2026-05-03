@@ -2692,6 +2692,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'Condividi la tua email e ti manderemo aggiornamenti quando si aprirà l\'accesso.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Aiuto accesso tramite invito';
 
   @override

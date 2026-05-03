@@ -2661,6 +2661,9 @@ class AppLocalizationsSv extends AppLocalizations {
       'Dela din e-post så skickar vi uppdateringar när åtkomst öppnas.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Hjälp med inbjudningsåtkomst';
 
   @override

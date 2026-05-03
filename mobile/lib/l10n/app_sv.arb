@@ -1220,6 +1220,7 @@
     "authJoinWaitlist": "Ansluta till väntelistan",
     "authJoinWaitlistTitle": "Ansluta till väntelistan",
     "authJoinWaitlistDescription": "Dela din e-post så skickar vi uppdateringar när åtkomst öppnas.",
+    "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
     "authInviteAccessHelp": "Hjälp med inbjudningsåtkomst",
     "authGeneratingConnection": "Genererar anslutning...",
     "authConnectedAuthenticating": "Ansluten! Autentiserar...",

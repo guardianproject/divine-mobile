@@ -2648,6 +2648,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'E-postanı paylaş, erişim açıldıkça güncelleme gönderelim.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Davet erişimi yardımı';
 
   @override

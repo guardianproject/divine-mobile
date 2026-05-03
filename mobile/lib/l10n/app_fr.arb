@@ -1220,6 +1220,7 @@
     "authJoinWaitlist": "Rejoindre la liste d'attente",
     "authJoinWaitlistTitle": "Rejoindre la liste d'attente",
     "authJoinWaitlistDescription": "Partage ton e-mail et on t'enverra des mises à jour dès que l'accès s'ouvre.",
+    "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
     "authInviteAccessHelp": "Aide pour l'accès par invitation",
     "authGeneratingConnection": "Génération de la connexion...",
     "authConnectedAuthenticating": "Connecté ! Authentification...",

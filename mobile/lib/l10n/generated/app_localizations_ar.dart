@@ -2637,6 +2637,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'شاركنا بريدك وسنرسل لك التحديثات عند فتح الوصول.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'مساعدة وصول الدعوة';
 
   @override

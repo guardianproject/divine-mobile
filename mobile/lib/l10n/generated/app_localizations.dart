@@ -4701,8 +4701,14 @@ abstract class AppLocalizations {
   /// No description provided for @authJoinWaitlistDescription.
   ///
   /// In en, this message translates to:
-  /// **'Share your email and we\'ll send updates as access opens up.'**
+  /// **'Share your email and we\'ll send an invite code as access opens up.'**
   String get authJoinWaitlistDescription;
+
+  /// No description provided for @authJoinWaitlistNewsletterOptIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send me Divine inspiration'**
+  String get authJoinWaitlistNewsletterOptIn;
 
   /// No description provided for @authInviteAccessHelp.
   ///

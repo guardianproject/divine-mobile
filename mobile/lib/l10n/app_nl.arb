@@ -1220,6 +1220,7 @@
     "authJoinWaitlist": "Op de wachtlijst",
     "authJoinWaitlistTitle": "Op de wachtlijst",
     "authJoinWaitlistDescription": "Deel je e-mailadres en we sturen updates zodra toegang opengaat.",
+    "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
     "authInviteAccessHelp": "Hulp bij invite-toegang",
     "authGeneratingConnection": "Verbinding genereren...",
     "authConnectedAuthenticating": "Verbonden! Authenticeren...",

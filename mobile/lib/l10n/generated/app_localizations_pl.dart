@@ -2734,6 +2734,9 @@ class AppLocalizationsPl extends AppLocalizations {
       'Podaj swój e-mail, a będziemy wysyłać aktualizacje, gdy dostęp się otworzy.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Pomoc z dostępem z zaproszenia';
 
   @override

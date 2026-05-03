@@ -2537,6 +2537,9 @@ class AppLocalizationsJa extends AppLocalizations {
       'メールアドレスを教えてね。アクセス開放に合わせてアップデートを送るよ。';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => '招待アクセスのヘルプ';
 
   @override
