@@ -728,15 +728,6 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Send me Divine Inspiration',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        color: VineTheme.lightText,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
                     SizedBox(
                       width: 24,
                       height: 24,
@@ -752,6 +743,15 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
                         side: BorderSide(
                           color: VineTheme.whiteText.withValues(alpha: 0.5),
                         ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Send me Divine inspiration',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        color: VineTheme.lightText,
                       ),
                     ),
                   ],

@@ -2663,7 +2663,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authJoinWaitlistDescription =>
-      'Share your email and we\'ll send updates as access opens up.';
+      'Share your email and we\'ll send an invite code as access opens up.';
 
   @override
   String get authInviteAccessHelp => 'Invite access help';

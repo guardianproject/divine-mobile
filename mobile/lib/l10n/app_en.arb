@@ -1393,7 +1393,7 @@
   "authNext": "Next",
   "authJoinWaitlist": "Join waitlist",
   "authJoinWaitlistTitle": "Join the waitlist",
-  "authJoinWaitlistDescription": "Share your email and we'll send updates as access opens up.",
+  "authJoinWaitlistDescription": "Share your email and we'll send an invite code as access opens up.",
   "authInviteAccessHelp": "Invite access help",
   "authGeneratingConnection": "Generating connection...",
   "authConnectedAuthenticating": "Connected! Authenticating...",
