@@ -215,6 +215,7 @@ void main() {
         () => mockInviteApiClient.joinWaitlist(
           contact: any(named: 'contact'),
           sourceSlug: any(named: 'sourceSlug'),
+          newsletterOptIn: any(named: 'newsletterOptIn'),
         ),
       ).thenAnswer(
         (_) async =>
@@ -270,6 +271,7 @@ void main() {
         () => mockInviteApiClient.joinWaitlist(
           contact: 'fan@example.com',
           sourceSlug: 'lele-pons',
+          newsletterOptIn: true,
         ),
       ).called(1);
     });

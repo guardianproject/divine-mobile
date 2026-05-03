@@ -723,8 +723,8 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
                 onTap: _isSubmitting
                     ? null
                     : () => setState(() {
-                          _newsletterOptIn = !_newsletterOptIn;
-                        }),
+                        _newsletterOptIn = !_newsletterOptIn;
+                      }),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -736,8 +736,8 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
                         onChanged: _isSubmitting
                             ? null
                             : (value) => setState(() {
-                                  _newsletterOptIn = value ?? false;
-                                }),
+                                _newsletterOptIn = value ?? false;
+                              }),
                         activeColor: VineTheme.vineGreen,
                         checkColor: VineTheme.whiteText,
                         side: BorderSide(
