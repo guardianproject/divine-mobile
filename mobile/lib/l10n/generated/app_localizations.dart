@@ -9924,6 +9924,12 @@ abstract class AppLocalizations {
   /// **'Popular Blossom Servers'**
   String get blossomPopularServers;
 
+  /// Snackbar shown when the user typed a non-loopback http:// Blossom server URL. Under release transport security those uploads would silently fail at the OS layer; the validator rejects them with this hint instead.
+  ///
+  /// In en, this message translates to:
+  /// **'Blossom server URL must use https://'**
+  String get blossomServerUrlMustUseHttps;
+
   /// No description provided for @blueskyFailedToUpdateCrosspost.
   ///
   /// In en, this message translates to:

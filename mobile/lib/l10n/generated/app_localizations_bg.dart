@@ -5679,6 +5679,10 @@ class AppLocalizationsBg extends AppLocalizations {
   String get blossomPopularServers => 'Popular Blossom Servers';
 
   @override
+  String get blossomServerUrlMustUseHttps =>
+      'Blossom server URL must use https://';
+
+  @override
   String get blueskyFailedToUpdateCrosspost =>
       'Неуспешно актуализиране на настройката за кръстосана публикация';
 

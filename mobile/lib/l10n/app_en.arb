@@ -2949,6 +2949,11 @@
   "blossomCustomServerHelper": "Enter the URL of your custom Blossom server",
   "blossomPopularServers": "Popular Blossom Servers",
 
+  "blossomServerUrlMustUseHttps": "Blossom server URL must use https://",
+  "@blossomServerUrlMustUseHttps": {
+    "description": "Snackbar shown when the user typed a non-loopback http:// Blossom server URL. Under release transport security those uploads would silently fail at the OS layer; the validator rejects them with this hint instead."
+  },
+
   "blueskyFailedToUpdateCrosspost": "Failed to update crosspost setting",
   "blueskySignInRequired": "Sign in to manage Bluesky settings",
   "blueskyPublishVideos": "Publish videos to Bluesky",
