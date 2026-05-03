@@ -2666,6 +2666,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Share your email and we\'ll send an invite code as access opens up.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Invite access help';
 
   @override

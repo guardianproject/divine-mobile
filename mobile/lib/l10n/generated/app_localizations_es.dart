@@ -2694,6 +2694,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Dejanos tu email y te mandamos novedades cuando haya cupos.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Ayuda con el acceso por invitación';
 
   @override

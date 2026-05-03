@@ -2707,6 +2707,9 @@ class AppLocalizationsBg extends AppLocalizations {
       'Остави имейла си и ще ти пишем, когато достъпът се отвори.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Помощ с поканите';
 
   @override

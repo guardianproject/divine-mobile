@@ -719,42 +719,29 @@ class _WaitlistEntrySheetState extends State<_WaitlistEntrySheet> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              GestureDetector(
-                onTap: _isSubmitting
-                    ? null
-                    : () => setState(() {
-                        _newsletterOptIn = !_newsletterOptIn;
-                      }),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Checkbox(
-                        value: _newsletterOptIn,
-                        onChanged: _isSubmitting
-                            ? null
-                            : (value) => setState(() {
-                                _newsletterOptIn = value ?? false;
-                              }),
-                        activeColor: VineTheme.vineGreen,
-                        checkColor: VineTheme.whiteText,
-                        side: BorderSide(
-                          color: VineTheme.whiteText.withValues(alpha: 0.5),
+              MergeSemantics(
+                child: Semantics(
+                  checked: _newsletterOptIn,
+                  enabled: !_isSubmitting,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _isSubmitting
+                        ? null
+                        : () => setState(() {
+                            _newsletterOptIn = !_newsletterOptIn;
+                          }),
+                    child: DivineCheckbox(
+                      state: _newsletterOptIn
+                          ? DivineCheckboxState.selected
+                          : DivineCheckboxState.unselected,
+                      label: Text(
+                        context.l10n.authJoinWaitlistNewsletterOptIn,
+                        style: VineTheme.bodyLargeFont(
+                          color: VineTheme.lightText,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Send me Divine inspiration',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        color: VineTheme.lightText,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

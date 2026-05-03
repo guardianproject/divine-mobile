@@ -2548,6 +2548,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get authJoinWaitlistDescription => '이메일을 알려주시면 접근이 열릴 때 업데이트를 보내드릴게요.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => '초대 접근 도움말';
 
   @override

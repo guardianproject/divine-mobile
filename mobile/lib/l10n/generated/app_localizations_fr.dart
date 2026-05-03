@@ -2700,6 +2700,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Partage ton e-mail et on t\'enverra des mises à jour dès que l\'accès s\'ouvre.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Aide pour l\'accès par invitation';
 
   @override

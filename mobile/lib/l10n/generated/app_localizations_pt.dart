@@ -2686,6 +2686,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Compartilhe seu e-mail e enviaremos novidades conforme o acesso for liberado.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Ajuda com acesso por convite';
 
   @override

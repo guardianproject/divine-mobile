@@ -2639,6 +2639,9 @@ class AppLocalizationsId extends AppLocalizations {
       'Bagikan emailmu dan kami akan mengirim pembaruan saat akses terbuka.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Bantuan akses undangan';
 
   @override

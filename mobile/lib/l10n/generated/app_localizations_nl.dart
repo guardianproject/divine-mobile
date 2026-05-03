@@ -2674,6 +2674,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'Deel je e-mailadres en we sturen updates zodra toegang opengaat.';
 
   @override
+  String get authJoinWaitlistNewsletterOptIn => 'Send me Divine inspiration';
+
+  @override
   String get authInviteAccessHelp => 'Hulp bij invite-toegang';
 
   @override
