@@ -1294,6 +1294,7 @@
   "authJoinWaitlist": "Присъедини се към списъка с чакащи",
   "authJoinWaitlistTitle": "Присъедини се към списъка с чакащи",
   "authJoinWaitlistDescription": "Остави имейла си и ще ти пишем, когато достъпът се отвори.",
+  "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
   "authInviteAccessHelp": "Помощ с поканите",
   "authGeneratingConnection": "Генериране на връзка...",
   "authConnectedAuthenticating": "Свързан! Удостоверява се...",

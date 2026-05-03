@@ -1220,6 +1220,7 @@
     "authJoinWaitlist": "Alătură-te listei de așteptare",
     "authJoinWaitlistTitle": "Alătură-te listei de așteptare",
     "authJoinWaitlistDescription": "Dă-ne emailul tău și âți vom trimite noutăți pe măsură ce se deschide accesul.",
+    "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
     "authInviteAccessHelp": "Ajutor pentru accesul prin invitație",
     "authGeneratingConnection": "Se generează conexiunea...",
     "authConnectedAuthenticating": "Conectat! Se autentifică...",

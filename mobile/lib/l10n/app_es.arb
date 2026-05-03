@@ -1224,6 +1224,7 @@
     "authJoinWaitlist": "Unirme a la lista de espera",
     "authJoinWaitlistTitle": "Unite a la lista de espera",
     "authJoinWaitlistDescription": "Dejanos tu email y te mandamos novedades cuando haya cupos.",
+    "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
     "authInviteAccessHelp": "Ayuda con el acceso por invitación",
     "authGeneratingConnection": "Generando conexión...",
     "authConnectedAuthenticating": "¡Conectado! Autenticando...",

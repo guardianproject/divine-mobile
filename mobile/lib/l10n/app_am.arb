@@ -1400,6 +1400,7 @@
   "authJoinWaitlist": "የተጠባባቂ ዝርዝሩን ይቀላቀሉ",
   "authJoinWaitlistTitle": "የተጠባባቂ ዝርዝሩን ይቀላቀሉ",
   "authJoinWaitlistDescription": "ኢሜልዎን ያጋሩ እና መዳረሻ ሲከፈት ማሻሻያዎችን እንልካለን።",
+  "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
   "authInviteAccessHelp": "የመዳረሻ እገዛን ጋብዝ",
   "authGeneratingConnection": "ግንኙነት በማመንጨት ላይ...",
   "authConnectedAuthenticating": "ተገናኝቷል! በማረጋገጥ ላይ...",

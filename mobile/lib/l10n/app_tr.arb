@@ -1217,6 +1217,7 @@
     "authJoinWaitlist": "Bekleme listesine katıl",
     "authJoinWaitlistTitle": "Bekleme listesine katıl",
     "authJoinWaitlistDescription": "E-postanı paylaş, erişim açıldıkça güncelleme gönderelim.",
+    "authJoinWaitlistNewsletterOptIn": "Send me Divine inspiration",
     "authInviteAccessHelp": "Davet erişimi yardımı",
     "authGeneratingConnection": "Bağlantı oluşturuluyor...",
     "authConnectedAuthenticating": "Bağlandı! Kimlik doğrulanıyor...",
