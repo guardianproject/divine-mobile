@@ -786,9 +786,8 @@ class AppLocalizationsBg extends AppLocalizations {
   String get profileSetupGotItButton => 'Разбрах';
 
   @override
-  String profileSetupUploadFailedGeneric(Object error) {
-    return 'Неуспешно качване на изображение: $error';
-  }
+  String get profileSetupUploadFailedGeneric =>
+      'Качването на изображението се провали. Опитай отново след малко.';
 
   @override
   String get profileSetupUploadNetworkError =>
@@ -801,6 +800,14 @@ class AppLocalizationsBg extends AppLocalizations {
   @override
   String get profileSetupUploadFileTooLarge =>
       'Файлът е твърде голям. Избери по-малко изображение (макс. 10 MB).';
+
+  @override
+  String get profileSetupUploadServerError =>
+      'Качването на изображението се провали. Сървърите ни временно не са достъпни. Опитай пак след малко.';
+
+  @override
+  String get profileSetupUploadUnsupportedOnWeb =>
+      'Качването на профилна снимка все още не е налично в уеб. Използвай приложението за iOS или Android или постави URL на изображение.';
 
   @override
   String get profileSetupUsernameChecking => 'Проверява се наличността...';

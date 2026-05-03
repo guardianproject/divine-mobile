@@ -777,9 +777,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get profileSetupGotItButton => 'Begrepen';
 
   @override
-  String profileSetupUploadFailedGeneric(Object error) {
-    return 'Afbeelding uploaden mislukt: $error';
-  }
+  String get profileSetupUploadFailedGeneric =>
+      'Uploaden van afbeelding mislukt. Probeer het later opnieuw.';
 
   @override
   String get profileSetupUploadNetworkError =>
@@ -792,6 +791,14 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get profileSetupUploadFileTooLarge =>
       'Bestand te groot: kies een kleinere afbeelding (max 10 MB).';
+
+  @override
+  String get profileSetupUploadServerError =>
+      'Uploaden van afbeelding mislukt. Onze servers zijn tijdelijk niet beschikbaar. Probeer het zo opnieuw.';
+
+  @override
+  String get profileSetupUploadUnsupportedOnWeb =>
+      'Het uploaden van een profielfoto is nog niet beschikbaar op web. Gebruik de iOS- of Android-app, of plak een afbeeldings-URL.';
 
   @override
   String get profileSetupUsernameChecking => 'Beschikbaarheid controleren...';

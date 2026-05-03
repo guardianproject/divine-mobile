@@ -784,9 +784,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileSetupGotItButton => 'Verstanden';
 
   @override
-  String profileSetupUploadFailedGeneric(Object error) {
-    return 'Bild konnte nicht hochgeladen werden: $error';
-  }
+  String get profileSetupUploadFailedGeneric =>
+      'Bild konnte nicht hochgeladen werden. Bitte versuche es später noch einmal.';
 
   @override
   String get profileSetupUploadNetworkError =>
@@ -799,6 +798,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get profileSetupUploadFileTooLarge =>
       'Datei zu groß: Bitte wähl ein kleineres Bild (max. 10MB).';
+
+  @override
+  String get profileSetupUploadServerError =>
+      'Bild konnte nicht hochgeladen werden. Unsere Server sind vorübergehend nicht verfügbar. Bitte versuche es gleich noch einmal.';
+
+  @override
+  String get profileSetupUploadUnsupportedOnWeb =>
+      'Das Hochladen eines Profilbilds ist im Web noch nicht verfügbar. Nutze die iOS- oder Android-App oder füge eine Bild-URL ein.';
 
   @override
   String get profileSetupUsernameChecking => 'Verfügbarkeit wird geprüft...';
