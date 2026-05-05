@@ -144,6 +144,11 @@ class FunnelcakeApiClient {
     return (items: const <dynamic>[], hasMore: false, nextCursor: null);
   }
 
+  static int? _parseIntPageToken(String? value) {
+    if (value == null) return null;
+    return int.tryParse(value);
+  }
+
   /// Builds the notifications endpoint URI for a user.
   ///
   /// The returned URI includes the same query parameters used by
@@ -229,7 +234,12 @@ class FunnelcakeApiClient {
             ? int.tryParse(totalCountHeader)
             : null;
 
-        return VideosByAuthorResponse(videos: videos, totalCount: totalCount);
+        return VideosByAuthorResponse(
+          videos: videos,
+          totalCount: totalCount,
+          nextOffset: _parseIntPageToken(nextCursor),
+          hasMore: hasMore,
+        );
       } else if (response.statusCode == 404) {
         throw FunnelcakeNotFoundException(
           resource: 'Author videos',
@@ -389,6 +399,16 @@ class FunnelcakeApiClient {
     int limit = 50,
     int? before,
   }) async {
+    final response = await getWatchingVideosPage(limit: limit, before: before);
+    return response.videos;
+  }
+
+  /// Fetches videos sorted by 24-hour CDN view count with NO age decay,
+  /// returning pagination metadata when the v2 envelope is available.
+  Future<WatchingVideosResponse> getWatchingVideosPage({
+    int limit = 50,
+    int? before,
+  }) async {
     if (!isAvailable) {
       throw const FunnelcakeNotConfiguredException();
     }
@@ -409,14 +429,20 @@ class FunnelcakeApiClient {
       final response = await _get(uri);
 
       if (response.statusCode == 200) {
-        final (:items, hasMore: _, nextCursor: _) = _unwrapListResponse(
+        final (:items, :hasMore, :nextCursor) = _unwrapListResponse(
           jsonDecode(response.body),
         );
 
-        return items
+        final videos = items
             .map((v) => VideoStats.fromJson(v as Map<String, dynamic>))
             .where((v) => v.id.isNotEmpty && v.videoUrl.isNotEmpty)
             .toList();
+
+        return WatchingVideosResponse(
+          videos: videos,
+          nextCursor: _parseIntPageToken(nextCursor),
+          hasMore: hasMore,
+        );
       } else {
         throw FunnelcakeApiException(
           message: 'Failed to fetch watching videos',
