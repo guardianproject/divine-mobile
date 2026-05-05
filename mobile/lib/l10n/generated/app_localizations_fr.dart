@@ -6007,6 +6007,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String notificationLikedYourComment(String actorName) {
+    return '$actorName a aimé ton commentaire';
+  }
+
+  @override
   String notificationCommentedOnYourVideo(String actorName) {
     return '$actorName a commenté ta vidéo';
   }

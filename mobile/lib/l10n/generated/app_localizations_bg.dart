@@ -5994,6 +5994,11 @@ class AppLocalizationsBg extends AppLocalizations {
   }
 
   @override
+  String notificationLikedYourComment(String actorName) {
+    return '$actorName хареса коментара ти';
+  }
+
+  @override
   String notificationCommentedOnYourVideo(String actorName) {
     return '$actorName коментира видеото ти';
   }

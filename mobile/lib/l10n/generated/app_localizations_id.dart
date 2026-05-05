@@ -5906,6 +5906,11 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String notificationLikedYourComment(String actorName) {
+    return '$actorName menyukai komentarmu';
+  }
+
+  @override
   String notificationCommentedOnYourVideo(String actorName) {
     return '$actorName mengomentari videomu';
   }

@@ -5928,6 +5928,11 @@ class AppLocalizationsSv extends AppLocalizations {
   }
 
   @override
+  String notificationLikedYourComment(String actorName) {
+    return '$actorName gillade din kommentar';
+  }
+
+  @override
   String notificationCommentedOnYourVideo(String actorName) {
     return '$actorName kommenterade din video';
   }

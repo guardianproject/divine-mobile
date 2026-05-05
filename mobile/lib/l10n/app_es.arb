@@ -2512,6 +2512,14 @@
             }
         }
     },
+    "notificationLikedYourComment": "{actorName} le dio like a tu comentario",
+    "@notificationLikedYourComment": {
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
     "notificationMentionedYou": "{actorName} te mencionó",
     "@notificationMentionedYou": {
         "placeholders": {

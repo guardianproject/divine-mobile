@@ -2830,6 +2830,14 @@
       }
     }
   },
+  "notificationLikedYourComment": "{actorName} хареса коментара ти",
+  "@notificationLikedYourComment": {
+    "placeholders": {
+      "actorName": {
+        "type": "String"
+      }
+    }
+  },
   "notificationCommentedOnYourVideo": "{actorName} коментира видеото ти",
   "@notificationCommentedOnYourVideo": {
     "placeholders": {

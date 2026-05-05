@@ -5985,6 +5985,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String notificationLikedYourComment(String actorName) {
+    return '$actorName le dio like a tu comentario';
+  }
+
+  @override
   String notificationCommentedOnYourVideo(String actorName) {
     return '$actorName comentó tu video';
   }

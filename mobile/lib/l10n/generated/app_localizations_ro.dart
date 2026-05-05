@@ -6071,6 +6071,11 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
+  String notificationLikedYourComment(String actorName) {
+    return '$actorName a apreciat comentariul tău';
+  }
+
+  @override
   String notificationCommentedOnYourVideo(String actorName) {
     return '$actorName a comentat la videoclipul tău';
   }

@@ -2504,6 +2504,14 @@
             }
         }
     },
+    "notificationLikedYourComment": "{actorName} gillade din kommentar",
+    "@notificationLikedYourComment": {
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
     "notificationMentionedYou": "{actorName} nämnde dig",
     "@notificationMentionedYou": {
         "placeholders": {

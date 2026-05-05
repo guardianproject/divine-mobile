@@ -11,6 +11,7 @@ import 'package:models/src/actor_info.dart';
 /// `NotificationType` enum in `notification_model.dart`.
 enum NotificationKind {
   like,
+  likeComment,
   comment,
   reply,
   follow,

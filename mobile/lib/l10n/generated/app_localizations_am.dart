@@ -5816,6 +5816,11 @@ class AppLocalizationsAm extends AppLocalizations {
   }
 
   @override
+  String notificationLikedYourComment(String actorName) {
+    return '$actorName አስተያየትህን ወደውታል።';
+  }
+
+  @override
   String notificationCommentedOnYourVideo(String actorName) {
     return '$actorName በቪዲዮዎ ላይ አስተያየት ሰጥቷል';
   }

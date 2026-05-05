@@ -2504,6 +2504,14 @@
             }
         }
     },
+    "notificationLikedYourComment": "{actorName} a apreciat comentariul tău",
+    "@notificationLikedYourComment": {
+        "placeholders": {
+            "actorName": {
+                "type": "String"
+            }
+        }
+    },
     "notificationMentionedYou": "{actorName} te-a menționat",
     "@notificationMentionedYou": {
         "placeholders": {
