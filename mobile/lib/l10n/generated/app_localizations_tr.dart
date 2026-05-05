@@ -6039,6 +6039,25 @@ class AppLocalizationsTr extends AppLocalizations {
   String get videoRecorderWhySixSecondsButton => 'Anladım!';
 
   @override
+  String get videoRecorderUploadTitle => 'Neden yükleme yok?';
+
+  @override
+  String get videoRecorderUploadBody =>
+      'Divine\'da gördüğün şey insan yapımı: ham ve o an yakalanmış. Çok yapımcı veya yapay zekâ tarafından üretilmiş yüklemelere izin veren platformların aksine, doğrudan kamera deneyiminin özgünlüğüne öncelik veriyoruz.';
+
+  @override
+  String get videoRecorderUploadBodyDetail =>
+      'Yaratımı uygulama içinde tutarak, içeriğin gerçek ve düzenlenmemiş olduğunu daha iyi garanti edebiliyoruz. Şu anda harici galeriden yüklemelere açmıyoruz; bu özgünlüğü korumak ve topluluğumuzu sentetik içerikten mümkün olduğunca uzak tutmak için.';
+
+  @override
+  String get videoRecorderUploadBodyCta =>
+      'Gerçek bir şey çekmek için Capture veya Classic\'e geç.';
+
+  @override
+  String get videoRecorderUploadLearnMore =>
+      'Doğrulamanın nasıl çalıştığını öğren';
+
+  @override
   String get videoRecorderAutosaveFoundTitle => 'Devam eden bir çalışma bulduk';
 
   @override

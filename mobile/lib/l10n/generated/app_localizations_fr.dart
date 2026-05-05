@@ -6133,6 +6133,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get videoRecorderWhySixSecondsButton => 'Compris !';
 
   @override
+  String get videoRecorderUploadTitle => 'Pourquoi pas d\'envoi ?';
+
+  @override
+  String get videoRecorderUploadBody =>
+      'Ce que tu vois sur Divine est fait par des humains : brut et capturé sur le moment. Contrairement aux plateformes qui autorisent les envois très produits ou générés par IA, nous donnons la priorité à l\'authenticité de l\'expérience caméra-directe.';
+
+  @override
+  String get videoRecorderUploadBodyDetail =>
+      'En gardant la création à l\'intérieur de l\'app, nous pouvons mieux garantir que le contenu est réel et non édité. Nous n\'ouvrons pas les envois depuis la galerie externe pour le moment, afin de protéger cette authenticité et garder notre communauté libre de contenu synthétique autant que possible.';
+
+  @override
+  String get videoRecorderUploadBodyCta =>
+      'Passe à Capture ou Classic pour filmer quelque chose de réel.';
+
+  @override
+  String get videoRecorderUploadLearnMore =>
+      'Découvre comment fonctionne la vérification';
+
+  @override
   String get videoRecorderAutosaveFoundTitle =>
       'Nous avons trouvé un travail en cours';
 

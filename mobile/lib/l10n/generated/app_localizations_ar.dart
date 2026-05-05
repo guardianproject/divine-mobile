@@ -6013,6 +6013,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get videoRecorderWhySixSecondsButton => 'فهمت!';
 
   @override
+  String get videoRecorderUploadTitle => 'لماذا لا يوجد رفع؟';
+
+  @override
+  String get videoRecorderUploadBody =>
+      'ما تراه على Divine من صنع البشر: خام وملتقط في اللحظة. بعكس المنصات التي تسمح بمقاطع منتجة بشكل مكثف أو مولّدة بالذكاء الاصطناعي، نُعطي الأولوية لأصالة تجربة الكاميرا المباشرة.';
+
+  @override
+  String get videoRecorderUploadBodyDetail =>
+      'بإبقاء عملية الإنشاء داخل التطبيق، يمكننا ضمان أن المحتوى حقيقي وغير معدّل بشكل أفضل. لا نفتح حاليًا عمليات الرفع من المعرض الخارجي لحماية تلك الأصالة والحفاظ على مجتمعنا خاليًا من المحتوى الاصطناعي قدر الإمكان.';
+
+  @override
+  String get videoRecorderUploadBodyCta =>
+      'انتقل إلى Capture أو Classic لتصوير شيء حقيقي.';
+
+  @override
+  String get videoRecorderUploadLearnMore => 'تعرّف على آلية التحقق';
+
+  @override
   String get videoRecorderAutosaveFoundTitle => 'وجدنا عملاً قيد التنفيذ';
 
   @override

@@ -5940,6 +5940,24 @@ class AppLocalizationsAm extends AppLocalizations {
   String get videoRecorderWhySixSecondsButton => 'ገባኝ!';
 
   @override
+  String get videoRecorderUploadTitle => 'ለምን መጫን የለም?';
+
+  @override
+  String get videoRecorderUploadBody =>
+      'በዲቫይን ላይ የምታየው በሰው የተሰራ ነው፦ ጥሬ እና በወቅቱ የተቀረጸ። በከፍተኛ የተዘጋጁ ወይም በAI የተፈጠሩ ጭነቶችን የሚፈቅዱ መድረኮች በተለየ መልኩ፣ የቀጥታ ካሜራ ተሞክሮን ትክክለኛነት እናስቀድማለን።';
+
+  @override
+  String get videoRecorderUploadBodyDetail =>
+      'ፍጠራን ከመተግበሪያው ውስጥ በማቆየት፣ ይዘቱ እውነተኛ እና ያልተስተካከለ መሆኑን በተሻለ ሁኔታ ልንዋስ እንችላለን። ያን እውነተኛነት ለመጠበቅና ማህበረሰባችንን በተቻለ መጠን ከሰው ሰራሽ ይዘት ነጻ ለማድረግ፣ በአሁኑ ጊዜ ከውጪ ጋለሪ መጫን አንፈቅድም።';
+
+  @override
+  String get videoRecorderUploadBodyCta =>
+      'እውነተኛ ነገር ለመቅረጽ ወደ Capture ወይም Classic ቀይር።';
+
+  @override
+  String get videoRecorderUploadLearnMore => 'ማረጋገጫ እንዴት እንደሚሰራ ተማር';
+
+  @override
   String get videoRecorderAutosaveFoundTitle => 'በሂደት ላይ ያለ ስራ አግኝተናል';
 
   @override

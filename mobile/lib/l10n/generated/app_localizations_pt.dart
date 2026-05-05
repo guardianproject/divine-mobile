@@ -6092,6 +6092,25 @@ class AppLocalizationsPt extends AppLocalizations {
   String get videoRecorderWhySixSecondsButton => 'Entendi!';
 
   @override
+  String get videoRecorderUploadTitle => 'Por que sem upload?';
+
+  @override
+  String get videoRecorderUploadBody =>
+      'O que você vê no Divine é feito por humanos: cru e capturado no momento. Diferente das plataformas que permitem uploads muito produzidos ou gerados por IA, priorizamos a autenticidade da experiência câmera-direta.';
+
+  @override
+  String get videoRecorderUploadBodyDetail =>
+      'Ao manter a criação dentro do app, podemos garantir melhor que o conteúdo é real e sem edição. Não estamos abrindo uploads da galeria externa neste momento para proteger essa autenticidade e manter nossa comunidade livre de conteúdo sintético tanto quanto possível.';
+
+  @override
+  String get videoRecorderUploadBodyCta =>
+      'Mude para Capture ou Classic para gravar algo real.';
+
+  @override
+  String get videoRecorderUploadLearnMore =>
+      'Saiba como a verificação funciona';
+
+  @override
   String get videoRecorderAutosaveFoundTitle =>
       'Encontramos trabalho em andamento';
 

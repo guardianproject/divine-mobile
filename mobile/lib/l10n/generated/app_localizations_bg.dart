@@ -6120,6 +6120,24 @@ class AppLocalizationsBg extends AppLocalizations {
   String get videoRecorderWhySixSecondsButton => 'Разбрах!';
 
   @override
+  String get videoRecorderUploadTitle => 'Защо няма качване?';
+
+  @override
+  String get videoRecorderUploadBody =>
+      'Това, което виждаш в Divine, е направено от хора: сурово и заснето в момента. За разлика от платформи, които позволяват силно продуцирани или генерирани от ИИ качвания, ние даваме приоритет на автентичността на преживяването директно от камерата.';
+
+  @override
+  String get videoRecorderUploadBodyDetail =>
+      'Като пазим създаването вътре в приложението, можем по-добре да гарантираме, че съдържанието е истинско и нередактирано. В момента не отваряме качвания от външна галерия, за да защитим тази автентичност и да пазим общността си свободна от синтетично съдържание, доколкото е възможно.';
+
+  @override
+  String get videoRecorderUploadBodyCta =>
+      'Превключи на Capture или Classic, за да заснемеш нещо истинско.';
+
+  @override
+  String get videoRecorderUploadLearnMore => 'Научи как работи проверката';
+
+  @override
   String get videoRecorderAutosaveFoundTitle => 'Намерихме започнато видео';
 
   @override
